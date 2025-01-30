@@ -110,6 +110,12 @@ const Layout = ({
                 <i className={`ml-1 fa-solid fa-circle-dollar-to-slot hidden sm:inline`}></i>
               </a>
             </nav>
+            <nav>
+              <Link href="/auth/login" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/auth/login`) ? 'border-b-2 border-red' : ''}`}>
+                <span>{`Login`}</span>
+                <i className={`ml-1 fa-solid fa-sign-in hidden sm:inline`}></i>
+              </Link>
+            </nav>
           </div>
         </div>
       </header>
