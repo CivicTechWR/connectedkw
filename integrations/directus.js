@@ -3,10 +3,15 @@ import {
   staticToken, 
   rest,
   readItems,
-  readSingleton
+  registerUser,
+  registerUserVerify,
+  authentication,
+  login,
 } from '@directus/sdk'
 
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
+const client = createDirectus(process.env.DIRECTUS_URL).with(authentication('json')).with(rest());
+
 
 const getActivities = async (limit=-1, offset=0) => {
 
@@ -585,6 +590,142 @@ const getCamps = async () => {
   }
 }
 
+const register = async (firstName, lastName, email, password) => {
+  try {
+    const result = await directus.request(registerUser(email, password, {
+      first_name: firstName,
+      last_name: lastName,
+      verification_url: process.env.DIRECTUS_VERIFICATION_URL
+    }))
+
+    return result
+  } catch (error) {
+    return error
+  }
+}
+
+const loginUser = async (email, password) => {
+  try {
+    const response = await client.login(email, password);
+    return response;
+  } catch (err) {
+    throw new Error(err.message);
+  }
+};
+
+const verifyEmail = async (token) => {
+  try {
+    await directus.request(registerUserVerify(token))
+  } catch (error) {
+    return error
+  }
+}
+const getProfiles = async (skillID = -1) => {
+  
+  try {
+    //Changed this filter to reference the SKILL ID insteadf of the ID in the junction table
+    const filters = (skillID != -1)
+  ? {
+      status: {
+        _eq: 'public'
+      },
+      skills: {
+        skills_id: {
+          id: { _eq: skillID }
+        }
+      }
+    }
+  : {
+    status: {
+    _eq: 'public'
+    },
+  };
+
+    const result = await directus.request(
+      readItems("profiles", {
+        fields: [
+          "id",
+          "city",
+          "is_visible",
+          "is_verified",
+          "name",
+          "headline",
+          "bio",
+          "interests",
+          "experiences",
+          "profile_picture",
+          "preferred_contact_method",
+          "status",
+          "user_created",
+          "skills.*.*"
+        ],
+        filter: filters,
+        sort: ["id"],
+        limit: -1,
+      })
+    );
+
+    //console.log(result);
+    return result.data || result;
+
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    return [];
+  }
+};
+
+const getProfileSkills = async () => {
+  try {
+    const result =  await directus.request(
+      readItems('skills', {
+        fields: 'id,name',
+        sort: ['id'],
+        limit: -1,
+      })
+    );
+
+    return result
+  } catch (error) {
+    console.log({error})
+    return []
+  }
+}
+
+// this can probably be merged into getProfile with an optional parameter
+const getProfileById = async (profileID) => {
+  try {
+
+    const result = await directus.request(
+      readItems("profiles", {
+        fields: [
+          "id",
+          "city",
+          "is_visible",
+          "is_verified",
+          "name",
+          "headline",
+          "bio",
+          "interests",
+          "experiences",
+          "profile_picture",
+          "preferred_contact_method",
+          "status",
+          "user_created",
+          "skills"
+        ],
+        filter: {id: {_eq: profileID}},
+        sort: ["id"],
+        limit: -1,
+      })
+    );
+
+    //console.log(result);
+    return result.data || result;
+  } catch (error) {
+    console.error("Error fetching profiles:", error);
+    return [];
+  }
+};
 
 export { 
   getEvents,
@@ -604,5 +745,11 @@ export {
   getPageData,
   getPagesByTemplate,
   getPages,
-  getCamps
+  getCamps,
+  register,
+  loginUser,
+  verifyEmail,
+  getProfiles,
+  getProfileSkills,
+  getProfileById
 };
