@@ -38,7 +38,7 @@ export default function ProfileDetails({ profile }) {
   return (
     <Layout color="rainbow">
       <button
-        onClick={() => router.push("/auth/profiles/profiles")}
+        onClick={() => router.push("/profiles")}
         className="bg-slate-100 md:py-12 pt-12 pb-12 w-full flex justify-start pl-8"
       >
           {`< Back`}

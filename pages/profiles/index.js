@@ -81,7 +81,7 @@ export default function ProfilePage({ profiles, skills }) {
     setSelected(skillId);
     // Update the URL without reloading
     router.push({
-      pathname: "/auth/profiles/profiles",
+      pathname: "profiles",
       query: { skillId },
     });
   };
@@ -135,7 +135,7 @@ export default function ProfilePage({ profiles, skills }) {
 								return (
 									<Link
 										key={profile.id}
-										href={`/auth/profiles/${profile.id}`} 
+										href={`/profiles/${profile.id}`} 
 										className="block no-underline"
 									>
 									<div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer">

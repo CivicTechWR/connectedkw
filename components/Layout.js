@@ -117,7 +117,7 @@ const Layout = ({
               </Link>
             </nav>
             <nav>
-              <Link href="/auth/profiles/profiles" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/auth/login`) ? 'border-b-2 border-red' : ''}`}>
+              <Link href="/profiles" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/auth/login`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Profiles`}</span>
                 <i className={`ml-1 fa-solid fa-user hidden sm:inline`}></i>
               </Link>
