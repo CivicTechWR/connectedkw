@@ -65,24 +65,24 @@ export default function Events({ events=[], categories=[], tags=[], dataSources=
     },
   ]
   return (
-    <Layout title="Family-friendly events in Kitchener-Waterloo" description="Here you'll find things to do for families, children, and your inner child." color="blue">
+    <Layout title="Events in Kitchener-Waterloo" description="Here you'll find things to do for families, children, and your inner child." color="blue">
       <section className="bg-slate-100 py-6">
         <div className="container py-5 mx-auto">
           <div className="lg:grid grid-cols-2 gap-6">
             <div className="flex justify-center items-center">
               <div>
                 <h1 className="text-4 mb-6 md:text-6xl font-title">
-                  Family-friendly events in KW
+                  Events in KW
                 </h1>
                 <p className="text-lg">{`Tired of checking multiple event calendars and still missing out?`}</p> 
                 <p className="text-lg">{`Connected KW aggregates events from the City of Kitchener, the City of Waterloo, the City of Cambridge, Explore Waterloo, Region of Waterloo Museums, Waterloo Public Library, Eventbrite, and social media.`}</p> 
                 <p className="text-lg">{`You can add events to your calendar, subscribe to get them all, or bookmark this page so you'll always know what there is to do!`}</p>
                 <div className="flex flex-col md:flex-row gap-2 items-center">
                   <CalendarSubscriptionButton />
-                  <a href="https://cms.connectedkw.com/admin/" target="_blank" className="btn btn-yellow py-[11px]" rel="noreferrer">
+                  <Link href="/events/new" className="btn btn-yellow py-[11px]">
                     <i className={`mr-2 fa-solid fa-circle-user hidden sm:inline`}></i>
                     Submit an event                
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
