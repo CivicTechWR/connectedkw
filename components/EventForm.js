@@ -1,14 +1,17 @@
+'use client'
+
 import { useState, useEffect, useRef } from 'react'
 import Layout from 'components/Layout'
 import { EditorState, convertToRaw, ContentState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
-
+import { uploadImage } from 'integrations/directus'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
   () => import('react-draft-wysiwyg').then(mod => mod.Editor),
   { ssr: false }
 ) 
+import { useRouter } from 'next/navigation'
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
 
 export default function NewEventPage() {
@@ -19,7 +22,7 @@ export default function NewEventPage() {
   const [imageFile, setImageFile] = useState(null)
   const [fileUploading, setFileUploading] = useState(false)
   const fileInputRef = useRef(null)
-  
+  const router = useRouter()
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -101,45 +104,22 @@ export default function NewEventPage() {
   }
 
   const handleFileChange = async(e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-
-    try {
+    if (e.target.files[0]) {
       setFileUploading(true)
       const formData = new FormData()
-      formData.append('file', file, file.name)
-
-      const response = await fetch('/api/upload-image', {
-        method: 'POST',
-        body: formData,
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      })
-
-      if (!response.ok) {
-        throw new Error('Failed to upload image')
-      }
-
-      const data = await response.json()
-      
-      // Update form with the new image URL
+      formData.append('file', e.target.files[0], e.target?.files[0]?.name)
+      const result = await uploadImage(formData)
+      console.log('result', result)
       setFormData(prev => ({
         ...prev,
-        image_url: data.url
+        image: result
       }))
-
-      // Clear the file input
-      setImageFile(null)
-      if (fileInputRef.current) {
-        fileInputRef.current.value = ''
-      }
-
-    } catch (error) {
-      console.error('Error uploading image:', error)
-      setError('Failed to upload image: ' + error.message)
-    } finally {
       setFileUploading(false)
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        image: null
+      }))
     }
   }
 
@@ -149,35 +129,21 @@ export default function NewEventPage() {
     setError(null)
 
     try {
-      // Create FormData if we have a file
-      let body = formData
-      if (imageFile) {
-        const formDataWithFile = new FormData()
-        Object.entries(formData).forEach(([key, value]) => {
-          if (key !== 'image_url') { // Skip image_url since we're uploading a file
-            formDataWithFile.append(key, value)
-          }
-        })
-        formDataWithFile.append('image', imageFile)
-        body = formDataWithFile
-      }
-
       const response = await fetch('/api/events', {
         method: 'POST',
-        headers: imageFile ? {} : {
-          'Content-Type': 'application/json',
-        },
-        body: imageFile ? body : JSON.stringify(body),
+        headers: {
+            'Content-Type': 'application/json',
+          },
+        body: JSON.stringify(formData)
       })
 
       const data = await response.json()
-
       if (!response.ok) {
         throw new Error(data?.error?.errors[0]?.message || 'Failed to submit event')
       }
 
       // Redirect to event page or show success message
-      window.location.href = `/events/${data.event.id}`
+      router.push(`/events/success`)
     } catch (error) {
       setError(error.message)
       console.log(error)
@@ -409,7 +375,7 @@ export default function NewEventPage() {
                   disabled={fileUploading}
                   className="block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
-                    file:rounded file:border-0
+                    file:border-0
                     file:text-sm file:font-semibold
                     file:bg-blue-50 file:text-blue-700
                     hover:file:bg-blue-100

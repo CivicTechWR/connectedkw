@@ -49,14 +49,6 @@ export default async (req, res) => {
 
   if (req.method === "POST") {
     try {
-      
-      const image = await directus.request(
-        uploadFiles(req.body.image)
-      );
-      const eventData = {
-        ...req.body,
-        image: image
-      }
       const event = await directus.request(
         createItem('events', req.body)
       )

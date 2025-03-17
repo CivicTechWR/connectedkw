@@ -1,3 +1,5 @@
+"use server"
+
 import { 
   createDirectus, 
   staticToken, 
@@ -7,11 +9,21 @@ import {
   registerUserVerify,
   authentication,
   login,
+  uploadFiles
 } from '@directus/sdk'
 
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 const client = createDirectus(process.env.DIRECTUS_URL).with(authentication('json')).with(rest());
 
+const uploadImage = async (formData) => {
+  try {
+    const result = await directus.request(uploadFiles(formData));
+    return result
+  } catch(error) {
+    console.log({error})
+    return error
+  }
+}
 
 const getActivities = async (limit=-1, offset=0) => {
 
@@ -748,5 +760,6 @@ export {
   verifyEmail,
   getProfiles,
   getProfileSkills,
+  uploadImage
   //getProfileById
 };

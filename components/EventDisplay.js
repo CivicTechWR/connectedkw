@@ -12,6 +12,8 @@ function EventDisplay({ event, showImage=true, closeModal, backLink="/events" })
 
   if (!event) return null
 
+  console.log({event})
+
   const { title,
     description,
     starts_at,
@@ -19,10 +21,11 @@ function EventDisplay({ event, showImage=true, closeModal, backLink="/events" })
     external_link,
     link_text,
     price,
-    tags,
+    tags=[],
     categories,
     image,
-    location 
+    image_url,
+    location  
   } = event;
 
   const dateString = buildDateString(starts_at, ends_at)
@@ -31,7 +34,7 @@ function EventDisplay({ event, showImage=true, closeModal, backLink="/events" })
   const calendarLocation = (location?.name && location?.street_address) ? `${location.name}, ${location.street_address}` : (location?.name) ? `${location.name}` : "TBD"
   const calendarTitle = title ? `${title}` : "Untitled event"
 
-  const imageUrl = image ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}` : null
+  const imageUrl = image ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}` : image_url ? image_url : null
   const showCalendarButton = new Date(starts_at) > new Date()
 
   return (
@@ -43,6 +46,13 @@ function EventDisplay({ event, showImage=true, closeModal, backLink="/events" })
           <div className="relative">
             <img className="w-full object-cover aspect-video" src={imageUrl} alt={image.description} width={image.width} height={image.height} />
             { (image.credit) && <small className={`absolute bottom-0 left-0 right-0 text-xs p-1 ${styles.bgCaption}`}><ReactMarkdown>{image.credit}</ReactMarkdown></small> }
+          </div>
+        </div>
+        }
+        {!image && image_url && showImage &&
+        <div className="mb-4">
+          <div className="relative">
+            <img className="w-full object-cover aspect-video" src={imageUrl} />
           </div>
         </div>
         }

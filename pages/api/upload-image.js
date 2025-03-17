@@ -4,6 +4,19 @@ const directus = createDirectus('https://cms.connectedkw.com')
   .with(rest())
   .with(staticToken(process.env.DIRECTUS_TOKEN));
 
+export const config = {
+  api: {
+    bodyParser: false,
+  },
+};
+
+async function getRawBody(readable) {
+  const chunks = [];
+  for await (const chunk of readable) {
+    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
+  }
+  return Buffer.concat(chunks);
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,19 +24,23 @@ export default async function handler(req, res) {
   }
 
   try {
-    // Get the file data from the request
-    const formData = await req.formData();
+    const rawBody = await getRawBody(req);
+    const formData = new FormData();
+    const blob = new Blob([rawBody]);
+    const file = new File([blob], 'image.png', { lastModified: new Date().getTime(), type: blob.type });
+    formData.append('file', file);
 
     if (!formData) {
       return res.status(400).json({ error: 'No file uploaded' });
     }
 
-    // Upload directly to Directus
     const uploadedFile = await directus.request(
       uploadFiles(formData)
     );
 
-    // Return the file object
+    console.log({uploadedFile})
+
+    // Return the file ID/URL
     return res.status(200).json(uploadedFile);
 
   } catch (error) {
