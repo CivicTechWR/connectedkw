@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Layout from 'components/Layout'
 import { EditorState, convertToRaw, ContentState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
@@ -16,6 +16,9 @@ export default function NewEventPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [editorState, setEditorState] = useState(EditorState.createEmpty())
+  const [imageFile, setImageFile] = useState(null)
+  const [fileUploading, setFileUploading] = useState(false)
+  const fileInputRef = useRef(null)
   
   // Form state
   const [formData, setFormData] = useState({
@@ -32,6 +35,7 @@ export default function NewEventPage() {
 
   // Convert markdown to editor state when description changes from import
   useEffect(() => {
+    console.log('formData.description', formData.description)
     if (formData.description) {
       try {
         const contentState = stateFromMarkdown(formData.description)
@@ -44,7 +48,10 @@ export default function NewEventPage() {
 
   const handleEditorStateChange = (state) => {
     setEditorState(state)
-    const markdown = stateToMarkdown(state.getCurrentContent())
+  }
+
+  const onEditorBlur = () => {
+    const markdown = stateToMarkdown(editorState.getCurrentContent())
     setFormData(prev => ({
       ...prev,
       description: markdown
@@ -93,30 +100,87 @@ export default function NewEventPage() {
     }
   }
 
+  const handleFileChange = async(e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    try {
+      setFileUploading(true)
+      const formData = new FormData()
+      formData.append('file', file, file.name)
+
+      const response = await fetch('/api/upload-image', {
+        method: 'POST',
+        body: formData,
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to upload image')
+      }
+
+      const data = await response.json()
+      
+      // Update form with the new image URL
+      setFormData(prev => ({
+        ...prev,
+        image_url: data.url
+      }))
+
+      // Clear the file input
+      setImageFile(null)
+      if (fileInputRef.current) {
+        fileInputRef.current.value = ''
+      }
+
+    } catch (error) {
+      console.error('Error uploading image:', error)
+      setError('Failed to upload image: ' + error.message)
+    } finally {
+      setFileUploading(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
 
     try {
+      // Create FormData if we have a file
+      let body = formData
+      if (imageFile) {
+        const formDataWithFile = new FormData()
+        Object.entries(formData).forEach(([key, value]) => {
+          if (key !== 'image_url') { // Skip image_url since we're uploading a file
+            formDataWithFile.append(key, value)
+          }
+        })
+        formDataWithFile.append('image', imageFile)
+        body = formDataWithFile
+      }
+
       const response = await fetch('/api/events', {
         method: 'POST',
-        headers: {
+        headers: imageFile ? {} : {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: imageFile ? body : JSON.stringify(body),
       })
 
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.error || 'Failed to submit event')
+        throw new Error(data?.error?.errors[0]?.message || 'Failed to submit event')
       }
 
       // Redirect to event page or show success message
       window.location.href = `/events/${data.event.id}`
     } catch (error) {
       setError(error.message)
+      console.log(error)
     } finally {
       setLoading(false)
     }
@@ -132,19 +196,19 @@ export default function NewEventPage() {
 
   return (
     <Layout>
-      <div className="container mx-auto px-4 py-8">
+      <div className="container max-w-screen-lg mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Submit New Event</h1>
         
         {/* Import section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Import from URL</h2>
-          <form onSubmit={handleImport} className="max-w-xl">
+          <h2 className="text-xl font-semibold mb-4">Import Event</h2>
+          <form onSubmit={handleImport} className="">
             <div className="mb-4">
               <label 
                 htmlFor="url" 
-                className="block text-gray-700 text-sm font-bold mb-2"
+                className="block text-sm font-semibold mb-1"
               >
-                Event URL (optional)
+                Event Page URL (optional)
               </label>
               <div className="flex gap-2">
                 <input
@@ -169,8 +233,11 @@ export default function NewEventPage() {
           </form>
         </div>
 
+        <hr className="border-t border-gray-300 my-6" />
+
         {/* Event form */}
-        <form onSubmit={handleSubmit} className="max-w-2xl space-y-4">
+        <h2 className="text-xl font-semibold mb-4">Event Form</h2>
+        <form onSubmit={handleSubmit} className=" space-y-4">
           {error && (
             <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
               {error}
@@ -178,7 +245,7 @@ export default function NewEventPage() {
           )}
 
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="title" className="block text-sm font-semibold mb-1">
               Event Title*
             </label>
             <input
@@ -193,13 +260,14 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label htmlFor="description" className="block text-gray-700 text-sm font-bold mb-2">
+            <label htmlFor="description" className="block text-sm font-semibold mb-1">
               Description*
             </label>
             <div className="border shadow">
               <Editor
-                initialEditorState={editorState}
+                editorState={editorState}
                 onEditorStateChange={handleEditorStateChange}
+                onBlur={onEditorBlur}
                 wrapperClassName="w-full"
                 editorClassName="px-3 min-h-[200px]"
                 toolbar={{
@@ -220,7 +288,7 @@ export default function NewEventPage() {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="starts_at" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="starts_at" className="block text-sm font-semibold mb-1">
                 Start Date and Time*
               </label>
               <input
@@ -230,12 +298,12 @@ export default function NewEventPage() {
                 required
                 value={formData.starts_at}
                 onChange={handleChange}
-                className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+                className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
               />
             </div>
 
             <div>
-              <label htmlFor="ends_at" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="ends_at" className="block text-sm font-semibold mb-1">
                 End Date and Time
               </label>
               <input
@@ -244,13 +312,13 @@ export default function NewEventPage() {
                 name="ends_at"
                 value={formData.ends_at}
                 onChange={handleChange}
-                className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+                className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="location_source_text" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="location_source_text" className="block text-sm font-semibold mb-1">
               Location*
             </label>
             <input
@@ -265,7 +333,7 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="price" className="block text-sm font-semibold mb-1">
               Price
             </label>
             <input
@@ -275,13 +343,13 @@ export default function NewEventPage() {
               value={formData.price}
               onChange={handleChange}
               placeholder="Free"
-              className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+              className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
             />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="external_link" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="external_link" className="block text-sm font-semibold mb-1">
                 Registration/Ticket Link
               </label>
               <input
@@ -290,12 +358,12 @@ export default function NewEventPage() {
                 name="external_link"
                 value={formData.external_link}
                 onChange={handleChange}
-                className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+                className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
               />
             </div>
 
             <div>
-              <label htmlFor="link_text" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="link_text" className="block text-sm font-semibold mb-1">
                 Link Text
               </label>
               <input
@@ -305,23 +373,55 @@ export default function NewEventPage() {
                 value={formData.link_text}
                 onChange={handleChange}
                 placeholder="Register Here"
-                className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+                className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
               />
             </div>
           </div>
 
           <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-gray-700">
-              Image URL
+            <label className="block text-sm font-semibold mb-1">
+              Event Image
             </label>
-            <input
-              type="url"
-              id="image_url"
-              name="image_url"
-              value={formData.image_url}
-              onChange={handleChange}
-              className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
-            />
+            {formData.image_url ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <img 
+                    src={formData.image_url} 
+                    alt="Preview" 
+                    className="h-20 w-20 object-cover rounded"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Remove and upload different image
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  disabled={fileUploading}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:rounded file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-blue-50 file:text-blue-700
+                    hover:file:bg-blue-100
+                    disabled:opacity-50"
+                />
+                {fileUploading && (
+                  <div className="text-sm text-gray-600">
+                    Uploading...
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="pt-4">

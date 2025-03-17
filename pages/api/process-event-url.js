@@ -85,7 +85,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'No event information found' });
     }
 
-    const preppedEventData = {
+    const event = {
       title: eventData.title,
       description: eventData.description,
       starts_at: eventData.starts_at,
@@ -99,11 +99,11 @@ export default async function handler(req, res) {
       source_url: url,
       status: 'draft'
     };
-    console.log({preppedEventData})
+    console.log({event})
 
-    const event = await directus.request(
-        createItem('events', preppedEventData)
-    )
+    // const event = await directus.request(
+    //     createItem('events', preppedEventData)
+    // )
 
     return res.status(200).json({ 
       message: 'Event processed successfully',
