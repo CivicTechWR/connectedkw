@@ -1,9 +1,7 @@
 import Link from 'next/link'
-import Layout from 'components/Layout'
 
 export default function EventSuccessPage() {
   return (
-    <Layout>
       <div className="container max-w-screen-lg mx-auto px-4 py-16 text-center">
         <div className="bg-white p-8 rounded-lg shadow-sm">
           <div className="mb-8">
@@ -48,6 +46,5 @@ export default function EventSuccessPage() {
           </div>
         </div>
       </div>
-    </Layout>
   )
 }

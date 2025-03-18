@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import Layout from 'components/Layout'
-import { EditorState, convertToRaw, ContentState } from 'draft-js'
+import { useState, useEffect } from 'react'
+import { EditorState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
 import { uploadImage } from 'integrations/directus'
+import { importEventFromUrl } from 'integrations/openai'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
   () => import('react-draft-wysiwyg').then(mod => mod.Editor),
   { ssr: false }
-) 
+)
 import { useRouter } from 'next/navigation'
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
 
@@ -19,10 +19,9 @@ export default function NewEventPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [editorState, setEditorState] = useState(EditorState.createEmpty())
-  const [imageFile, setImageFile] = useState(null)
   const [fileUploading, setFileUploading] = useState(false)
-  const fileInputRef = useRef(null)
   const router = useRouter()
+
   // Form state
   const [formData, setFormData] = useState({
     title: '',
@@ -38,8 +37,7 @@ export default function NewEventPage() {
 
   // Convert markdown to editor state when description changes from import
   useEffect(() => {
-    console.log('formData.description', formData.description)
-    if (formData.description) {
+    if (formData.description.length > 0) {
       try {
         const contentState = stateFromMarkdown(formData.description)
         setEditorState(EditorState.createWithContent(contentState))
@@ -67,22 +65,14 @@ export default function NewEventPage() {
     setError(null)
 
     try {
-      const response = await fetch('/api/process-event-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      })
+      const response = await importEventFromUrl(url)
 
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process URL')
+      if (response.error) {
+        throw new Error(response.error)
       }
 
       // Populate form with imported data
-      const event = data.event
+      const event = response.event
       setFormData({
         title: event.title || '',
         description: event.description || '',
@@ -161,10 +151,9 @@ export default function NewEventPage() {
   }
 
   return (
-    <Layout>
-      <div className="container max-w-screen-lg mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-8">Submit New Event</h1>
-        
+    <div className="container max-w-screen-lg mx-auto px-4 py-8">
+      <h1 className="text-3xl font-bold mb-8">Submit New Event</h1>
+      
         {/* Import section */}
         <div className="mb-8">
           <h2 className="text-xl font-semibold mb-4">Import Event</h2>
@@ -348,17 +337,17 @@ export default function NewEventPage() {
             <label className="block text-sm font-semibold mb-1">
               Event Image
             </label>
-            {formData.image_url ? (
+            {formData.image_url || formData.image ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2">
                   <img 
-                    src={formData.image_url} 
+                    src={formData.image_url || `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`} 
                     alt="Preview" 
                     className="h-20 w-20 object-cover rounded"
                   />
                   <button 
                     type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '', image: null }))}
                     className="text-blue-600 hover:text-blue-800"
                   >
                     Remove and upload different image
@@ -369,7 +358,6 @@ export default function NewEventPage() {
               <div className="space-y-2">
                 <input
                   type="file"
-                  ref={fileInputRef}
                   onChange={handleFileChange}
                   accept="image/*"
                   disabled={fileUploading}
@@ -403,6 +391,5 @@ export default function NewEventPage() {
           </div>
         </form>
       </div>
-    </Layout>
   )
 } 
