@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { EditorState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
 import { uploadImage } from 'integrations/directus'
 import { importEventFromUrl } from 'integrations/openai'
 import LocationSelector from 'components/LocationSelector'
-import Loading from 'components/Loading'
+import ErrorNotification from 'components/ErrorNotification'
+
 import Image from 'next/image'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
@@ -43,7 +44,7 @@ export default function NewEventPage() {
 
   // Convert markdown to editor state when description changes from import
   useEffect(() => {
-    if (formData.description.length > 0) {
+    if (formData.description.length > 0 && Editor) {
       try {
         const contentState = stateFromMarkdown(formData.description)
         setEditorState(EditorState.createWithContent(contentState))
@@ -71,14 +72,22 @@ export default function NewEventPage() {
     setError(null)
 
     try {
-      const response = await importEventFromUrl(url)
+      const response = await fetch('/api/process-event-url', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url }),
+      })
 
-      if (response.error) {
-        throw new Error(response.error)
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to process URL')
       }
 
       // Populate form with imported data
-      const event = response.event
+      const event = data.event
       setFormData({
         title: event.title || '',
         description: event.description || '',
@@ -166,19 +175,28 @@ export default function NewEventPage() {
   }
 
   return (
-    <div className="container max-w-screen-lg mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Submit New Event</h1>
+    <>
+      {error && (
+        <ErrorNotification 
+          message={error} 
+          onClose={() => setError(null)} 
+        />
+      )}
       
+      <div className="container max-w-screen-lg mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Submit an Event</h1>
+        
         {/* Import section */}
         <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Import Event</h2>
+          <h2 className="text-xl font-semibold mb-2">Import Event (optional)</h2>
+          <p className="text-gray-500 mb-4">{`If you already have an event page elsewhere, drop the link here and we'll try to import the details.`}</p>
           <form onSubmit={handleImport} className="">
             <div className="mb-4">
               <label 
                 htmlFor="url" 
                 className="block text-sm font-semibold mb-1"
               >
-                Event Page URL (optional)
+                Event Page URL
               </label>
               <div className="flex gap-2">
                 <input
@@ -204,17 +222,11 @@ export default function NewEventPage() {
         <hr className="border-t border-gray-300 my-6" />
 
         {/* Event form */}
-        <h2 className="text-xl font-semibold mb-4">Event Form</h2>
+        <h2 className="text-xl font-semibold mb-4">Event Details</h2>
         <form onSubmit={handleSubmit} className=" space-y-4">
-          {error && (
-            <div className="bg-red-100 text-red-700 p-4 rounded mb-4">
-              {error}
-            </div>
-          )}
-
           <div>
             <label htmlFor="title" className="block text-sm font-semibold mb-1">
-              Event Title*
+              Title*
             </label>
             <input
               type="text"
@@ -412,5 +424,6 @@ export default function NewEventPage() {
           </div>
         </form>
       </div>
+    </>
   )
 } 
