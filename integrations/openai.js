@@ -56,6 +56,8 @@ export const importEventFromUrl = async (url) => {
             - description: full event description
             - starts_at: datetime in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ)
             - ends_at: datetime in ISO format (if available)
+            - location_name: name of the physical location of the event
+            - location_address: address of the physical location of the event
             - location_source_text: physical location of the event
             - price: price/cost of the event (if free, specify "Free")
             - external_link: URL for registration (if none found, use "${url}")
@@ -79,6 +81,8 @@ export const importEventFromUrl = async (url) => {
       description: eventData.description,
       starts_at: eventData.starts_at,
       ends_at: eventData.ends_at,
+      location_name: eventData.location_name,
+      location_address: eventData.location_address,
       location_source_text: eventData.location_source_text,
       price: eventData.price,
       external_link: eventData.external_link || url,

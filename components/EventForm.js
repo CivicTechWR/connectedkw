@@ -6,6 +6,9 @@ import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
 import { uploadImage } from 'integrations/directus'
 import { importEventFromUrl } from 'integrations/openai'
+import LocationSelector from 'components/LocationSelector'
+import Loading from 'components/Loading'
+import Image from 'next/image'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
   () => import('react-draft-wysiwyg').then(mod => mod.Editor),
@@ -28,11 +31,14 @@ export default function NewEventPage() {
     description: '',
     starts_at: '',
     ends_at: '',
+    location_name: '',
+    location_address: '',
     location_source_text: '',
     price: '',
     external_link: '',
     link_text: '',
-    image_url: ''
+    image_url: '',
+    image: null
   })
 
   // Convert markdown to editor state when description changes from import
@@ -78,6 +84,8 @@ export default function NewEventPage() {
         description: event.description || '',
         starts_at: event.starts_at ? new Date(event.starts_at).toISOString().slice(0, 16) : '', // Format for datetime-local input
         ends_at: event.ends_at ? new Date(event.ends_at).toISOString().slice(0, 16) : '',
+        location_name: event.location_name || '',
+        location_address: event.location_address || '',
         location_source_text: event.location_source_text || '',
         price: event.price || '',
         external_link: event.external_link || '',
@@ -113,11 +121,18 @@ export default function NewEventPage() {
     }
   }
 
+  const handleLocationSelect = (location) => {
+    setFormData(prev => ({
+      ...prev,
+      location_address: location.formatted_address
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-
+    console.log(formData)
     try {
       const response = await fetch('/api/events', {
         method: 'POST',
@@ -175,13 +190,11 @@ export default function NewEventPage() {
                   className="shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
                 />
                 <button
-                  type="submit"
-                  disabled={loading || !url}
-                  className={`btn btn-primary ${
-                    loading || !url ? 'opacity-50 cursor-not-allowed' : ''
-                  }`}
+                    type="submit"
+                    disabled={loading || !url}
+                    className={`btn btn-primary w-[92px] flex justify-center items-center ${!url ? 'opacity-50 cursor-not-allowed' : ''} ${loading ? 'bg-white hover:bg-white cursor-not-allowed' : ''}`}
                 >
-                  {loading ? 'Importing...' : 'Import'}
+                    {loading ? <Image src="/loading.svg" width={40} height={40} alt="loading" /> : 'Import'}
                 </button>
               </div>
             </div>
@@ -273,17 +286,27 @@ export default function NewEventPage() {
           </div>
 
           <div>
-            <label htmlFor="location_source_text" className="block text-sm font-semibold mb-1">
-              Location*
+            <label htmlFor="location_name" className="block text-sm font-semibold mb-1">
+              Location Name
             </label>
             <input
               type="text"
-              id="location_source_text"
-              name="location_source_text"
-              required
-              value={formData.location_source_text}
+              id="location_name"
+              name="location_name"
+              value={formData.location_name}
               onChange={handleChange}
               className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="location_address" className="block text-sm font-semibold mb-1">
+              Location Address*
+            </label>
+            <LocationSelector
+              handleSelect={handleLocationSelect}
+              required={true}
+              value={formData.location_address}
             />
           </div>
 
@@ -382,11 +405,9 @@ export default function NewEventPage() {
             <button
               type="submit"
               disabled={loading}
-              className={`btn btn-primary w-full md:w-auto ${
-                loading ? 'opacity-50 cursor-not-allowed' : ''
-              }`}
+              className={`btn btn-primary w-full md:w-auto flex justify-center items-center ${loading ? 'bg-white hover:bg-white cursor-not-allowed' : ''}`}
             >
-              {loading ? 'Submitting...' : 'Submit Event'}
+              {loading ? <Image src="/loading.svg" width={40} height={40} alt="loading" /> : 'Submit Event'}
             </button>
           </div>
         </form>
