@@ -8,6 +8,8 @@ import {
   meetupExtractor
 } from 'utils/event-extractors';
 
+import { getTags } from 'integrations/directus';
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
@@ -68,12 +70,13 @@ export const importEventFromUrl = async (url) => {
         temperature: 0.2,
       });
 
+      console.log({completion})
 
-      if (!completion?.output_text) {
+      eventData = JSON.parse(completion?.output_text);
+
+      if (!eventData) {
         return { error: 'No event information found' };
       }
-
-      eventData = JSON.parse(completion.output_text);
     }
 
     const event = {
@@ -106,3 +109,49 @@ export const importEventFromUrl = async (url) => {
     };
   }
 } 
+
+export const generateTags = async (event) => {
+  const { title, description } = event;
+  const tags = await getTags('Events and activities')
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-3.5-turbo",
+      messages: [{
+        role: "system",
+        content: "You are a helpful assistant that analyzes event titles and descriptions to suggest relevant tags."
+      }, {
+        role: "user", 
+        content: `Analyze this event title and description and select the relevant tags from the provided list. The list of tags is in JSON format. Return the list of relevant tags as an array of tag IDs.
+
+        Event Title: ${title}
+        Event Description: ${description}
+
+        List of tag options: ${JSON.stringify(tags)}
+
+        Return format should be a JSON array of tag IDs. Do not include any other text in your response and do not wrap it with JSON md markers.`
+      }],
+      temperature: 0.3,
+    });
+
+    console.log({completion})
+
+    if (!completion?.choices?.[0]?.message?.content) {
+      return { error: 'No tag suggestions generated' };
+    }
+
+    const suggestedTags = JSON.parse(completion.choices[0].message.content);
+
+    return {
+      message: 'Tags generated successfully',
+      tags: suggestedTags
+    };
+
+  } catch (error) {
+    console.error('Error generating tags:', error);
+    return {
+      error: 'Failed to generate tags',
+      details: error.message
+    };
+  }
+}

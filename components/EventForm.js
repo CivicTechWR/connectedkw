@@ -5,10 +5,10 @@ import { EditorState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
 import { uploadImage } from 'integrations/directus'
-import { importEventFromUrl } from 'integrations/openai'
+import { importEventFromUrl, generateTags } from 'integrations/openai'
 import LocationSelector from 'components/LocationSelector'
 import ErrorNotification from 'components/ErrorNotification'
-
+import TagButton from 'components/TagButton'
 import Image from 'next/image'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
@@ -18,13 +18,14 @@ const Editor = dynamic(
 import { useRouter } from 'next/navigation'
 import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
 
-export default function NewEventPage() {
+export default function NewEventPage({ tags }) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [editorState, setEditorState] = useState(EditorState.createEmpty())
   const [fileUploading, setFileUploading] = useState(false)
   const router = useRouter()
+  const [selectedTags, setSelectedTags] = useState([])
 
   // Form state
   const [formData, setFormData] = useState({
@@ -39,7 +40,8 @@ export default function NewEventPage() {
     external_link: '',
     link_text: '',
     image_url: '',
-    image: null
+    image: null,
+    tags: []
   })
 
   // Convert markdown to editor state when description changes from import
@@ -66,28 +68,40 @@ export default function NewEventPage() {
     }))
   }
 
+  const handleTagClick = (tag) => {
+    console.log('tag', tag)
+    setSelectedTags(prev => {
+      const isSelected = prev.some(t => t === tag.id)
+      const newTags = isSelected 
+        ? prev.filter(t => t !== tag.id)
+        : [...prev, tag.id]
+
+      return newTags
+    })
+  }
+
   const handleImport = async (e) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    setSelectedTags([]) // Reset selected tags
 
     try {
-      const response = await fetch('/api/process-event-url', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.error || 'Failed to process URL')
+      const { event, error, message } = await importEventFromUrl(url)
+      console.log({event})
+      console.log({error})
+      if (error) {
+        throw new Error(error)
       }
 
-      // Populate form with imported data
-      const event = data.event
+      // Generate tags
+      const suggestedTags = await generateTags(event)
+      console.log({suggestedTags})
+      // Auto-select suggested tags
+      if (suggestedTags.tags) {
+        setSelectedTags(suggestedTags.tags)
+      }
+      
       setFormData({
         title: event.title || '',
         description: event.description || '',
@@ -141,14 +155,17 @@ export default function NewEventPage() {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    console.log(formData)
+    const eventData = {
+      ...formData,
+      tags: selectedTags.map(t => ({tags_id: t}))
+    }
     try {
       const response = await fetch('/api/events', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
           },
-        body: JSON.stringify(formData)
+        body: JSON.stringify(eventData)
       })
 
       const data = await response.json()
@@ -411,6 +428,25 @@ export default function NewEventPage() {
                 )}
               </div>
             )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold mb-1">
+              Event Tags
+            </label>
+            <p className="text-sm text-gray-500 mb-2">
+              Select all the tags that apply to this event
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {tags.map(tag => (
+                <TagButton 
+                  key={tag.id} 
+                  tag={tag}
+                  selected={selectedTags.some(t => t === tag.id)}
+                  onClick={handleTagClick}
+                />
+              ))}
+            </div>
           </div>
 
           <div className="pt-4">
