@@ -736,6 +736,23 @@ const getProfileSkills = async () => {
 //   }
 // };
 
+const searchVenues = async (query) => {
+  try {
+    const locations = await directus.request(
+      readItems('locations', {
+        fields: ['id'], 
+        search: query,
+        limit: 1
+      })
+    );
+
+    return locations[0]
+  } catch (error) {
+    console.log({error})
+    return null
+  }
+}
+
 export { 
   getEvents,
   getEvent,
@@ -760,6 +777,7 @@ export {
   verifyEmail,
   getProfiles,
   getProfileSkills,
-  uploadImage
+  uploadImage,
+  searchVenues
   //getProfileById
 };

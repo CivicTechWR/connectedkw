@@ -5,7 +5,7 @@ import { EditorState } from 'draft-js'
 import { stateToMarkdown } from 'draft-js-export-markdown'
 import { stateFromMarkdown } from 'draft-js-import-markdown'
 import { uploadImage } from 'integrations/directus'
-import { importEventFromUrl, generateTags } from 'integrations/openai'
+import { importEventFromUrl, generateTags, extractEventFromImage } from 'integrations/openai'
 import LocationSelector from 'components/LocationSelector'
 import ErrorNotification from 'components/ErrorNotification'
 import TagButton from 'components/TagButton'
@@ -130,11 +130,12 @@ export default function NewEventPage({ tags }) {
       const formData = new FormData()
       formData.append('file', e.target.files[0], e.target?.files[0]?.name)
       const result = await uploadImage(formData)
-      console.log('result', result)
+      
       setFormData(prev => ({
         ...prev,
         image: result
       }))
+      
       setFileUploading(false)
     } else {
       setFormData(prev => ({
@@ -190,6 +191,9 @@ export default function NewEventPage({ tags }) {
       [name]: value
     }))
   }
+
+  console.log({tags})
+  console.log({selectedTags})
 
   return (
     <>

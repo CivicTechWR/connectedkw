@@ -31,7 +31,11 @@ export const importEventFromUrl = async (url) => {
     }
 
     if (url.includes('facebook.com/events')) {
-    return { error: 'Facebook events are not supported' };
+      return { error: 'Facebook events are not supported, please use the event form.' };
+    }
+
+    if (url.includes('instagram.com/')) {
+      return { error: 'Instagram posts are not supported, please use the event form.' };
     }
 
     // Fetch the webpage content
@@ -70,12 +74,10 @@ export const importEventFromUrl = async (url) => {
         temperature: 0.2,
       });
 
-      console.log({completion})
-
       eventData = JSON.parse(completion?.output_text);
 
       if (!eventData) {
-        return { error: 'No event information found' };
+        return { error: 'No event information found, please use the event form.' };
       }
     }
 
@@ -133,8 +135,6 @@ export const generateTags = async (event) => {
       }],
       temperature: 0.3,
     });
-
-    console.log({completion})
 
     if (!completion?.choices?.[0]?.message?.content) {
       return { error: 'No tag suggestions generated' };
