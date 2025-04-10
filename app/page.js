@@ -1,30 +1,13 @@
 import Image from 'next/image'
 import Link from 'next/link'
-import styles from 'styles/Home.module.css'
 
-import Layout from 'components/Layout'
-import Section from 'components/Section'
 import GridCard from "components/GridCard"
 
 import { getPagesByTemplate, getEvents } from 'integrations/directus';
 
-export async function getServerSideProps({ params }) {
+export default async function Home() {
   const places = await getPagesByTemplate('map')
   const events = await getEvents(10)
-
-  // const randomActivities = [...Array(10)].map((item, i) => {
-  //   const randomIndex = Math.floor(Math.random()*activities.length);
-  //   const randomActivity = activities[randomIndex]
-  //   activities.splice(randomIndex,1)
-  //   return randomActivity
-  // })
-
-  return {
-    props: { places, events }
-  }
-}
-
-export default function Home({ places, events }) {
 
   const mapPages = places.map(page => {
     return {
@@ -35,10 +18,10 @@ export default function Home({ places, events }) {
   })
 
   return (
-    <Layout color="rainbow">
+    <>
       <section className="bg-slate-100 py-12">
         <div className="container mx-auto">
-          <div className="lg:grid grid-cols-2">
+          <div className="md:grid grid-cols-2">
             <div className="flex justify-center items-center">
               <div>
                 <h1 className="mb-6 md:text-6xl font-title">
@@ -78,7 +61,7 @@ export default function Home({ places, events }) {
         </div>
       </section>
 
-      <section className={`w-full relative py-12`} data-aos="fade-up">
+      <section className={`w-full relative py-12`}>
         <div className="container mx-auto">
           <h2 className="font-title text-3xl md:text-4xl mt-6 mb-6">
             Upcoming Events 🗓
@@ -95,7 +78,7 @@ export default function Home({ places, events }) {
         </div>
       </section>
 
-      <section className={`w-full relative pb-12`} data-aos="fade-up">
+      <section className={`w-full relative pb-12`}>
         <div className="container mx-auto">
           <h2 className="font-title text-3xl md:text-4xl mb-6">
             Local Info 🐝
@@ -112,7 +95,7 @@ export default function Home({ places, events }) {
         </div>
       </section>
     
-    </Layout>
+    </>
   )
 }
 

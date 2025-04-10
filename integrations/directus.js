@@ -753,6 +753,47 @@ const searchVenues = async (query) => {
   }
 }
 
+export async function getMapList() {
+  try {
+    const maps = await directus.request(
+      readItems('maps', {
+        sort: ['title'],
+        filter: {
+          status: {
+            _eq: 'published'
+          }
+        }
+      })
+    )
+    return maps
+  } catch (error) {
+    console.error('Error fetching maps:', error)
+    return []
+  }
+}
+
+export async function getMapBySlug(slug) {
+  try {
+    const maps = await directus.request(
+      readItems('maps', {
+        filter: {
+          slug: {
+            _eq: slug
+          },
+          status: {
+            _eq: 'published'
+          }
+        },
+        limit: 1
+      })
+    )
+    return maps?.[0] || null
+  } catch (error) {
+    console.error('Error fetching map:', error)
+    return null
+  }
+}
+
 export { 
   getEvents,
   getEvent,
