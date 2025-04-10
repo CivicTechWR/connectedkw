@@ -1,11 +1,11 @@
 import localFont from 'next/font/local';
-const slackey = localFont({ src: '../fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
+const slackey = localFont({ src: '../assets/fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
 import NavigationHeader from 'components/NavigationHeader'
 import Footer from 'components/Footer'
 import Head from 'next/head'
 import Script from 'next/script'
+import PlausibleProvider from 'next-plausible'
 
-import 'aos/dist/aos.css';
 import '../styles/globals.css'
 
 export default function RootLayout({
@@ -34,9 +34,10 @@ export default function RootLayout({
           <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
 
         </Head>
-        <body className={`${slackey.variable}`}>
-            <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
-                <NavigationHeader />
+        <PlausibleProvider domain="connectedkw.com">
+          <body className={`${slackey.variable}`}>
+              <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
+                  <NavigationHeader />
                 <main className={`flex-auto snap-y`}>
 
                     {children}
@@ -45,7 +46,8 @@ export default function RootLayout({
 
                 <Footer />
             </div>
-        </body>
+          </body>
+        </PlausibleProvider>
       </html>
     )
   }

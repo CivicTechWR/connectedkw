@@ -6,7 +6,7 @@ const Footer = () => {
   return (
 
       <footer className={`w-full relative bg-slate-100 py-6`}>
-        <div className="p-5 mx-auto">
+        <div className="container max-w-screen-xl mx-auto px-5">
           <div className="md:grid grid-cols-2 md:gap-24">
             <div className="mb-4 basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">About Connected KW</p>

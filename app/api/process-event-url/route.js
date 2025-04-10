@@ -11,6 +11,7 @@ import {
   facebookExtractor,
   meetupExtractor
 } from 'utils/event-extractors';
+import { NextResponse } from 'next/server';
 
 const directus = createDirectus('https://cms.connectedkw.com').with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 
@@ -28,20 +29,22 @@ function getExtractor(url) {
   return null;
 }
 
-export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+export async function POST(request) {
   try {
-    const { url } = req.body;
+    const { url } = await request.json();
 
     if (!url) {
-      return res.status(400).json({ error: 'URL is required' });
+      return NextResponse.json(
+        { error: 'URL is required' },
+        { status: 400 }
+      );
     }
 
     if (url.includes('facebook.com/events')) {
-        return res.status(400).json({ error: 'Facebook events are not supported' });
+      return NextResponse.json(
+        { error: 'Facebook events are not supported' },
+        { status: 400 }
+      );
     }
 
     // Fetch the webpage content
@@ -82,7 +85,10 @@ export default async function handler(req, res) {
     }
 
     if (!eventData) {
-      return res.status(400).json({ error: 'No event information found' });
+      return NextResponse.json(
+        { error: 'No event information found' },
+        { status: 400 }
+      );
     }
 
     const event = {
@@ -105,16 +111,18 @@ export default async function handler(req, res) {
     //     createItem('events', preppedEventData)
     // )
 
-    return res.status(200).json({ 
+    return NextResponse.json({ 
       message: 'Event processed successfully',
       event 
     });
 
   } catch (error) {
     console.error('Error processing event:', error);
-    return res.status(500).json({ 
+    return NextResponse.json({ 
       error: 'Failed to process event',
       details: error.message 
+    }, { 
+      status: 500 
     });
   }
-} 
+}

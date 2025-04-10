@@ -1,6 +1,6 @@
 import Image from 'next/image'
 import Link from 'next/link'
-
+import Section from 'components/layout/Section'
 import GridCard from "components/GridCard"
 
 import { getPagesByTemplate, getEvents } from 'integrations/directus';
@@ -19,8 +19,7 @@ export default async function Home() {
 
   return (
     <>
-      <section className="bg-slate-100 py-12">
-        <div className="container mx-auto">
+      <Section className="bg-slate-100">
           <div className="md:grid grid-cols-2">
             <div className="flex justify-center items-center">
               <div>
@@ -58,11 +57,9 @@ export default async function Home() {
               </video>
             </div>
           </div>
-        </div>
-      </section>
+        </Section>
 
-      <section className={`w-full relative py-12`}>
-        <div className="container mx-auto">
+      <Section>
           <h2 className="font-title text-3xl md:text-4xl mt-6 mb-6">
             Upcoming Events 🗓
           </h2>
@@ -75,11 +72,9 @@ export default async function Home() {
               <i className={`mr-2 fa-solid fa-arrow-right ml-2`}></i>
             </Link>
           </div>
-        </div>
-      </section>
+      </Section>
 
-      <section className={`w-full relative pb-12`}>
-        <div className="container mx-auto">
+      <Section>
           <h2 className="font-title text-3xl md:text-4xl mb-6">
             Local Info 🐝
           </h2>
@@ -92,8 +87,7 @@ export default async function Home() {
               <i className={`mr-2 fa-solid fa-arrow-right ml-2`}></i>
             </Link>
           </div>
-        </div>
-      </section>
+      </Section>
     
     </>
   )
