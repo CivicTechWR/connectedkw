@@ -1,73 +1,45 @@
-import Layout from 'components/Layout'
 import EventsFeed from 'components/EventsFeed'
 import CalendarSubscriptionButton from '/components/CalendarSubscriptionButton'
 import { getEvents, getCategories, getTags, getDataSources } from 'integrations/directus';
-import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
+import Section from 'components/layout/Section'
 
-export async function getStaticProps() {
+export default async function Events() {
   const categories = await getCategories('Age groups')
   const tags = await getTags('Events and activities')
   const events = await getEvents()
   const dataSources = await getDataSources()
 
-  return {
-    props: { tags, categories, dataSources, events },
-    revalidate: 3600, // In seconds
-  }
-}
 
-export default function Events({ events=[], categories=[], tags=[], dataSources=[] }) {
-  // const [events, setEvents] = useState([])
-  const [loading, setLoading] = useState(false)
-
-  // useEffect(() => {
-  //   const fetchEvents = async () => {
-  //     const data = await fetch('/api/events');
-  //     const json = await data.json();
-  //     setEvents(json);
-  //     setLoading(false)
-  //   }
-
-  //   try {
-  //     setLoading(true)
-  //     fetchEvents()
-  //   } catch(err) {
-  //     setLoading(false)
-  //     console.log(err)
-  //   }
-  // }, [])
-
-  const filters = [
-    {
-      label: 'Featured',
-      id: 'featured',
-      type: 'boolean',
-      default: false,
-      attributeFn: (event) => event.featured
-    },
-    {
-      label: 'Tags',
-      id: 'tags',
-      type: 'select-multiple',
-      options: tags,
-      multipleSelect: true,
-      attributeFn: (event) => event.tags.map(t => t.id)
-    },  
-    {
-      label: 'Sources',
-      id: 'sources',
-      type: 'select-multiple',
-      options: dataSources,
-      multipleSelect: true,
-      attributeFn: (event) => [event.data_source]
-    },
-  ]
+  // const filters = [
+  //   {
+  //     label: 'Featured',
+  //     id: 'featured',
+  //     type: 'boolean',
+  //     default: false,
+  //     attributeFn: (event) => event.featured
+  //   },
+  //   {
+  //     label: 'Tags',
+  //     id: 'tags',
+  //     type: 'select-multiple',
+  //     options: tags,
+  //     multipleSelect: true,
+  //     attributeFn: (event) => event.tags.map(t => t.id)
+  //   },  
+  //   {
+  //     label: 'Sources',
+  //     id: 'sources',
+  //     type: 'select-multiple',
+  //     options: dataSources,
+  //     multipleSelect: true,
+  //     attributeFn: (event) => [event.data_source]
+  //   },
+  // ]
   return (
-    <Layout title="Events in Kitchener-Waterloo" description="Here you'll find things to do for families, children, and your inner child." color="blue">
-      <section className="bg-slate-100 py-6">
-        <div className="container py-5 mx-auto">
+    <>
+      <Section className="bg-slate-100">
           <div className="lg:grid grid-cols-2 gap-6">
             <div className="flex justify-center items-center">
               <div>
@@ -98,14 +70,11 @@ export default function Events({ events=[], categories=[], tags=[], dataSources=
                 />
             </div>
           </div>
-        </div>
-      </section>
-      <section className="py-6">
-        <div className="container mx-auto">
-          <EventsFeed events={events} filters={filters} loading={loading} />
-        </div>
-      </section>
-    </Layout>
+      </Section>
+      <Section>
+        <EventsFeed events={events} />
+      </Section>
+    </>
   )
 }
 

@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, forwardRef } from 'react'
-import styles from 'styles/ideaGenerator.module.css'
+import { useState, forwardRef } from 'react'
 import { tagEmojiDict, eventCategories } from 'utils/constants'
 import ReactModal from 'react-modal';
 

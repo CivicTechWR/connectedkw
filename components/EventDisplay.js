@@ -1,4 +1,3 @@
-import styles from "../styles/ideaGenerator.module.css"
 import { eventCategories, tagEmojiDict } from "../utils/constants"
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
@@ -40,12 +39,12 @@ function EventDisplay({ event, showImage=true, closeModal, backLink="/events" })
   return (
     <div className={`overflow-auto styled-scrollbar min-h-0 h-full w-full`}>
     
-      <div className={styles.appear}>
+      <div>
         {image && showImage &&
         <div className="mb-4">
           <div className="relative">
             <img className="w-full object-cover aspect-video" src={imageUrl} alt={image.description} width={image.width} height={image.height} />
-            { (image.credit) && <small className={`absolute bottom-0 left-0 right-0 text-xs p-1 ${styles.bgCaption}`}><ReactMarkdown>{image.credit}</ReactMarkdown></small> }
+            { (image.credit) && <small className={`absolute bottom-0 left-0 right-0 text-xs p-1`}><ReactMarkdown>{image.credit}</ReactMarkdown></small> }
           </div>
         </div>
         }

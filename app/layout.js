@@ -38,11 +38,11 @@ export default function RootLayout({
           <body className={`${slackey.variable}`}>
               <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
                   <NavigationHeader />
-                <main className={`flex-auto snap-y`}>
+                    <main className={`flex-auto snap-y`}>
 
-                    {children}
+                        {children}
 
-                </main>
+                    </main>
 
                 <Footer />
             </div>

@@ -125,9 +125,9 @@ p {
   color: var(--theme-black);
 }
 
-a {
+/* a {
   text-decoration: underline;
-}
+} */
 
 a:hover,
 a:active {

@@ -11,11 +11,11 @@ const Footer = () => {
             <div className="mb-4 basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">About Connected KW</p>
               <p className="">Connected KW is a volunteer-run project with the goal of creating an inclusive and comprehensive resource for residents of KW.</p>
-              <p className="">If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red">reach out!</a></p>
+              <p className="">If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red underline">reach out!</a></p>
               <a
                 href="https://instagram.com/connectedkw"
                 rel="noopener noreferrer"
-                className="my-6 block"
+                className="my-6 block underline"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height="30" width="30" fill="currentColor">
                   <path
@@ -27,12 +27,12 @@ const Footer = () => {
 
             <div className="basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">Get involved</p>
-              <p className=""><a href="https://cms.connectedkw.com/admin/" target="_blank" rel="noreferrer">Submit an event</a></p>
-              <p className=""><a href="https://github.com/s-kennedy/connectedkw/issues" target="_blank" rel="noreferrer">Report a bug</a></p>
-              <p className=""><a href="https://buy.stripe.com/cN24hE161goQcZa8wx" target="_blank" rel="noreferrer">Make a donation</a></p>
-              <p className=""><a href="mailto:shay@connectedkw.com" target="_blank" rel="noreferrer">Contact shay@connectedkw.com</a></p>
+              <p className=""><a className="underline" href="https://cms.connectedkw.com/admin/" target="_blank" rel="noreferrer">Submit an event</a></p>
+              <p className=""><a className="underline" href="https://github.com/s-kennedy/connectedkw/issues" target="_blank" rel="noreferrer">Report a bug</a></p>
+              <p className=""><a className="underline" href="https://buy.stripe.com/cN24hE161goQcZa8wx" target="_blank" rel="noreferrer">Make a donation</a></p>
+              <p className=""><a className="underline" href="mailto:shay@connectedkw.com" target="_blank" rel="noreferrer">Contact shay@connectedkw.com</a></p>
               <p className="my-6">
-                <a href="https://www.dreamsidedigital.com" className="hover:text-red order-1 sm:order-2 mb-4">
+                <a href="https://www.dreamsidedigital.com" className="hover:text-red order-1 sm:order-2 mb-4 underline">
                   Made by Dreamside Digital
                 </a>
               </p>

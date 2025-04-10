@@ -3,7 +3,7 @@ import Link from 'next/link'
 export default function EventSuccessPage() {
   return (
       <div className="container max-w-screen-lg mx-auto px-4 py-16 text-center">
-        <div className="bg-white p-8 rounded-lg shadow-sm">
+        <div className="bg-white p-8 shadow-lg">
           <div className="mb-8">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <svg 

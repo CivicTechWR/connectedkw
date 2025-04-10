@@ -1,4 +1,3 @@
-import styles from "styles/events.module.css"
 import Link from 'next/link'
 import Image from 'next/image'
 import { buildDateString } from 'utils/dates'
@@ -34,8 +33,8 @@ const EventCard = ({ event, showImage, labels }) => {
   const imageUrl = image?.id ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}?key=small-640` : "/default-event-image.png"
 
   return (
-    <div className={`${styles.eventCard} py-4 snap-start transition-all relative items-start flex-col w-full`}>
-      <div className={`${styles.appear} shadow relative flex flex-col w-full md:h-full min-h-0`}>
+    <div className={`py-4 snap-start transition-all relative items-start flex-col w-full`}>
+      <div className={`shadow relative flex flex-col w-full md:h-full min-h-0`}>
         {
           (featured) && 
           <div className={`bg-red text-black flex-none w-full text-sm px-3 py-1 flex font-medium`}>
@@ -47,7 +46,7 @@ const EventCard = ({ event, showImage, labels }) => {
           <div className={`basis-1/2 relative flex-auto min-h-0 overflow-hidden`}>
             <Link href={`/${urlFragment}/${slug}`}>
             <Image
-              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square ${styles.appear}`}
+              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
               src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}?key=small-640`}
               alt={image.description || image.title} 
               title={image.title}
@@ -63,7 +62,7 @@ const EventCard = ({ event, showImage, labels }) => {
           <div className={`w-full aspect-video sm:aspect-square sm:w-40 grow-0 relative min-h-0 overflow-hidden`}>
             <Link href={`/${urlFragment}/${slug}`}>
             <Image
-              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square ${styles.appear}`}
+              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
               src={imageUrl}
               alt={"event image"} 
               loading="lazy"

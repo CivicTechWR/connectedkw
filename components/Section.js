@@ -1,5 +1,3 @@
-import styles from "styles/section.module.css"
-
 export default function Section({ className, children, id }) {
   return (
     <section className={`md:p-4 ${className}`} id={id}>

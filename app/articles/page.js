@@ -1,16 +1,8 @@
 import Link from 'next/link'
 import Section from 'components/Section'
-import Layout from 'components/Layout'
 import Image from 'next/image'
 import { getPages } from 'integrations/directus';
 
-export async function getStaticProps() {
-  const pages = await getPages()
-
-  return {
-    props: { pages }
-  }
-}
 
 const locale = 'en-CA';
 const options = {
@@ -24,9 +16,10 @@ const urlFragments = {
     'map': 'maps',
   }
 
-export default function AllArticles({ pages }) {
+export default async function AllArticles() {
+  const pages = await getPages()
   return (
-    <Layout title="Local info for families in Kitchener Waterloo" color="red">
+    <>
       <section className="bg-slate-100 py-6">
         <div className="container py-5 mx-auto">
           <div className="lg:grid grid-cols-2 gap-6">
@@ -99,6 +92,6 @@ export default function AllArticles({ pages }) {
           </div>
         </div>
       </section>
-    </Layout>
+    </>
   )
 }

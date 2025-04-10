@@ -9,6 +9,7 @@ import { importEventFromUrl, generateTags, extractEventFromImage } from 'integra
 import LocationSelector from 'components/LocationSelector'
 import ErrorNotification from 'components/ErrorNotification'
 import TagButton from 'components/TagButton'
+import Section from 'components/layout/Section'
 import Image from 'next/image'
 import dynamic from 'next/dynamic';
 const Editor = dynamic(
@@ -191,10 +192,7 @@ export default function NewEventPage({ tags }) {
       [name]: value
     }))
   }
-
-  console.log({tags})
-  console.log({selectedTags})
-
+  
   return (
     <>
       {error && (
@@ -204,7 +202,7 @@ export default function NewEventPage({ tags }) {
         />
       )}
       
-      <div className="container max-w-screen-lg mx-auto px-4 py-8">
+      <Section>
         <h1 className="text-3xl font-bold mb-8">Submit an Event</h1>
         
         {/* Import section */}
@@ -463,7 +461,7 @@ export default function NewEventPage({ tags }) {
             </button>
           </div>
         </form>
-      </div>
+      </Section>
     </>
   )
 } 

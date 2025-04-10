@@ -1,7 +1,8 @@
 import { createEvents } from 'ics'
 import { DateTime } from 'luxon'
-import { getEvents } from 'integrations/directus';
-import {marked} from 'marked';
+import { getEvents } from 'integrations/directus'
+import { marked } from 'marked'
+import { NextResponse } from 'next/server'
 
 function generateCalendar(events) {
   const eventData = events.map(event => {
@@ -48,34 +49,20 @@ function generateCalendar(events) {
     throw Error(error)
   }
 
-  return `${value}`;
+  return value
 }
 
-function Calendar() {
-  // getServerSideProps will do the heavy lifting
-}
-
-export async function getServerSideProps({ res }) {
+export async function GET() {
   try {
-    // We make an API call to gather the events for the calendar
     const events = await getEvents()
+    const calendar = generateCalendar(events)
 
-    // We generate the ics file with the event data
-    const calendar = generateCalendar(events);
-
-    res.setHeader('Content-Type', 'text/calendar');
-    // we send the ICS to the browser
-    res.write(calendar);
-    res.end();
-  } catch (err) {
-    return {
-       notFound: true,
-     }
+    return new NextResponse(calendar, {
+      headers: {
+        'Content-Type': 'text/calendar'
+      }
+    })
+  } catch (error) {
+    return new NextResponse('Error generating calendar', { status: 500 })
   }
-
-  return {
-    props: {},
-  };
 }
-
-export default Calendar;

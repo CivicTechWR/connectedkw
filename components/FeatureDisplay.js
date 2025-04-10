@@ -1,4 +1,3 @@
-import styles from "../styles/ideaGenerator.module.css"
 import ReactMarkdown from 'react-markdown'
 
 function FeatureDisplay({ feature={}, closeModal }) {
@@ -43,8 +42,8 @@ function FeatureDisplay({ feature={}, closeModal }) {
           {image &&
           <div className="">
             <div className="relative w-full aspect-square overflow-hidden bg-latte">
-              <img className={`w-full h-full object-cover ${styles.appear}`} src={imageUrl} alt={`Photo of artwork titled ${title}`} />
-              { (image.credit?.length > 2) && <small className={`absolute bottom-0 left-0 right-0 text-xs px-5 py-1 ${styles.bgCaption}`}><ReactMarkdown>{`Image credit: ${image.credit}`}</ReactMarkdown></small> }
+              <img className={`w-full h-full object-cover`} src={imageUrl} alt={`Photo of artwork titled ${title}`} />
+              { (image.credit?.length > 2) && <small className={`absolute bottom-0 left-0 right-0 text-xs px-5 py-1`}><ReactMarkdown>{`Image credit: ${image.credit}`}</ReactMarkdown></small> }
             </div>
           </div>
           }

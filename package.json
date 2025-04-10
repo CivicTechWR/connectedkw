@@ -40,6 +40,7 @@
     "gray-matter": "^4.0.3",
     "html-entities": "^2.5.2",
     "ics": "^3.7.6",
+    "immutable": "^5.1.1",
     "isomorphic-dompurify": "^2.22.0",
     "luxon": "^3.4.4",
     "marked": "^13.0.2",
