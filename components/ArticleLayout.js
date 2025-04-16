@@ -1,4 +1,4 @@
-import Layout from 'components/Layout'
+import Layout from 'archived/Layout'
 import Link from 'next/link'
 
 export default function ArticleLayout({ meta, color, children }) {
