@@ -1,3 +1,5 @@
+'use client'
+
 import { useEffect, useState, useRef, isValidElement, cloneElement, Children } from 'react';
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
@@ -387,7 +389,7 @@ const InteractiveMapParks = ({ features, mapConfig }) => {
   return(
     <div id={mapId} className="w-full h-full">
     { view === "map" &&
-      <div className="h-visibleScreen">
+      <div className="h-[80vh]">
         <Wrapper apiKey={process.env.NEXT_PUBLIC_GOOGLE_API_KEY} render={render}>
           <MapComponent 
             features={filteredFeatures} 

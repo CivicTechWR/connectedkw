@@ -20,8 +20,7 @@ export default async function AllArticles() {
   const pages = await getPages()
   return (
     <>
-      <section className="bg-slate-100 py-6">
-        <div className="container py-5 mx-auto">
+      <Section className="bg-slate-100 py-6">
           <div className="lg:grid grid-cols-2 gap-6">
             <div className="flex justify-center items-center">
               <div>
@@ -49,11 +48,8 @@ export default async function AllArticles() {
                 />
             </div>
           </div>
-        </div>
-      </section>
-      <section>
-        <div className="container mx-auto py-5">
-
+      </Section>
+      <Section>
           <div className="space-y-2 divide-y divide-slate-300">
           {
             pages.map(page => {
@@ -90,8 +86,7 @@ export default async function AllArticles() {
             })
           }
           </div>
-        </div>
-      </section>
+      </Section>
     </>
   )
 }

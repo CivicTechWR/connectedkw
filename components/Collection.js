@@ -1,9 +1,7 @@
-import styles from "styles/events.module.css"
+'use client'
+
 import { useState, useEffect } from "react"
-import Link from 'next/link'
-import Image from 'next/image'
 import dynamic from 'next/dynamic'
-import TagFilter from "components/TagFilter"
 import EventCard from "components/EventCard"
 import Filters from "components/Filters"
 import Loading from 'components/Loading'
@@ -43,17 +41,6 @@ const Collection = ({ title="Events", events=[], filters=[], loading, config={},
   const toggleView = (newView) => () => {
     setView(newView)
   }
-
-  // const fetchEvents = () => {
-  //   setLoading(true)
-  //   fetch("/api/events")
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       setAllEvents(data.events)
-  //       setFilteredEvents(data.events)
-  //       setLoading(false)
-  //     })
-  // }
 
   useEffect(() => {
     filterEvents()

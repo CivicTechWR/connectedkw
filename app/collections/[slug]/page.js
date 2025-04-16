@@ -1,15 +1,10 @@
 import { getCollectionBySlug } from 'integrations/directus'
 import Collection from 'components/Collection'
 
-export async function getServerSideProps({ params }) {
-  const collection = await getCollectionBySlug(params.slug)
+export default async function CollectionPage({ params }) {
+  const {slug} = await params
+  const collection = await getCollectionBySlug(slug)
 
-  return {
-    props: { collection },
-  }
-}
-
-export default function CollectionPage({ collection }) {
   return (
     <Collection title={collection.title} events={collection.events} />
   )
