@@ -1,3 +1,5 @@
+"use server"
+
 import { 
   createDirectus, 
   staticToken, 
@@ -7,11 +9,21 @@ import {
   registerUserVerify,
   authentication,
   login,
+  uploadFiles
 } from '@directus/sdk'
 
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 const client = createDirectus(process.env.DIRECTUS_URL).with(authentication('json')).with(rest());
 
+const uploadImage = async (formData) => {
+  try {
+    const result = await directus.request(uploadFiles(formData));
+    return result
+  } catch(error) {
+    console.log({error})
+    return error
+  }
+}
 
 const getActivities = async (limit=-1, offset=0) => {
 
@@ -620,7 +632,7 @@ const verifyEmail = async (token) => {
     return error
   }
 }
-const getProfiles = async ({skillID = -1, profileID = -1}) => {
+const getProfiles = async ({skillID = -1, slug}) => {
   
   try {
     //Changed this filter to reference the SKILL ID insteadf of the ID in the junction table
@@ -633,8 +645,8 @@ const getProfiles = async ({skillID = -1, profileID = -1}) => {
           }
         }
       }),
-      ...(profileID != -1 && {
-        id: { _eq: profileID }
+      ...(slug && {
+        slug: { _eq: slug }
       })
     };
 
@@ -642,6 +654,7 @@ const getProfiles = async ({skillID = -1, profileID = -1}) => {
       readItems("profiles", {
         fields: [
           "id",
+          "slug",
           "city",
           "is_visible",
           "is_verified",
@@ -724,6 +737,64 @@ const getProfileSkills = async () => {
 //   }
 // };
 
+const searchVenues = async (query) => {
+  try {
+    const locations = await directus.request(
+      readItems('locations', {
+        fields: ['id'], 
+        search: query,
+        limit: 1
+      })
+    );
+
+    return locations[0]
+  } catch (error) {
+    console.log({error})
+    return null
+  }
+}
+
+export async function getMapList() {
+  try {
+    const maps = await directus.request(
+      readItems('maps', {
+        sort: ['title'],
+        filter: {
+          status: {
+            _eq: 'published'
+          }
+        }
+      })
+    )
+    return maps
+  } catch (error) {
+    console.error('Error fetching maps:', error)
+    return []
+  }
+}
+
+export async function getMapBySlug(slug) {
+  try {
+    const maps = await directus.request(
+      readItems('maps', {
+        filter: {
+          slug: {
+            _eq: slug
+          },
+          status: {
+            _eq: 'published'
+          }
+        },
+        limit: 1
+      })
+    )
+    return maps?.[0] || null
+  } catch (error) {
+    console.error('Error fetching map:', error)
+    return null
+  }
+}
+
 export { 
   getEvents,
   getEvent,
@@ -748,5 +819,7 @@ export {
   verifyEmail,
   getProfiles,
   getProfileSkills,
+  uploadImage,
+  searchVenues
   //getProfileById
 };

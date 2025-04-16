@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 const localizer = luxonLocalizer(DateTime, { firstDayOfWeek: 7 })
 import { useState, useCallback, useEffect } from 'react'
 import ReactModal from "react-modal";
-import EventDisplay from "components/EventDisplay"
+import EventDisplay from "components/events/EventDisplay"
 import "react-big-calendar/lib/css/react-big-calendar.css"
 
 const CalendarView = ({ events }) => {

@@ -1,11 +1,12 @@
 import Head from 'next/head'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import OutsideClickHandler from 'react-outside-click-handler';
-import Train from 'components/Train'
-import Footer from 'components/Footer'
+import Train from 'archived/Train'
+import Footer from 'components/layout/Footer'
 import styles from 'styles/navbar.module.css'
 
 const stops = [
@@ -26,7 +27,8 @@ const Layout = ({
   const router = useRouter()
   const [menuOpen, setMenuOpen] = useState(false)
   const [menuHidden, setMenuHidden] = useState(true)
-  const url = `${process.env.NEXT_PUBLIC_BASE_URL}${router.asPath}`
+  const pathname = usePathname()
+  const url = `${process.env.NEXT_PUBLIC_BASE_URL}${pathname}`
   const shareImageUrl = image ? image : `${process.env.NEXT_PUBLIC_BASE_URL}/share-image.jpg`
 
   const toggleMenu = () => {
@@ -52,15 +54,15 @@ const Layout = ({
     }, 50)
   }
 
-  useEffect(() => {
-    router.events.on('hashChangeStart', closeMenu);
-    router.events.on('routeChangeStart', closeMenu);
+  // useEffect(() => {
+  //   router.events.on('hashChangeStart', closeMenu);
+  //   router.events.on('routeChangeStart', closeMenu);
 
-    return () => {
-      router.events.off('hashChangeStart', closeMenu);
-      router.events.off('routeChangeStart', closeMenu);
-    }
-  }, [router.events]);
+  //   return () => {
+  //     router.events.off('hashChangeStart', closeMenu);
+  //     router.events.off('routeChangeStart', closeMenu);
+  //   }
+  // }, [router.events]);
 
   // const currentStop = stops.find(stop => router.pathname.startsWith(`/${stop.slug}`)) || stops[0]
 
@@ -93,19 +95,19 @@ const Layout = ({
           </p>
           <div className="flex gap-4 lg:gap-6 items-center">
             <nav>
-              <Link href="/events" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/events`) ? 'border-b-2 border-red' : ''}`}>
+              <Link href="/events" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/events`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Events`}</span>
                 <i className={`ml-1 fa-solid fa-calendar-day hidden sm:inline`}></i>
               </Link>
             </nav>
             <nav>
-              <Link href="/articles" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/articles`) ? 'border-b-2 border-red' : ''}`}>
+              <Link href="/articles" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/articles`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Local info`}</span>
                 <i className={`ml-1 fa-solid fa-circle-info hidden sm:inline`}></i>
               </Link>
             </nav>
             <nav>
-              <Link href="/profiles" className={`pb-1 text-black no-underline font-medium ${router.pathname.startsWith(`/profiles`) ? 'border-b-2 border-red' : ''}`}>
+              <Link href="/profiles" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/profiles`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Directory`}</span>
                 <i className={`ml-1 fa-solid fa-user hidden sm:inline`}></i>
               </Link>

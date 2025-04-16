@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef, forwardRef } from 'react'
-import styles from 'styles/ideaGenerator.module.css'
+import { useState } from 'react'
 import TagFilter from "components/TagFilter"
 
 const Filters = ({ filters, selectedFilters, toggleFn, reset, children }) => {
