@@ -6,7 +6,7 @@ import Image from 'next/image'
 import Filters from "components/Filters"
 import slugify from 'slugify'
 import { useRouter } from 'next/router'
-import EventCard from "components/EventCard"
+import EventCard from "components/events/EventCard"
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"
 import GridCard from "components/GridCard"
 

@@ -5,8 +5,8 @@ import { useRouter } from 'next/navigation'
 import { usePathname } from 'next/navigation'
 import { useState, useEffect } from 'react'
 import OutsideClickHandler from 'react-outside-click-handler';
-import Train from 'components/Train'
-import Footer from 'components/Footer'
+import Train from 'archived/Train'
+import Footer from 'components/layout/Footer'
 import styles from 'styles/navbar.module.css'
 
 const stops = [

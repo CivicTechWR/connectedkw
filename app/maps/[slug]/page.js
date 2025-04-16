@@ -1,5 +1,5 @@
 import InteractiveMapParks from 'components/InteractiveMapParks'
-import Section from 'components/Section'
+import Section from 'components/layout/Section'
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'

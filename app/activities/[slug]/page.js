@@ -1,7 +1,7 @@
 import Layout from 'components/Layout'
 import EventDisplay from "components/EventDisplay"
 import { getEventBySlug } from 'integrations/directus'
-import ActivityDisplay from 'components/ActivityDisplay'
+import ActivityDisplay from 'archived/ActivityDisplay'
 
 export async function getServerSideProps({ params }) {
   const event = await getEventBySlug(params.slug)

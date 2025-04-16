@@ -6,7 +6,7 @@ import OutsideClickHandler from 'react-outside-click-handler';
 
 import IdeaDisplay from "components/IdeaDisplay"
 import TagFilter from "components/TagFilter"
-import GeneratorButton from "components/GeneratorButton"
+import GeneratorButton from "archived/GeneratorButton"
 
 function IdeaGenerator() {
   const [allIdeas, setAllIdeas] = useState([])

@@ -1,5 +1,5 @@
 import Layout from 'components/Layout'
-import Section from 'components/Section'
+import Section from 'components/layout/Section'
 import Link from 'next/link'
 import Image from 'next/image'
 import Masonry, { ResponsiveMasonry } from "react-responsive-masonry"

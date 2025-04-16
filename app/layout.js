@@ -1,7 +1,7 @@
 import localFont from 'next/font/local';
 const slackey = localFont({ src: '../assets/fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
-import NavigationHeader from 'components/NavigationHeader'
-import Footer from 'components/Footer'
+import NavigationHeader from 'components/layout/NavigationHeader'
+import Footer from 'components/layout/Footer'
 import Head from 'next/head'
 import Script from 'next/script'
 import PlausibleProvider from 'next-plausible'

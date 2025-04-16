@@ -2,7 +2,6 @@ import { useEffect, useState, useRef, isValidElement, cloneElement, Children } f
 import { Wrapper, Status } from "@googlemaps/react-wrapper";
 import { MarkerClusterer } from "@googlemaps/markerclusterer";
 import Loading from 'components/Loading'
-import Section from 'components/Section'
 import FeatureDisplay from 'components/FeatureDisplay'
 import FeatureList from 'components/FeatureList'
 import FeatureGrid from 'components/FeatureGrid'

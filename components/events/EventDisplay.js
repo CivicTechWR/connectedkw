@@ -1,4 +1,4 @@
-import { eventCategories, tagEmojiDict } from "../utils/constants"
+import { eventCategories, tagEmojiDict } from "utils/constants"
 import ReactMarkdown from 'react-markdown'
 import rehypeRaw from 'rehype-raw'
 import remarkGfm from 'remark-gfm'

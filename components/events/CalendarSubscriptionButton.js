@@ -1,9 +1,16 @@
 "use client"
 
+import { useEffect, useState } from 'react';
 import { AddToCalendarButton } from 'add-to-calendar-button-react';
 
-
 export default function CalendarSubscriptionButton() {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  if (!isClient) return null;
 
   return (
       <AddToCalendarButton

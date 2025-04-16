@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import Section from 'components/Section'
+import Section from 'components/layout/Section'
 import Image from 'next/image'
 import { getPages } from 'integrations/directus';
 

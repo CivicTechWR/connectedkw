@@ -1,12 +1,10 @@
-import Image from 'next/image'
-import Link from 'next/link'
+import Section from 'components/layout/Section'
 
 const Footer = () => {
 
   return (
-
       <footer className={`w-full relative bg-slate-100 py-6`}>
-        <div className="container max-w-screen-xl mx-auto px-5">
+        <Section>
           <div className="md:grid grid-cols-2 md:gap-24">
             <div className="mb-4 basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">About Connected KW</p>
@@ -38,8 +36,7 @@ const Footer = () => {
               </p>
             </div>
           </div>
-
-        </div>
+        </Section>
       </footer>
   )
 }

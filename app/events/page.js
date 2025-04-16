@@ -1,5 +1,5 @@
-import EventsFeed from 'components/EventsFeed'
-import CalendarSubscriptionButton from '/components/CalendarSubscriptionButton'
+import EventsFeed from 'components/events/EventsFeed'
+import CalendarSubscriptionButton from 'components/events/CalendarSubscriptionButton'
 import { getEvents, getCategories, getTags, getDataSources } from 'integrations/directus';
 import Image from 'next/image'
 import Link from 'next/link'

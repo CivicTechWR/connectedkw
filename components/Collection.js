@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import dynamic from 'next/dynamic'
-import EventCard from "components/EventCard"
+import EventCard from "components/events/EventCard"
 import Filters from "components/Filters"
 import Loading from 'components/Loading'
 

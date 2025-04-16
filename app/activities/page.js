@@ -1,5 +1,5 @@
 import Layout from 'components/Layout'
-import ActivitiesFeed from 'components/ActivitiesFeed'
+import ActivitiesFeed from 'archived/ActivitiesFeed'
 import { getActivities, getCategories, getTags } from 'integrations/directus';
 import slugify from 'slugify';
 

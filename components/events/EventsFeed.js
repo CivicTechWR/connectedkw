@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import TagFilter from "components/TagFilter"
-import EventCard from "components/EventCard"
+import EventCard from "components/events/EventCard"
 import Filters from "components/Filters"
 import Loading from 'components/Loading'
 
