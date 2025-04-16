@@ -56,7 +56,7 @@ export default function ProfileCard({ profile }) {
 
   return (
     <Link
-      href={`/profiles/${profile.id}`}
+      href={`/profiles/${profile.slug}`}
       className="block no-underline"
     >
       <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer">

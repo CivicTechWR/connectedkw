@@ -632,7 +632,7 @@ const verifyEmail = async (token) => {
     return error
   }
 }
-const getProfiles = async ({skillID = -1, profileID = -1}) => {
+const getProfiles = async ({skillID = -1, slug}) => {
   
   try {
     //Changed this filter to reference the SKILL ID insteadf of the ID in the junction table
@@ -645,8 +645,8 @@ const getProfiles = async ({skillID = -1, profileID = -1}) => {
           }
         }
       }),
-      ...(profileID != -1 && {
-        id: { _eq: profileID }
+      ...(slug && {
+        slug: { _eq: slug }
       })
     };
 
@@ -654,6 +654,7 @@ const getProfiles = async ({skillID = -1, profileID = -1}) => {
       readItems("profiles", {
         fields: [
           "id",
+          "slug",
           "city",
           "is_visible",
           "is_verified",

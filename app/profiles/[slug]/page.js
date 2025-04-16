@@ -36,8 +36,8 @@ function getRandomColor(skillName) {
 }
 
 export default async function ProfilePage({ params }) {
-  const { slug } = params;
-  const profiles = await getProfiles({ profileID: slug });
+  const { slug } = await params;
+  const profiles = await getProfiles({ slug: slug });
   const profile = profiles[0];
 
   if (!profile) {
