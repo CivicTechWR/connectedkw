@@ -1,4 +1,5 @@
 import ReactMarkdown from 'react-markdown'
+import Image from 'next/image'
 
 function FeatureDisplay({ feature={}, closeModal }) {
   if (!feature) {
@@ -42,7 +43,13 @@ function FeatureDisplay({ feature={}, closeModal }) {
           {image &&
           <div className="">
             <div className="relative w-full aspect-square overflow-hidden bg-latte">
-              <img className={`w-full h-full object-cover`} src={imageUrl} alt={`Photo of artwork titled ${title}`} />
+              <Image 
+                className={`w-full h-full object-cover`} 
+                src={imageUrl} 
+                alt={`Photo of artwork titled ${title}`} 
+                width={400} 
+                height={400} 
+              />
               { (image.credit?.length > 2) && <small className={`absolute bottom-0 left-0 right-0 text-xs px-5 py-1`}><ReactMarkdown>{`Image credit: ${image.credit}`}</ReactMarkdown></small> }
             </div>
           </div>
@@ -55,7 +62,13 @@ function FeatureDisplay({ feature={}, closeModal }) {
 
             <a href={mapUrl} className="flex no-underline text-black" title="Click to open in Google Maps" target="_blank" rel="noreferrer noopener">
               <div className="flex-none aspect-square overflow-hidden bg-latte h-[120px] w-[120px]">
-                <img src={staticMapUrl} alt="location of artwork on map" width="120" height="120" className="aspect-square w-full h-full" />
+                <Image 
+                  src={staticMapUrl} 
+                  alt="location of artwork on map" 
+                  width="120" 
+                  height="120" 
+                  className="aspect-square w-full h-full" 
+                />
               </div>
               <div className="w-full p-4">
                 <h4 className="text mb-1 font-body font-medium">Location</h4>

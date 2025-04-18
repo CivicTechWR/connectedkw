@@ -43,10 +43,6 @@ const Collection = ({ title="Events", events=[], filters=[], loading, config={},
   }
 
   useEffect(() => {
-    filterEvents()
-  }, [selectedFilters, events])
-
-  useEffect(() => {
     setLoading(loading)
   }, [loading])
 
@@ -79,6 +75,10 @@ const Collection = ({ title="Events", events=[], filters=[], loading, config={},
     setFilteredEvents(newFilteredEvents)
     setLoading(false)
   }
+
+  useEffect(() => {
+    filterEvents()
+  }, [selectedFilters, events])
 
   const reset = () => {
     setSelectedFilters(emptyFilters)

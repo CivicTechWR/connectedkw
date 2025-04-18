@@ -1,109 +1,57 @@
-import ow from "ow";
-import md5 from "blueimp-md5";
+import { NextResponse } from 'next/server'
 
-const MAILCHIMP_SERVER = 'us18'
-const MAILCHIMP_LIST_ID = '5922adb2bc'
-
-function owWithMessage(val, message, validator) {
+export async function POST(request) {
   try {
-    ow(val, validator);
-  } catch (error) {
-    throw new Error(message);
-  }
-}
+    const { email } = await request.json()
 
-owWithMessage(
-  process.env.MAILCHIMP_API_KEY,
-  "MAILCHIMP_API_KEY environment variable is not set",
-  ow.string.minLength(1)
-);
+    if (!email) {
+      return NextResponse.json(
+        { error: 'Email is required' },
+        { status: 400 }
+      )
+    }
 
-const isEmail = ow.string.is((e) => /^.+@.+\..+$/.test(e));
-const authorization =
-  "Basic " +
-  Buffer.from("randomstring:" + process.env.MAILCHIMP_API_KEY).toString(
-    "base64"
-  );
+    // Add to mailing list
+    const MAILCHIMP_API_KEY = process.env.MAILCHIMP_API_KEY
+    const MAILCHIMP_LIST_ID = process.env.MAILCHIMP_LIST_ID
+    const DATACENTER = process.env.MAILCHIMP_API_KEY?.split('-')[1]
 
-function addNewMember(email, firstName) {
-  return fetch(`https://${MAILCHIMP_SERVER}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      authorization,
-    },
-    body: JSON.stringify({
+    const data = {
       email_address: email,
-      status: "subscribed",
-      merge_fields: {
-        FNAME: firstName,
-      },
-    }),
-  });
-}
-
-function subscribeContact(email) {
-  return fetch(
-    `https://${MAILCHIMP_SERVER}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members/${md5(
-      email.toLowerCase()
-    )}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({
-        status: "subscribed",
-      }),
-      headers: {
-        authorization,
-      },
+      status: 'subscribed'
     }
-  );
-}
 
-function checkContactStatus(email) {
-  return fetch(
-    `https://${MAILCHIMP_SERVER}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members/${md5(
-      email.toLowerCase()
-    )}`,
-    {
-      headers: {
-        authorization,
-      },
-    }
-  );
-}
-export default async (req, res) => {
-  const { firstName, email } = JSON.parse(req.body);
-
-  if (req.method === "POST") {
-    try {
-      const { status } = await (await checkContactStatus(email)).json();
-      console.log({status})
-
-      if (status === 404) {
-        const message = await (await addNewMember(email, firstName)).json();
-
-        if (message.status === 400) {
-          message.status = 406;
-          return res.status(406).json({ message });
-        }
-
-        if (message) {
-          return res.status(200).json({ message: `Thanks for subscribing!` });
-        }
-      } else if (status === "subscribed") {
-        res.status(400).json({ message: "User already subscribed" });
-      } else {
-        const message = await (await subscribeContact(email)).json();
-        if (message) {
-          res.status(200).json({ message });
-        }
+    const response = await fetch(
+      `https://${DATACENTER}.api.mailchimp.com/3.0/lists/${MAILCHIMP_LIST_ID}/members`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `apikey ${MAILCHIMP_API_KEY}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
       }
-    } catch (err) {
-      console.log(err);
-      res.status(500).json({ message: err });
+    )
+
+    const responseData = await response.json()
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: responseData.detail || 'Failed to subscribe' },
+        { status: response.status }
+      )
     }
-  } else {
-    res.setHeader("Allow", ["POST"]);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
+
+    return NextResponse.json(
+      { message: 'Successfully subscribed!' },
+      { status: 200 }
+    )
+
+  } catch (error) {
+    console.error('Subscribe error:', error)
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    )
   }
-};
+}

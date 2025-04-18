@@ -9,7 +9,7 @@ import {
 } from '@directus/sdk';
 import { NodeHtmlMarkdown } from 'node-html-markdown'
 import { DateTime } from 'luxon'
-import cheerio from "cheerio"
+import * as cheerio from "cheerio"
 import {decode} from 'html-entities';
 
 const directus = createDirectus('https://cms.connectedkw.com').with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));

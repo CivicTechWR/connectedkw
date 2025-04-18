@@ -22,8 +22,6 @@ const VerificationMessage = () => {
 
 
 export default function LoginPage() {
-	const searchParams = useSearchParams()
-	const verification = searchParams.get('verification');
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
 

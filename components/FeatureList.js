@@ -1,4 +1,5 @@
 import { eventCategories, tagEmojiDict } from "../utils/constants"
+import Image from 'next/image'
 
 const FeatureCard = ({ feature, setSelectedFeature }) => {
   if (!feature) return null
@@ -27,12 +28,12 @@ const FeatureCard = ({ feature, setSelectedFeature }) => {
         <div className={`flex w-full h-full min-h-0`}>
         { imgSrc &&
           <div className={`aspect-square basis-1/3 flex-none overflow-hidden`}>
-            <img
+            <Image
               className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
               src={imgSrc}
               alt={imageDescription}
-              width={image ? image.thumbnails.large.width : undefined}
-              height={image ? image.thumbnails.large.height : undefined}
+              width={image ? image.thumbnails.large.width : 150}
+              height={image ? image.thumbnails.large.height : 150}
             />
           </div>
         }

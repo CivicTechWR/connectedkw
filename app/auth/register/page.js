@@ -29,8 +29,6 @@ export default function LoginPage({}) {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
 	const [success, setSuccess] = useState(null);
-	const searchParams = useSearchParams()
-	const verification = searchParams.get('verification');
 
 	// Error Messages
 	const [error, setError] = useState("");

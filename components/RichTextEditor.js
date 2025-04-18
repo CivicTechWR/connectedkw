@@ -13,4 +13,5 @@ const Editor = dynamic(() => import('components/InitializedMDXEditor'), {
 // to accept other props, including a ref.
 const RichTextEditor = forwardRef((props, ref) => <Editor {...props} editorRef={ref} />)
 
+RichTextEditor.displayName = 'RichTextEditor'
 export default RichTextEditor
