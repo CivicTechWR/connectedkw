@@ -5,6 +5,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 import Section from 'components/layout/Section'
 
+export const metadata = {
+  title: 'Events in Kitchener, Waterloo, and Cambridge',
+  description: 'Find events in Kitchener, Waterloo, and Cambridge. Get the latest events, activities, and things to do in the area.',
+}
+
 export default async function Events() {
   const categories = await getCategories('Age groups')
   const tags = await getTags('Events and activities')
