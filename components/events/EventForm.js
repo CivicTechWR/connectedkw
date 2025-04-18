@@ -1,9 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
-import { EditorState } from 'draft-js'
-import { stateToMarkdown } from 'draft-js-export-markdown'
-import { stateFromMarkdown } from 'draft-js-import-markdown'
+import { useState, useEffect, useRef, Suspense } from 'react'
 import { uploadImage } from 'integrations/directus'
 import { importEventFromUrl, generateTags } from 'integrations/openai'
 import LocationSelector from 'components/LocationSelector'
@@ -11,22 +8,20 @@ import ErrorNotification from 'components/ErrorNotification'
 import TagButton from 'components/TagButton'
 import Section from 'components/layout/Section'
 import Image from 'next/image'
-import dynamic from 'next/dynamic';
-const Editor = dynamic(
-  () => import('react-draft-wysiwyg').then(mod => mod.Editor),
-  { ssr: false }
-)
 import { useRouter } from 'next/navigation'
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
+import dynamic from 'next/dynamic'
+
+const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
+
 
 export default function NewEventPage({ tags }) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
-  const [editorState, setEditorState] = useState(EditorState.createEmpty())
   const [fileUploading, setFileUploading] = useState(false)
   const router = useRouter()
   const [selectedTags, setSelectedTags] = useState([])
+  const editorRef = useRef(null)
 
   // Form state
   const [formData, setFormData] = useState({
@@ -47,25 +42,16 @@ export default function NewEventPage({ tags }) {
 
   // Convert markdown to editor state when description changes from import
   useEffect(() => {
-    if (formData.description.length > 0 && Editor) {
-      try {
-        const contentState = stateFromMarkdown(formData.description)
-        setEditorState(EditorState.createWithContent(contentState))
-      } catch (error) {
-        console.error('Error converting markdown to editor state:', error)
-      }
+    if (formData.description.length > 0 && editorRef.current) {
+      editorRef.current.setMarkdown(formData.description)
     }
   }, [formData.description])
 
-  const handleEditorStateChange = (state) => {
-    setEditorState(state)
-  }
-
-  const onEditorBlur = () => {
-    const markdown = stateToMarkdown(editorState.getCurrentContent())
+  const handleEditorChange = (e) => {
+    const content = editorRef.current.getMarkdown()
     setFormData(prev => ({
       ...prev,
-      description: markdown
+      description: content
     }))
   }
 
@@ -263,25 +249,13 @@ export default function NewEventPage({ tags }) {
               Description*
             </label>
             <div className="border shadow">
-              <Editor
-                editorState={editorState}
-                onEditorStateChange={handleEditorStateChange}
-                onBlur={onEditorBlur}
-                wrapperClassName="w-full"
-                editorClassName="px-3 min-h-[200px]"
-                toolbar={{
-                  options: ['inline', 'blockType', 'list', 'link', 'emoji', 'history'],
-                  inline: {
-                    options: ['bold', 'italic', 'underline', 'strikethrough'],
-                  },
-                  blockType: {
-                    options: ['Normal', 'H2', 'H3', 'H4', 'Blockquote'],
-                  },
-                  list: {
-                    options: ['unordered', 'ordered'],
-                  },
-                }}
-              />
+              <Suspense fallback={<div>Loading...</div>}>
+                <RichTextEditor 
+                  markdown={formData.description} 
+                  onBlur={handleEditorChange}
+                  ref={editorRef}
+                />
+              </Suspense>
             </div>
           </div>
 

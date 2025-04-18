@@ -1,33 +1,16 @@
-import { EditorState, convertToRaw, ContentState } from 'draft-js'
-import { stateToMarkdown } from 'draft-js-export-markdown'
-import { stateFromMarkdown } from 'draft-js-import-markdown'
+'use client'
 
-import dynamic from 'next/dynamic';
-const Editor = dynamic(
-  () => import('react-draft-wysiwyg').then(mod => mod.Editor),
-  { ssr: false }
-) 
-import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css"
+import dynamic from 'next/dynamic'
+import { forwardRef } from "react"
 
-export default function RichTextEditor({editorState, handleEditorStateChange}) {
-  return(
-    <Editor
-        initialEditorState={editorState}
-        onEditorStateChange={handleEditorStateChange}
-        wrapperClassName="w-full"
-        editorClassName="px-3 min-h-[200px]"
-        toolbar={{
-        options: ['inline', 'blockType', 'list', 'link', 'emoji', 'history'],
-        inline: {
-            options: ['bold', 'italic', 'underline', 'strikethrough'],
-        },
-        blockType: {
-            options: ['Normal', 'H2', 'H3', 'H4', 'Blockquote'],
-        },
-        list: {
-            options: ['unordered', 'ordered'],
-        },
-        }}
-    />
-  )
-}
+// This is the only place InitializedMDXEditor is imported directly.
+const Editor = dynamic(() => import('components/InitializedMDXEditor'), {
+  // Make sure we turn SSR off
+  ssr: false
+})
+
+// This is what is imported by other components. Pre-initialized with plugins, and ready
+// to accept other props, including a ref.
+const RichTextEditor = forwardRef((props, ref) => <Editor {...props} editorRef={ref} />)
+
+export default RichTextEditor
