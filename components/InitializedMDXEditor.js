@@ -18,12 +18,14 @@ import {
   ListsToggle
 } from "@mdxeditor/editor";
 import '@mdxeditor/editor/style.css'
+import styles from 'styles/richtexteditor.module.css'
 
 
 export default function RichTextEditor({ editorRef=null, ...props }) { 
 
   return (
     <MDXEditor
+        className={`${styles.editor} min-h-[300px]`}
         plugins={[
           headingsPlugin(),
           linkPlugin(),
@@ -33,7 +35,7 @@ export default function RichTextEditor({ editorRef=null, ...props }) {
           quotePlugin(),
           codeBlockPlugin(),
           toolbarPlugin({
-            toolbarClassName: 'mdxeditor-toolbar',
+            toolbarClassName: styles.toolbar,
             toolbarContents: () => (
               <>
                 <BlockTypeSelect />

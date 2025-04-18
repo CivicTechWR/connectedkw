@@ -12,9 +12,6 @@ export default function NavigationHeader({ className, children, id }) {
                 <Link href="/">
                     <Image src="/icon-03.svg" height="80" width="80" alt="Connected KW" />
                 </Link>
-                <p className="hidden lg:block mb-0">
-                    A community-based resource for all things KW
-                </p>
             </div>
             <div className="flex gap-4 lg:gap-6 items-center">
                 <nav>
