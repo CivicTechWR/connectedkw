@@ -48,6 +48,7 @@ export async function POST(request) {
     const results = []
     const errors = []
 
+    // TODO: batch requests if there are too many events
     // Process each event
     for (const eventId of events) {
       try {
