@@ -23,7 +23,7 @@ const checkAuthorization = (req, done) => {
 
   const token = bearerToken.split(" ")[1];
 
-  if (token && token === process.env.UNBORING_SECRET_KEY) {
+  if (token && token === process.env.CONNECTEDKW_SECRET_KEY) {
     return done("Authorized")
   } else {
     return new NextResponse(null, { status: 401, statusText: "Unauthorized" })
