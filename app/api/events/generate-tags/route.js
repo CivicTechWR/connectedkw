@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { generateTags } from 'integrations/openai'
-import { directus } from 'integrations/directus'
-import { updateItem, readItem } from '@directus/sdk'
+import { getEventById, updateEvent } from 'integrations/directus'
 
 const checkAuthorization = (req, done) => {
   const bearerToken = req.headers.get("authorization")
@@ -53,9 +52,7 @@ export async function POST(request) {
     for (const eventId of events) {
       try {
         // Fetch event from Directus
-        const event = await directus.request(
-          readItem('events', eventId)
-        )
+        const event = await getEventById(eventId)
 
         if (!event) {
           errors.push({ id: eventId, error: 'Event not found' })
@@ -80,15 +77,14 @@ export async function POST(request) {
           tags_id: tagId
         }))
 
-        await directus.request(
-          updateItem('events', eventId, {
-            tags: formattedTags
-          })
-        )
+        await updateEvent(eventId, {
+          tags: formattedTags
+        })
 
         results.push({ id: eventId, tags })
 
       } catch (error) {
+        console.log({error})
         errors.push({ id: eventId, error: error.message })
       }
     }

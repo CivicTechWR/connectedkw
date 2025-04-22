@@ -4,9 +4,11 @@ import {
   createDirectus, 
   staticToken, 
   rest,
+  readItem,
   readItems,
   registerUser,
   registerUserVerify,
+  updateItem,
   authentication,
   login,
   uploadFiles
@@ -287,27 +289,6 @@ const getDataSources = async () => {
     console.log({error})
     return []
   }
-}
-
-
-const getEvent = async (id) => {
-  let { data: event, error } = await supabase
-    .from('events')
-    .select(`
-      *,
-      location(*),
-      categories(*),
-      tags(*)
-    `)
-    .eq('id', id)
-    .limit(1)
-    .single()
-
-  if (error) {
-    console.log({error})
-  }
-
-  return event
 }
 
 const getEventBySlug = async (slug) => {
@@ -795,9 +776,22 @@ export async function getMapBySlug(slug) {
   }
 }
 
+const getEventById = async (id) => {
+  const event = await directus.request(
+    readItem('events', id)
+  )
+  return event
+}
+
+const updateEvent = async (id, data) => {
+  const event = await directus.request(
+    updateItem('events', id, data)
+  )
+  return event
+}
+
 export { 
   getEvents,
-  getEvent,
   getEventCategories,
   getCategories,
   getTags,
@@ -820,6 +814,7 @@ export {
   getProfiles,
   getProfileSkills,
   uploadImage,
-  searchVenues
-  //getProfileById
+  searchVenues,
+  getEventById,
+  updateEvent
 };
