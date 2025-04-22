@@ -25,7 +25,7 @@ const Filters = ({ filters, selectedFilters, toggleFn, reset, children }) => {
   return (
     <div className="block mb-3">
       <div className="flex">
-        <p className="font-title text-xl">Filters 
+        <p className="font-semibold text-xl">Filters 
         {
           anySelected && 
           <>

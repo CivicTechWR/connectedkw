@@ -2,8 +2,8 @@ name: Import Eventbrite events on a CRON Schedule
 
 on:
   schedule:
-    # Runs every Friday at 8:00am
-    - cron: '0 8 * * 5'
+    # Runs every Wednesday at 8:00am
+    - cron: '0 8 * * 3'
   push:
     branches:
       - 'eventbrite_integration'
@@ -15,7 +15,7 @@ jobs:
       - name: cURL request
         # Hit the API endpoint to trigger an import
         run: |
-          curl -s -X POST https://www.connectedkw.com/api/import-events \
+          curl -s -X POST https://www.connectedkw.com/api/events/import \
             -d '{"source":"eventbrite"}' \
             -H 'Content-Type: application/json' \
-            -H 'Authorization: Bearer ${{ secrets.UNBORING_SECRET_KEY }}' \
+            -H 'Authorization: Bearer ${{ secrets.CONNECTEDKW_SECRET_KEY }}' \

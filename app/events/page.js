@@ -16,32 +16,6 @@ export default async function Events() {
   const events = await getEvents()
   const dataSources = await getDataSources()
 
-
-  // const filters = [
-  //   {
-  //     label: 'Featured',
-  //     id: 'featured',
-  //     type: 'boolean',
-  //     default: false,
-  //     attributeFn: (event) => event.featured
-  //   },
-  //   {
-  //     label: 'Tags',
-  //     id: 'tags',
-  //     type: 'select-multiple',
-  //     options: tags,
-  //     multipleSelect: true,
-  //     attributeFn: (event) => event.tags.map(t => t.id)
-  //   },  
-  //   {
-  //     label: 'Sources',
-  //     id: 'sources',
-  //     type: 'select-multiple',
-  //     options: dataSources,
-  //     multipleSelect: true,
-  //     attributeFn: (event) => [event.data_source]
-  //   },
-  // ]
   return (
     <>
       <Section className="bg-slate-100">
@@ -77,7 +51,7 @@ export default async function Events() {
           </div>
       </Section>
       <Section>
-        <EventsFeed events={events} />
+        <EventsFeed events={events} tags={tags} />
       </Section>
     </>
   )

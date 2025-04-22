@@ -27,8 +27,25 @@ const defaultConfig = {
   views: ['list', 'calendar']
 }
 
-const EventsFeed = ({ title="Family-friendly events", events=[], filters=[], loading, config={}, children }) => {
+const EventsFeed = ({ title="Family-friendly events", events=[], tags=[], loading, config={}, children }) => {
   const fullConfig = { ...defaultConfig, ...config }
+  const filters = [
+    {
+      label: 'Featured',
+      id: 'featured',
+      type: 'boolean',
+      default: false,
+      attributeFn: (event) => event.featured
+    },
+    {
+      label: 'Tags',
+      id: 'tags',
+      type: 'select-multiple',
+      options: tags,
+      multipleSelect: true,
+      attributeFn: (event) => event.tags.map(t => t.id)
+    }
+  ]
   const [isLoading, setLoading] = useState(loading)
   const emptyFilters = filters.reduce((a, f) => {
     const defaultValue = defaultValues[f.type]
@@ -138,7 +155,7 @@ const EventsFeed = ({ title="Family-friendly events", events=[], filters=[], loa
               </div>
               <div className="col-span-3">
                 <div className="sm:flex justify-between items-center mb-3">
-                  <p className="font-title text-xl">
+                  <p className="text-xl font-semibold">
                     Events 
                     {length && <span className="">{` (${length})`}</span>}
                   </p>

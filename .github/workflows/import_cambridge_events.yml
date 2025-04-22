@@ -2,8 +2,8 @@ name: Import the City of Cambridge events on a CRON Schedule
 
 on:
   schedule:
-    # Runs every Friday at 7:20am
-    - cron: '20 7 * * 5'
+    # Runs every Wednesday at 7:20am
+    - cron: '20 7 * * 3'
   push:
     branches:
       - 'apify_integration_cambridge'
@@ -15,7 +15,7 @@ jobs:
       - name: cURL request
         # Hit the API endpoint to trigger an import
         run: |
-          curl -s -X POST https://www.connectedkw.com/api/import-events \
+          curl -s -X POST https://www.connectedkw.com/api/events/import \
             -d '{"source":"cambridge"}' \
             -H 'Content-Type: application/json' \
-            -H 'Authorization: Bearer ${{ secrets.UNBORING_SECRET_KEY }}' \
+            -H 'Authorization: Bearer ${{ secrets.CONNECTEDKW_SECRET_KEY }}' \

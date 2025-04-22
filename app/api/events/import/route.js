@@ -8,12 +8,6 @@ const apify = new ApifyClient({
     token: process.env.APIFY_TOKEN
 });
 
-// Initializing the cors middleware
-const cors = Cors({
-  methods: ['POST', 'HEAD'],
-  origin: "*"
-})
-
 const checkAuthorization = (req, done) => {
   const bearerToken = req.headers.get("authorization")
 
@@ -45,7 +39,6 @@ function runMiddleware(req, fn) {
 }
 
 export async function POST(req) {
-  await runMiddleware(req, cors)
   await runMiddleware(req, checkAuthorization)
 
   try {
