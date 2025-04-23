@@ -1,4 +1,4 @@
-import { getEvents } from 'integrations/directus';
+import { getEvents, createEvent } from 'integrations/directus';
 import { NextResponse } from 'next/server';
 import { 
   createDirectus, 
@@ -40,42 +40,24 @@ export async function GET() {
 export async function POST(request) {
   try {
     const eventData = await request.json();
+    const event = await createEvent(eventData)
     
-    const locationText = [eventData.location_name, eventData.location_address].filter(Boolean).join(', ');
-    const locations = await directus.request(
-      readItems('locations', {
-        fields: ['id'],
-        search: locationText,
-        limit: 1
-      })
-    );
-
-    console.log(locations);
-
-    if (locations && locations[0]) {
-      eventData.location = locations[0].id;
+    if (event) {
+      return NextResponse.json(event, { 
+        status: 201,
+        headers: corsHeaders
+      });
     } else {
-      if (!eventData.location_source_text) {
-        eventData.location_source_text = locationText;
-      }
+      return NextResponse.json(
+        { msg: 'Something went wrong :(' },
+        { status: 500, headers: corsHeaders }
+      );
     }
-
-    delete eventData.location_name;
-    delete eventData.location_address;
-
-    const event = await directus.request(
-      createItem('events', eventData)
-    );
-    
-    return NextResponse.json(event, { 
-      status: 201,
-      headers: corsHeaders
-    });
   } catch (err) {
     console.log(err);
     const errorMessage = err.errors[0].message;
     return NextResponse.json(
-      { msg: errorMessage, error: err },
+      { msg: "Dang, something went wrong", error: err },
       { status: 500, headers: corsHeaders }
     );
   }

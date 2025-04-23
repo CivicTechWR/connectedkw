@@ -9,26 +9,13 @@ import {
 } from '@directus/sdk';
 import { NodeHtmlMarkdown } from 'node-html-markdown'
 import { DateTime } from 'luxon'
+import { waterlooRegionMuseumExtractor } from 'utils/event-extractors';
 
 const DEFAULT_EVENT_STATUS = "draft"
 
 const directus = createDirectus('https://cms.connectedkw.com').with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 const markdown = new NodeHtmlMarkdown()
 
-const importImage = async (url, title) => {
-  if (!url) return null
-  try {
-    const image = await directus.request(
-      importFile(url, {
-        title: title
-      })
-    );
-    return image
-  } catch (err) {
-    console.log(err)
-    return null
-  }    
-}
 
 export const defaultActorInput = {
   "breakpointLocation": "NONE",
@@ -239,55 +226,11 @@ export async function pageFunctionMuseums(context) {
       return null
   }
 
-  var months = ["January","February","March","April","May","June","July",
-          "August","September","October","November","December"];
+  const scrapedData = waterlooRegionMuseumExtractor($)
 
-  const dateText = $('.dateTime p').first().text().replace(/\t|\n/g, '')
-  const dateParts = dateText.split(' ')
-  const monthName = dateParts[1]
-  const monthIndex = months.indexOf(monthName)
-  const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
-  const day = dateParts[2].replace(',', '')
-  const zeroPaddedDay = `0${day}`.slice(-2)
-  const year = dateParts[3]
-  const startTime = dateParts[4]
-  const [startHour, startMinute] = startTime.split(':')
-  const startHourInt = parseInt(startHour)
-  const startHour24 = (dateParts[5] === "pm" &&  startHourInt < 12) ? (startHourInt + 12) : startHourInt
-  const endTime = dateParts[7]
-  const [endHour, endMinute] = endTime.split(':')
-  const endHourInt = parseInt(endHour)
-  const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
-  const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
-  const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
-
-
-  const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
-  const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`
-  const endDateTime = `${date}T${zeroPaddedEndHour24}:${endMinute}`
-
-  const title = $('#pageHeading h1').first().text().replace(/\t|\n/g, '')
-  $('h3:contains(Details:)').parent().attr('id', 'description-section');
-  $('#description-section').find('h3.sectionHeader').remove()
-  const description = $('#description-section').html().replace(/\t|\n/g, '')
-  const locationWithMaps = $('h3:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
-  const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
-
-  const imagePath = $(".contentRight img").first().attr("src")
-  const imageUrl = imagePath ? `https://calendar.waterlooregionmuseum.ca${imagePath}` : null;
-  
-  // Return an object with the data extracted from the page.
-  // It will be stored to the resulting dataset.
   return {
-      url: context.request.url,
-      title,
-      description,
-      location,
-      startDateTime,
-      endDateTime,
-      linkText: "Region of Waterloo Museums",
-      sourceDatabaseId: 10, // id in supabase
-      imageUrl
+      ...scrapedData,
+      external_link: scrapedData.external_link || context.request.url
   };
 }
 
@@ -339,16 +282,16 @@ export const saveEventsToDatabase = async(datasetItems) => {
   const promises = events.map(async(event) => {
     try {
       const description = event.description ? markdown.translate(event.description) : ""
-      const image = await importImage(event.imageUrl, event.title)
+      const image = await importImage(event.image_url, event.title)
       const locationText = event.location?.trim()
 
       const eventData = {
         title: event.title?.trim(),
         description: description?.trim(),
-        starts_at: event.startDateTime,
-        ends_at: event.endDateTime,
+        starts_at: event.starts_at,
+        ends_at: event.ends_at,
         location_source_text: locationText,
-        external_link: event.url,
+        external_link: event.external_link || event.url,
         link_text: event.linkText,
         price: event.price?.trim(),
         data_source: event.sourceDatabaseId,
@@ -387,11 +330,11 @@ export const saveEventsToDatabase = async(datasetItems) => {
   const results = await Promise.all(promises)
   console.log(`Processed ${results.length} events`)
 
-  return { created: created.length, failed: failed.length }
+  return { created: created.length, failed: failed.length, source: created[0].data_source }
 }
 
 export const generateActorInput = (source) => {
-  if (source === "kitchener") {
+  if (source === "City of Kitchener") {
     const today = DateTime.now().setZone("America/Toronto")
     const queryStartDate = `${today.month}/${today.day}/${today.year}`
     const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
@@ -407,7 +350,7 @@ export const generateActorInput = (source) => {
       ],
       "pageFunction": pageFunctionCityKitchener
     }
-  } else if (source === "waterloo") {
+  } else if (source === "City of Waterloo") {
     const today = DateTime.now().setZone("America/Toronto")
     const queryStartDate = `${today.month}/${today.day}/${today.year}`
     const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
@@ -423,7 +366,7 @@ export const generateActorInput = (source) => {
       ],
       "pageFunction": pageFunctionCityWaterloo
     }
-  } else if (source === "cambridge") {
+  } else if (source === "City of Cambridge") {
     const today = DateTime.now().setZone("America/Toronto")
     const queryStartDate = `${today.month}/${today.day}/${today.year}`
     const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
@@ -439,7 +382,7 @@ export const generateActorInput = (source) => {
       ],
       "pageFunction": pageFunctionCityCambridge
     }
-  } else if (source === "museums") {
+  } else if (source === "Region of Waterloo Museums") {
     const today = DateTime.now().setZone("America/Toronto")
     const queryStartDate = `${today.month}/${today.day}/${today.year}`
     const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
@@ -455,7 +398,7 @@ export const generateActorInput = (source) => {
       ],
       "pageFunction": pageFunctionMuseums
     }
-  } else if (source === "eventbrite") {
+  } else if (source === "Eventbrite") {
     return {
       "breakpointLocation": "NONE",
       "browserLog": false,

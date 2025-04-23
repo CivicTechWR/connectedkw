@@ -16,6 +16,6 @@ jobs:
         # Hit the API endpoint to trigger an import
         run: |
           curl -s -X POST https://www.connectedkw.com/api/events/import \
-            -d '{"source":"eventbrite"}' \
+            -d '{"source":"Eventbrite"}' \
             -H 'Content-Type: application/json' \
             -H 'Authorization: Bearer ${{ secrets.CONNECTEDKW_SECRET_KEY }}' \

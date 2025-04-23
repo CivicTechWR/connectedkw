@@ -2,8 +2,8 @@ name: Import WPL events on a CRON Schedule
 
 on:
   schedule:
-    # Runs every Friday at 7:5g0am
-    - cron: '50 7 * * 5'
+    # Runs every Wednesday at 7:50am
+    - cron: '50 7 * * 3'
   push:
     branches:
       - 'wpl_integration'

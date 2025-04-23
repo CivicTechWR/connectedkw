@@ -1,12 +1,6 @@
-import Cors from 'cors'
-import { generateActorInput } from 'utils/scraping-functions'
 import { importExploreWaterlooEvents } from 'utils/import-functions'
-import { ApifyClient } from 'apify-client'
 import { NextResponse } from 'next/server'
-
-const apify = new ApifyClient({
-    token: process.env.APIFY_TOKEN
-});
+import { triggerApify } from 'integrations/apify'
 
 const checkAuthorization = (req, done) => {
   const bearerToken = req.headers.get("authorization")
@@ -52,16 +46,27 @@ export async function POST(req) {
       )
     }
 
-    if (source === "explore-waterloo") {
+    if (source === "Explore Waterloo") {
       const result = await importExploreWaterlooEvents()
-      console.log({result})
+      
+      // trigger email notification
+      await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_URL, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          source: source,
+          created: result.created.length,
+          failed: result.failed.length,
+        })
+      })
       return NextResponse.json(result)
     }
 
-    const actorInput = generateActorInput(source)
-    const run = await apify.actor("apify/web-scraper").start(actorInput);
-    console.log({run})
-    return NextResponse.json(run)
+    const result = await triggerApify(source)
+    console.log({result})
+    return NextResponse.json({ message: "Triggered run on Apify for " + source })
 
   } catch (err) {
     console.log(err);

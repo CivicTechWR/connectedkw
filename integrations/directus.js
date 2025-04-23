@@ -11,7 +11,9 @@ import {
   updateItem,
   authentication,
   login,
-  uploadFiles
+  uploadFiles,
+  importFile,
+  createItem
 } from '@directus/sdk'
 
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
@@ -790,6 +792,78 @@ const updateEvent = async (id, data) => {
   return event
 }
 
+const importImage = async (url, title) => {
+  if (!url) return null
+  try {
+    const image = await directus.request(
+      importFile(url, {
+        title: title
+      })
+    );
+    return image
+  } catch (err) {
+    console.log(err)
+    return null
+  }    
+}
+
+const searchLocation = async (locationText) => {
+  const locations = await directus.request(
+    readItems('locations', {
+      fields: ['id'],
+      search: locationText,
+      limit: 1
+    })
+  )
+
+  if (locations && locations[0]) {
+    return locations[0].id
+  } else {
+    return null
+  }
+}
+
+const createEvent = async (eventData) => {
+  try {
+    const locationText = [eventData.location_name, eventData.location_address, eventData.location_source_text].filter(Boolean).join(', ');
+    const locationId = await searchLocation(locationText)
+
+    if (locationId) { 
+      eventData.location = locationId;
+    }
+    
+    if (!eventData.location_source_text) {
+      eventData.location_source_text = locationText;
+    }
+
+    const image = await importImage(eventData.image_url, eventData.title)
+
+    const event = await directus.request(
+      createItem('events', {
+        title: eventData.title,
+        description: eventData.description,
+        starts_at: eventData.starts_at,
+        ends_at: eventData.ends_at || null,
+        location: eventData.location,
+        location_source_text: eventData.location_source_text,
+        external_link: eventData.external_link || eventData.url || null,
+        link_text: eventData.link_text || "Event page",
+        price: eventData.price,
+        data_source: eventData.data_source || null,
+        image: image?.id,
+        image_url: eventData.image_url,
+        tags: eventData.tags,
+        status: eventData.status || 'draft',
+      })
+    );
+
+    return event
+  } catch (error) {
+    console.log(error.errors)
+    return null
+  }
+}
+
 export { 
   getEvents,
   getEventCategories,
@@ -816,5 +890,7 @@ export {
   uploadImage,
   searchVenues,
   getEventById,
-  updateEvent
+  updateEvent,
+  importImage,
+  createEvent
 };

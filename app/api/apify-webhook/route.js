@@ -1,7 +1,6 @@
 import { ApifyClient } from 'apify-client';
-import { saveEventsToDatabase } from 'utils/scraping-functions'
+import { saveEventsToDatabase } from 'integrations/apify'
 import { NextResponse } from 'next/server'
-import { headers } from 'next/headers'
 
 const apify = new ApifyClient({
     token: process.env.APIFY_TOKEN
@@ -15,6 +14,15 @@ export async function POST(request) {
     const datasetItems = await dataset.listItems()
     const result = await saveEventsToDatabase(datasetItems.items)
 
+    // trigger email notification
+    await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_URL, {
+      method: 'POST',
+      body: JSON.stringify({
+        source: result.source,
+        created: result.created,
+        failed: result.failed,
+      })
+    })
     return NextResponse.json({ result }, { status: 200 })
 
   } catch (err) {

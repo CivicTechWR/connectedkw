@@ -1,11 +1,15 @@
 "use server"
 
 import OpenAI from 'openai';
+import * as cheerio from 'cheerio';
 import { 
   genericExtractor,
   eventbriteExtractor,
   facebookExtractor,
-  meetupExtractor
+  meetupExtractor,
+  exploreWaterlooExtractor,
+  waterlooRegionMuseumExtractor,
+  cityOfKitchenerExtractor
 } from 'utils/event-extractors';
 
 import { getTags } from 'integrations/directus';
@@ -20,6 +24,15 @@ function getExtractor(url) {
   }
   if (url.includes('meetup.com')) {
     return meetupExtractor;
+  }
+  if (url.includes('explorewaterloo.ca')) {
+    return exploreWaterlooExtractor;
+  }
+  if (url.includes('calendar.waterlooregionmuseum.ca')) {
+    return waterlooRegionMuseumExtractor;
+  }
+  if (url.includes('calendar.kitchener.ca')) {
+    return cityOfKitchenerExtractor;
   }
   return null;
 }
@@ -41,18 +54,18 @@ export const importEventFromUrl = async (url) => {
     // Fetch the webpage content
     const response = await fetch(url);
     const html = await response.text();
-    
+    const $ = cheerio.load(html);
     // Try platform-specific extractor first
     const extractor = getExtractor(url);
-    let eventData = null;
+    let eventData = null; 
     
     if (extractor) {
-      eventData = extractor(html);
+      eventData = extractor($);
+      console.log({extracted_data: eventData})
     }
-    
     // Fall back to GPT if platform-specific extraction fails
     if (!eventData) {
-      const cleanedContent = genericExtractor(html);
+      const cleanedContent = genericExtractor($);
       
       const completion = await openai.responses.create({
         model: "gpt-3.5-turbo",
