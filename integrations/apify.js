@@ -4,7 +4,8 @@ import {
     waterlooRegionMuseumExtractor,
     cityOfKitchenerExtractor,
     cityOfWaterlooExtractor,
-    cityOfCambridgeExtractor
+    cityOfCambridgeExtractor,
+    eventbriteExtractor
 } from 'utils/event-extractors';
 import { ApifyClient } from 'apify-client'
 import { createEvent } from 'integrations/directus'
@@ -155,12 +156,7 @@ export const defaultActorInput = {
       }
     } else if (source === "Eventbrite") {
       return {
-        "breakpointLocation": "NONE",
-        "browserLog": false,
-        "closeCookieModals": false,
-        "debugLog": false,
-        "downloadCss": true,
-        "downloadMedia": false,
+        ...defaultActorInput,
         "linkSelector": ".discover-search-desktop-card a.event-card-link",
         "globs": [
             {
@@ -170,19 +166,6 @@ export const defaultActorInput = {
                 "glob": "https://www.eventbrite.ca/e/*"
             }
         ],
-        "headless": false,
-        "ignoreCorsAndCsp": false,
-        "ignoreSslErrors": false,
-        "injectJQuery": true,
-        "keepUrlFragments": false,
-        "maxPagesPerCrawl": 150,
-        "pageFunction": pageFunctionEventbrite,
-        "postNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept a single argument: the \"crawlingContext\" object.\n[\n    async (crawlingContext) => {\n        // ...\n    },\n]",
-        "preNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept two arguments: the \"crawlingContext\" object\n// and \"gotoOptions\".\n[\n    async (crawlingContext, gotoOptions) => {\n        // ...\n    },\n]\n",
-        "proxyConfiguration": {
-            "useApifyProxy": true
-        },
-        "runMode": "PRODUCTION",
         "startUrls": [
             {
                 "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/"
@@ -212,15 +195,12 @@ export const defaultActorInput = {
                 "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=4"
             }
         ],
-        "useChrome": false,
-        "waitUntil": [
-            "networkidle2"
-        ]
+        "pageFunction": eventbriteExtractor
       }
     }
   }
   
-  export const triggerApify = async (source) => {
+  export const triggerApifyScraper = async (source) => {
     const actorInput = generateActorInput(source)
     const run = await apify.actor("apify/cheerio-scraper").start(actorInput);
     console.log({run})
