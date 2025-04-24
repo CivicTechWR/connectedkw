@@ -13,7 +13,6 @@ import dynamic from 'next/dynamic'
 
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
 
-
 export default function NewEventPage({ tags }) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -217,7 +216,7 @@ export default function NewEventPage({ tags }) {
                     disabled={loading || !url}
                     className={`btn btn-primary w-[92px] flex justify-center items-center ${!url ? 'opacity-50 cursor-not-allowed' : ''} ${loading ? 'bg-white hover:bg-white cursor-not-allowed' : ''}`}
                 >
-                    {loading ? <Image src="/loading.svg" width={40} height={40} alt="loading" /> : 'Import'}
+                    {loading ? <Image src="/loading.svg" width={28} height={28} alt="loading" /> : 'Import'}
                 </button>
               </div>
             </div>

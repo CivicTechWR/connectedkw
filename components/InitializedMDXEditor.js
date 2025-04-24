@@ -25,7 +25,7 @@ export default function RichTextEditor({ editorRef=null, ...props }) {
 
   return (
     <MDXEditor
-        className={`${styles.editor} min-h-[300px]`}
+        className={`${styles.editor}`}
         plugins={[
           headingsPlugin(),
           linkPlugin(),
