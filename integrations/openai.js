@@ -5,21 +5,24 @@ import * as cheerio from 'cheerio';
 import { 
   genericExtractor,
   eventbriteExtractor,
-  facebookExtractor,
   meetupExtractor,
   exploreWaterlooExtractor,
   waterlooRegionMuseumExtractor,
-  cityOfKitchenerExtractor
+  cityOfKitchenerExtractor,
+  cityOfCambridgeExtractor,
+  cityOfWaterlooExtractor
 } from 'utils/event-extractors';
 
 import { getTags } from 'integrations/directus';
+import { NodeHtmlMarkdown } from 'node-html-markdown'
+const markdown = new NodeHtmlMarkdown() 
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 function getExtractor(url) {
-  if (url.includes('eventbrite.com')) {
+  if (url.includes('eventbrite.com') || url.includes('eventbrite.ca')) {
     return eventbriteExtractor;
   }
   if (url.includes('meetup.com')) {
@@ -33,6 +36,12 @@ function getExtractor(url) {
   }
   if (url.includes('calendar.kitchener.ca')) {
     return cityOfKitchenerExtractor;
+  }
+  if (url.includes('events.cambridge.ca')) {
+    return cityOfCambridgeExtractor;
+  }
+  if (url.includes('events.waterloo.ca')) {
+    return cityOfWaterlooExtractor;
   }
   return null;
 }
@@ -57,10 +66,10 @@ export const importEventFromUrl = async (url) => {
     const $ = cheerio.load(html);
     // Try platform-specific extractor first
     const extractor = getExtractor(url);
+    console.log({ extractor })
     let eventData = null; 
-    
     if (extractor) {
-      eventData = extractor($);
+      eventData = await extractor({ $, request: { url }, log: console });
       console.log({extracted_data: eventData})
     }
     // Fall back to GPT if platform-specific extraction fails
@@ -96,7 +105,7 @@ export const importEventFromUrl = async (url) => {
 
     const event = {
       title: eventData.title,
-      description: eventData.description,
+      description: markdown.translate(eventData.description),
       starts_at: eventData.starts_at,
       ends_at: eventData.ends_at,
       location_name: eventData.location_name,

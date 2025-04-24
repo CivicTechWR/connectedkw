@@ -1,7 +1,7 @@
 import {decode} from 'html-entities';
-import { NodeHtmlMarkdown } from 'node-html-markdown'
 
-const markdown = new NodeHtmlMarkdown() 
+const MONTHS = ["January","February","March","April","May","June","July",
+    "August","September","October","November","December"];
 
 const getStructuredEventData = ($) => {
     try {
@@ -18,9 +18,8 @@ const getStructuredEventData = ($) => {
           }
       }).first().html();
       const parsedData = JSON.parse(structuredData);
-      
       // If there's a @graph array, extract the Event data from it
-      if (parsedData['@graph']) {
+      if (parsedData && parsedData['@graph']) {
         const eventData = parsedData['@graph'].find(item => item['@type'] === 'Event');
         return eventData;
       }
@@ -32,7 +31,6 @@ const getStructuredEventData = ($) => {
     }
 }
   
-
 // Base extractor for unknown sites
 export const genericExtractor = ($) => {
   // Remove unnecessary elements
@@ -57,66 +55,47 @@ export const genericExtractor = ($) => {
 }
 
 // Eventbrite extractor
-export const eventbriteExtractor = ($) => {
-    const eventData = getStructuredEventData($)
-    if (!eventData) return null
-    // Get image from structured data or fallback to meta image
-    const image = Array.isArray(eventData.image) ? eventData.image[eventData.image.length - 1] : eventData.image || $('meta[property="og:image"]').attr('content');
-
-    return {
-        title: eventData.name,
-        description: eventData.description,
-        starts_at: eventData.startDate,
-        ends_at: eventData.endDate,
-        external_link: eventData.url,
-        link_text: "Eventbrite page",
-        data_source: 9,
-        location_source_text: eventData.location?.address?.streetAddress,
-        price: $('.eds-text-bs--fixed').first().text() || 'Free',
-        image_url: image
-    }
-}
-
-// Facebook Events extractor
-export const facebookExtractor = (html) => {
-  const $ = cheerio.load(html);
+export const eventbriteExtractor = ({ $, request, log }) => {
+    const title = $('h1.event-title').first().text();
   
-  try {
-    const title = $('[data-testid="event-title"]').text();
-    const description = $('[data-testid="event-description"]').text();
-    const dateTime = $('time').attr('datetime');
-    const location = $('[data-testid="event-location"]').text();
-    const image = $('meta[property="og:image"]').attr('content');
-    
-    if (!title) return null;
+    if (!title) {
+        return null
+    }
+
+    if (log) {
+        log.info(`URL: ${request.url}, TITLE: ${title}`);
+    }
+
+    const description = $('.event-details__main-inner .eds-text--left').html()?.replace(/\t|\n/g, '')
+    const startDateTime = $('meta[property="event:start_time"]').attr('content')
+    const endDateTime = $('meta[property="event:end_time"]').attr('content')
+    const locationTitle = $('.location-info__address-text').text()
+    const locationAddress = $('meta[name="twitter:data1"]').attr('value')
+    const location = [locationTitle, locationAddress].join(", ")
+    let price = $('.ticket-card-compact-size__price').text()
+    if (!price) {
+        price = $('.conversion-bar__panel-info').text()
+    }
+    const imageUrl = $('meta[property="og:image"]').attr('content')
 
     return {
-      title,
-      description,
-      starts_at: dateTime,
-      location_source_text: location,
-      price: 'Free',
-      image_url: image,
-      data_source: 6, // Other
-      link_text: "Facebook Event"
+        external_link: request.url,
+        title,
+        description,
+        location,
+        starts_at: startDateTime,
+        ends_at: endDateTime,
+        price,
+        link_text: "Eventbrite",
+        data_source: 9, // id in supabase
+        image_url: imageUrl
     };
-  } catch (error) {
-    console.log('Failed to extract Facebook event data:', error);
-    return null;
-  }
 }
 
 // Meetup extractor
-export const meetupExtractor = ($) => {
+export const meetupExtractor = ({ $, request, log }) => {
   try {
-    const structuredData = $('script[type="application/ld+json"]').filter((i, el) => {
-      try {
-        const data = JSON.parse($(el).html());
-        return data['@type'] === 'Event';
-      } catch (e) {
-        return false;
-      }
-    }).first().html();
+    const structuredData = getStructuredEventData($)
     const eventData = JSON.parse(structuredData);
     const image = Array.isArray(eventData.image) ? eventData.image[eventData.image.length - 1] : eventData.image || $('meta[property="og:image"]').attr('content');
 
@@ -138,8 +117,8 @@ export const meetupExtractor = ($) => {
   }
 } 
 
-// exploreWaterloo extractor
-export const exploreWaterlooExtractor = ($) => {
+export const exploreWaterlooExtractor = ({ $, request, log }) => {
+  // $ is the loaded cheerio object
   const eventData = getStructuredEventData($)
   if (!eventData) return null
 
@@ -157,7 +136,7 @@ export const exploreWaterlooExtractor = ($) => {
         description: trimmedDecription,
         starts_at: eventData.startDate,
         ends_at: eventData.endDate,
-        external_link: eventData.url,
+        external_link: eventData.url || request.url,
         link_text: "Explore Waterloo event page",
         data_source: 5,
         location_source_text: location_source_text
@@ -168,14 +147,22 @@ export const exploreWaterlooExtractor = ($) => {
   }
 }
 
-export const waterlooRegionMuseumExtractor = ($) => {
-    var months = ["January","February","March","April","May","June","July",
-    "August","September","October","November","December"];
+export async function waterlooRegionMuseumExtractor ({ $, request, log }) {
+    // $ is the loaded cheerio object
+
+    if (log) {
+        const pageTitle = $('title').first().text();
+        log.info(`URL: ${request.url}, TITLE: ${pageTitle}`);
+    }
+
+    if (!request.url.startsWith("https://calendar.waterlooregionmuseum.ca/Default/Detail/")) {
+        return null
+    }
 
     const dateText = $('.dateTime p').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
     const monthName = dateParts[1]
-    const monthIndex = months.indexOf(monthName)
+    const monthIndex = MONTHS.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
     const day = dateParts[2].replace(',', '')
     const zeroPaddedDay = `0${day}`.slice(-2)
@@ -199,8 +186,7 @@ export const waterlooRegionMuseumExtractor = ($) => {
     const title = $('#pageHeading h1').first().text().replace(/\t|\n/g, '')
     $('h3:contains(Details:)').parent().attr('id', 'description-section');
     $('#description-section').find('h3.sectionHeader').remove()
-    const descriptionHtml = $('#description-section').html().replace(/\t|\n/g, '')
-    const description = markdown.translate(descriptionHtml)
+    const description = $('#description-section').html().replace(/\t|\n/g, '')
     const locationWithMaps = $('h3:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
     const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
 
@@ -215,18 +201,27 @@ export const waterlooRegionMuseumExtractor = ($) => {
         ends_at: endDateTime,
         link_text: "Region of Waterloo Museums",
         data_source: 10, // id in supabase
-        image_url: imageUrl
+        image_url: imageUrl,
+        external_link: request.url
     };
 }
 
-export const cityOfKitchenerExtractor = ($) => {
-    var months = ["January","February","March","April","May","June","July",
-        "August","September","October","November","December"];
+export async function cityOfKitchenerExtractor ({ $, request, log }) {
+    // $ is the loaded cheerio object
+
+    if (log) {
+        const pageTitle = $('title').first().text();
+        log.info(`URL: ${request.url}, TITLE: ${pageTitle}`);
+    }
+  
+    if (!request.url.startsWith("https://calendar.kitchener.ca/default/Detail/")) {
+        return null
+    }
 
     const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
     const monthName = dateParts[1]
-    const monthIndex = months.indexOf(monthName)
+    const monthIndex = MONTHS.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
     const day = dateParts[2].replace(',', '')
     const zeroPaddedDay = `0${day}`.slice(-2)
@@ -249,8 +244,7 @@ export const cityOfKitchenerExtractor = ($) => {
     const title = $('title').text().replace(/\t|\n/g, '')
     $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
     $('#description-section').find('h2.sectionHeader').remove()
-    const descriptionHtml = $('#description-section').html().replace(/\t|\n/g, '')
-    const description = markdown.translate(descriptionHtml)
+    const description = $('#description-section').html().replace(/\t|\n/g, '')
     const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
     const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
     const price = $('.calendar-details-header:contains(Fee)').next().text().replace(/\t|\n/g, '')
@@ -262,7 +256,112 @@ export const cityOfKitchenerExtractor = ($) => {
         price,
         starts_at: startDateTime,
         ends_at: endDateTime,
+        external_link: request.url,
         link_text: "City of Kitchener event page",
         data_source: 2 // id in supabase
+    };
+}
+
+export async function cityOfWaterlooExtractor ({ $, request, log }) {
+    // $ is the loaded cheerio object
+    const pageTitle = $('title').first().text();
+
+    if (log) {
+        log.info(`URL: ${request.url}, TITLE: ${pageTitle}`);
+    }
+  
+    if (!request.url.startsWith("https://events.waterloo.ca/default/Detail")) {
+        return null
+    }
+  
+    const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
+    const dateParts = dateText.split(' ')
+    const monthName = dateParts[1]
+    const monthIndex = MONTHS.indexOf(monthName)
+    const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
+    const day = dateParts[2].replace(',', '')
+    const zeroPaddedDay = `0${day}`.slice(-2)
+    const year = dateParts[3]
+    const startTime = dateParts[4]
+    const [startHour, startMinute] = startTime.split(':')
+    const startHourInt = parseInt(startHour)
+    const startHour24 = (dateParts[5] === "pm" &&  startHourInt < 12) ? (startHourInt + 12) : startHourInt
+    const endTime = dateParts[7]
+    const [endHour, endMinute] = endTime.split(':')
+    const endHourInt = parseInt(endHour)
+    const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
+    const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
+    const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
+  
+    const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
+    const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`
+    const endDateTime = `${date}T${zeroPaddedEndHour24}:${endMinute}`
+  
+    $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
+    $('#description-section').find('h2.sectionHeader').remove()
+    const description = $('#description-section').html().replace(/\t|\n/g, '')
+    const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
+    const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
+    
+    return {
+        external_link: request.url,
+        title: pageTitle,
+        description,
+        location_source_text: location,
+        starts_at: startDateTime,
+        ends_at: endDateTime,
+        link_text: "City of Waterloo event page",
+        data_source: 3 // id in supabase
+    };
+}
+
+export async function cityOfCambridgeExtractor ({ $, request, log }) {
+    // $ is the loaded cheerio object
+    const pageTitle = $('title').first().text();
+
+    if (log) {
+        log.info(`URL: ${request.url}, TITLE: ${pageTitle}`);
+    }
+
+    if (!request.url.startsWith("https://events.cambridge.ca/default/Detail")) {
+        return null
+    }
+    
+    const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
+    const dateParts = dateText.split(' ')
+    const monthName = dateParts[1]
+    const monthIndex = MONTHS.indexOf(monthName)
+    const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
+    const day = dateParts[2].replace(',', '')
+    const zeroPaddedDay = `0${day}`.slice(-2)
+    const year = dateParts[3]
+    const startTime = `${dateParts[4]} ${dateParts[5].toUpperCase()}`
+    const endTime = `${dateParts[7]} ${dateParts[8].toUpperCase()}`
+    
+    const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
+    const startDateObj = new Date(`${date} ${startTime}`)
+    const endDateObj = new Date(`${date} ${endTime}`)
+    const startDateTime = startDateObj.toISOString()
+    const endDateTime = endDateObj.toISOString()
+  
+    $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
+    $('#description-section').find('h2.sectionHeader').remove()
+    const description = $('#description-section').html().replace(/\t|\n/g, '')
+    const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
+    const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
+    const price = $('.calendar-details-header:contains(Fee)').next().text().replace(/\t|\n/g, '')
+  
+    // Return an object with the data extracted from the page.
+    // It will be stored to the resulting dataset.
+    return {
+        external_link: request.url,
+        title: pageTitle,
+        description,
+        location_source_text: location,
+        price,
+        starts_at: startDateTime,
+        ends_at: endDateTime,
+        link_text: "City of Cambridge event page",
+        data_source: 8 // id in supabase
     };
 }

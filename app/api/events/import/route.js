@@ -1,6 +1,6 @@
 import { importExploreWaterlooEvents } from 'utils/import-functions'
 import { NextResponse } from 'next/server'
-import { triggerApify } from 'integrations/apify'
+import { triggerApifyScraper } from 'integrations/apify'
 
 const checkAuthorization = (req, done) => {
   const bearerToken = req.headers.get("authorization")
@@ -64,7 +64,7 @@ export async function POST(req) {
       return NextResponse.json(result)
     }
 
-    const result = await triggerApify(source)
+    const result = await triggerApifyScraper(source)
     console.log({result})
     return NextResponse.json({ message: "Triggered run on Apify for " + source })
 
