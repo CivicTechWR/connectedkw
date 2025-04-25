@@ -211,7 +211,7 @@ export const defaultActorInput = {
     const created = []
     const failed = []
   
-    const events = datasetItems.filter(item => !!item.url && !!item.title)
+    const events = datasetItems.filter(item => (!!item.url || !!item.external_link) && !!item.title && !!item.starts_at)
   
     const promises = events.map(async(event) => {
       try {
