@@ -323,7 +323,7 @@ export async function cityOfCambridgeExtractor ({ $, request, log }) {
         log.info(`URL: ${request.url}, TITLE: ${pageTitle}`);
     }
 
-    if (!request.url.startsWith("https://events.cambridge.ca/default/Detail")) {
+    if (!request.url.startsWith("https://calendar.cambridge.ca/default/Detail")) {
         return null
     }
     
