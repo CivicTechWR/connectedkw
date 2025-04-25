@@ -183,7 +183,7 @@ export async function waterlooRegionMuseumExtractor ({ $, request, log }) {
     const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`
     const endDateTime = `${date}T${zeroPaddedEndHour24}:${endMinute}`
 
-    const title = $('#pageHeading h1').first().text().replace(/\t|\n/g, '')
+    const title = $('title').text().replace(/\t|\n/g, '')
     $('h3:contains(Details:)').parent().attr('id', 'description-section');
     $('#description-section').find('h3.sectionHeader').remove()
     const description = $('#description-section').html().replace(/\t|\n/g, '')
