@@ -1,8 +1,5 @@
 import {decode} from 'html-entities';
 
-const MONTHS = ["January","February","March","April","May","June","July",
-    "August","September","October","November","December"];
-
 const getStructuredEventData = ($) => {
     try {
       const structuredData = $('script[type="application/ld+json"]').filter((i, el) => {
@@ -159,10 +156,13 @@ export async function waterlooRegionMuseumExtractor ({ $, request, log }) {
         return null
     }
 
+    const months = ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+
     const dateText = $('.dateTime p').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
     const monthName = dateParts[1]
-    const monthIndex = MONTHS.indexOf(monthName)
+    const monthIndex = months.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
     const day = dateParts[2].replace(',', '')
     const zeroPaddedDay = `0${day}`.slice(-2)
@@ -218,10 +218,13 @@ export async function cityOfKitchenerExtractor ({ $, request, log }) {
         return null
     }
 
+    const months = ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
+
     const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
     const monthName = dateParts[1]
-    const monthIndex = MONTHS.indexOf(monthName)
+    const monthIndex = months.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
     const day = dateParts[2].replace(',', '')
     const zeroPaddedDay = `0${day}`.slice(-2)
@@ -273,11 +276,14 @@ export async function cityOfWaterlooExtractor ({ $, request, log }) {
     if (!request.url.startsWith("https://events.waterloo.ca/default/Detail")) {
         return null
     }
+
+    const months = ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
   
     const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
     const monthName = dateParts[1]
-    const monthIndex = MONTHS.indexOf(monthName)
+    const monthIndex = months.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
     const day = dateParts[2].replace(',', '')
     const zeroPaddedDay = `0${day}`.slice(-2)
@@ -326,48 +332,32 @@ export async function cityOfCambridgeExtractor ({ $, request, log }) {
     if (!request.url.startsWith("https://calendar.cambridge.ca/default/Detail")) {
         return null
     }
+
+    const months = ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
     
     const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
-    log.info({dateText})
     const dateParts = dateText.split(' ')
-    log.info({dateParts})
     const monthName = dateParts[1]
-    log.info({monthName})
-    const monthIndex = MONTHS.indexOf(monthName)
-    log.info({monthIndex})
+    const monthIndex = months.indexOf(monthName)
     const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
-    log.info({zeroPaddedMonth})
     const day = dateParts[2].replace(',', '')
-    log.info({day})
     const zeroPaddedDay = `0${day}`.slice(-2)
-    log.info({zeroPaddedDay})
     const year = dateParts[3]
-    log.info({year})
     const startTime = `${dateParts[4]} ${dateParts[5].toUpperCase()}`
-    log.info({startTime})
     const endTime = `${dateParts[7]} ${dateParts[8].toUpperCase()}`
-    log.info({endTime})
     
     const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
-    log.info({date})
     const startDateObj = new Date(`${date} ${startTime}`)
-    log.info({startDateObj})
     const endDateObj = new Date(`${date} ${endTime}`)
-    log.info({endDateObj})
     const startDateTime = startDateObj.toISOString()
-    log.info({startDateTime})
     const endDateTime = endDateObj.toISOString()
-    log.info({endDateTime})
     $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
     $('#description-section').find('h2.sectionHeader').remove()
     const description = $('#description-section').html().replace(/\t|\n/g, '')
-    log.info({description})
     const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
-    log.info({locationWithMaps})
     const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
-    log.info({location})
     const price = $('.calendar-details-header:contains(Fee)').next().text().replace(/\t|\n/g, '')
-    log.info({price})
   
     // Return an object with the data extracted from the page.
     // It will be stored to the resulting dataset.
