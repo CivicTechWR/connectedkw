@@ -41,6 +41,7 @@ export async function POST(request) {
 
   try {
     const data = await request.json()
+    console.log({webhook_data: data})
     const success = data.eventType === "ACTOR.RUN.SUCCEEDED"
 
     if (!success) {
