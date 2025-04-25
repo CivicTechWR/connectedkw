@@ -104,8 +104,7 @@ export const defaultActorInput = {
                 "url": `https://calendar.kitchener.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&Public%20Events=City-Run%20Events&Public%20Events=Arts,%20Culture,%20Film%20and%20Music&Public%20Events=Free%20Community%20Events&Public%20Events=Children%20and%20Youth%20Friendly%20Events&Public%20Events=Downtown%20Events&Public%20Events=The%20Market&Public%20Events=Tech%20Events&limit=150`
             }
         ],
-        "pageFunction": cityOfKitchenerExtractor,
-        "datasetName": `city-of-kitchener`
+        "pageFunction": cityOfKitchenerExtractor
       }
     } else if (source === "City of Waterloo") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -121,8 +120,7 @@ export const defaultActorInput = {
                 "url": `https://events.waterloo.ca/default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
             }
         ],
-        "pageFunction": cityOfWaterlooExtractor,
-        "datasetName": `city-of-waterloo`
+        "pageFunction": cityOfWaterlooExtractor
       }
     } else if (source === "City of Cambridge") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -138,8 +136,7 @@ export const defaultActorInput = {
                 "url": `https://calendar.cambridge.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&limit=100&Events%20Calendar=Centre+for+the+Arts+Events%7cCambridge+Farmers+Market%7cCommunity+Submitted+Events%7cFestivals+and+Events`
             }
         ],
-        "pageFunction": cityOfCambridgeExtractor,
-        "datasetName": `city-of-cambridge`
+        "pageFunction": cityOfCambridgeExtractor
       }
     } else if (source === "Region of Waterloo Museums") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -155,8 +152,7 @@ export const defaultActorInput = {
                 "url": `https://calendar.waterlooregionmuseum.ca/Default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
             }
         ],
-        "pageFunction": waterlooRegionMuseumExtractor,
-        "datasetName": `region-of-waterloo-museums`
+        "pageFunction": waterlooRegionMuseumExtractor
       }
     } else if (source === "Eventbrite") {
       return {
@@ -199,8 +195,7 @@ export const defaultActorInput = {
                 "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=4"
             }
         ],
-        "pageFunction": eventbriteExtractor,
-        "datasetName": `eventbrite`
+        "pageFunction": eventbriteExtractor
       }
     }
   }
