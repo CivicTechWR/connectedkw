@@ -47,6 +47,9 @@ export async function POST(request) {
     if (!success) {
       await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_FAILED_URL, {
         method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           source: "apify"
         })
@@ -62,6 +65,9 @@ export async function POST(request) {
     // trigger email notification
     await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_URL, {
       method: 'POST',
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         source: result.source,
         created: result.created,
