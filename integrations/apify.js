@@ -105,7 +105,7 @@ export const defaultActorInput = {
             }
         ],
         "pageFunction": cityOfKitchenerExtractor,
-        "datasetName": `city_of_kitchener`
+        "datasetName": `city-of-kitchener`
       }
     } else if (source === "City of Waterloo") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -122,7 +122,7 @@ export const defaultActorInput = {
             }
         ],
         "pageFunction": cityOfWaterlooExtractor,
-        "datasetName": `city_of_waterloo`
+        "datasetName": `city-of-waterloo`
       }
     } else if (source === "City of Cambridge") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -139,7 +139,7 @@ export const defaultActorInput = {
             }
         ],
         "pageFunction": cityOfCambridgeExtractor,
-        "datasetName": `city_of_cambridge`
+        "datasetName": `city-of-cambridge`
       }
     } else if (source === "Region of Waterloo Museums") {
       const today = DateTime.now().setZone("America/Toronto")
@@ -156,7 +156,7 @@ export const defaultActorInput = {
             }
         ],
         "pageFunction": waterlooRegionMuseumExtractor,
-        "datasetName": `region_of_waterloo_museums`
+        "datasetName": `region-of-waterloo-museums`
       }
     } else if (source === "Eventbrite") {
       return {
