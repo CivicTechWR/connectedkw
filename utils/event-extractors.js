@@ -326,6 +326,9 @@ export async function cityOfCambridgeExtractor ({ $, request, log }) {
     if (!request.url.startsWith("https://calendar.cambridge.ca/default/Detail")) {
         return null
     }
+
+    const MONTHS = ["January","February","March","April","May","June","July",
+        "August","September","October","November","December"];
     
     const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
     const dateParts = dateText.split(' ')
@@ -362,6 +365,7 @@ export async function cityOfCambridgeExtractor ({ $, request, log }) {
         starts_at: startDateTime,
         ends_at: endDateTime,
         link_text: "City of Cambridge event page",
-        data_source: 8 // id in supabase
+        data_source: 8, // id in Directus
+        source: "City of Cambridge" 
     };
 }
