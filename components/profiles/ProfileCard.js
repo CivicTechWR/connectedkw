@@ -36,6 +36,38 @@ function getRandomColor(skillName) {
   return `rgb(${red}, ${green}, ${blue})`
 }
 
+function renderSkills(profileSkillNames) {
+  
+  if (profileSkillNames.length === 0) {
+    return <span className="text-xs text-gray-500">No skills</span>
+  }
+  
+  return profileSkillNames.map((skillName, index) => (
+    <span
+      key={index}
+      style={{ backgroundColor: getRandomColor(skillName.name) }}
+      className="inline-flex items-center text-white px-2 py-1 text-xs font-semibold rounded-full"
+    >
+      {skillName.name}
+    </span>
+  ))
+}
+
+function renderAvatar(avatarURL, profileName) {
+  if (avatarURL) {
+    return (
+      <Image
+        src={avatarURL}
+        alt={`${profileName}'s avatar`}
+        fill
+        className="object-cover"
+      />
+    )
+  } else {
+    return <div className="w-full h-full bg-gray-300" />
+  }
+}
+
 export default function ProfileCard({ profile }) {
   const directusURL = process.env.NEXT_PUBLIC_DIRECTUS_URL
   const avatarURL = profile.profile_picture 
@@ -62,16 +94,7 @@ export default function ProfileCard({ profile }) {
       <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition-shadow cursor-pointer">
         <div className="flex items-center space-x-4 mb-2">
           <div className="w-20 h-20 relative rounded-full overflow-hidden">
-            {avatarURL ? (
-              <Image
-                src={avatarURL}
-                alt={`${profile.name}'s avatar`}
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-300" />
-            )}
+            {renderAvatar(avatarURL, profile.name)}
           </div>
           <div>
             <h2 className="text-xl font-semibold">{profile.name}</h2>
@@ -89,19 +112,7 @@ export default function ProfileCard({ profile }) {
         />
 
         <div className="mt-4 flex flex-wrap gap-2">
-          {profileSkillNames.length > 0 ? (
-            profileSkillNames.map((skillName, index) => (
-              <span
-                key={index}
-                style={{ backgroundColor: getRandomColor(skillName.name) }}
-                className="inline-flex items-center text-white px-2 py-1 text-xs font-semibold rounded-full"
-              >
-                {skillName.name}
-              </span>
-            ))
-          ) : (
-            <span className="text-xs text-gray-500">No skills</span>
-          )}
+          {renderSkills(profileSkillNames)}
         </div>
       </div>
     </Link>
