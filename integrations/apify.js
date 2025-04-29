@@ -9,6 +9,7 @@ import {
 } from 'utils/event-extractors';
 import { ApifyClient } from 'apify-client'
 import { createEvent } from 'integrations/directus'
+import { DATA_SOURCE_LOOKUP } from 'utils/constants'
 
 const apify = new ApifyClient({
     token: process.env.APIFY_TOKEN
@@ -244,8 +245,9 @@ export const defaultActorInput = {
   
     const results = await Promise.all(promises)
     console.log(`Processed ${results.length} events`)
+    const source = created.length > 0 ? DATA_SOURCE_LOOKUP.find(s => s.id === created[0].data_source).name : "Apify"
   
-    return { created: created.length, failed: failed.length, source: "Apify" }
+    return { created: created.length, failed: failed.length, source }
   }
 
   

@@ -178,3 +178,16 @@ export const TIME_FORMAT = { hour: 'numeric', minute: '2-digit' }
 
 export const DEFAULT_CATEGORY_ID = 6 // All ages
 
+export const DATA_SOURCE_LOOKUP = [
+    { id: 1, name: "Waterloo Public Library" },
+    { id: 2, name: "City of Kitchener" },
+    { id: 3, name: "City of Waterloo" },
+    { id: 4, name: "Kitchener Public Library" },
+    { id: 5, name: "Explore Waterloo" },
+    { id: 6, name: "Other" },
+    { id: 7, name: "Region of Waterloo Museums" },
+    { id: 8, name: "City of Cambridge" },
+    { id: 9, name: "Eventbrite" },
+    { id: 10, name: "Region of Waterloo Museums" }, 
+    { id: 11, name: "Meetup" },
+]
