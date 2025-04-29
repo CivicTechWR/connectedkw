@@ -33,46 +33,16 @@ const EventCard = ({ event, showImage, labels }) => {
   const imageUrl = image?.id ? `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}?key=small-640` : "/default-event-image.png"
 
   return (
-    <div className={`py-4 snap-start transition-all relative items-start flex-col w-full`}>
-      <div className={`shadow relative flex flex-col w-full md:h-full min-h-0`}>
+    <div className={`py-2 snap-start transition-all relative items-start flex-col w-full`}>
+      <div className={`shadow border border-slate-100 relative flex flex-col w-full md:h-full min-h-0`}>
         {
           (featured) && 
           <div className={`bg-red text-black flex-none w-full text-sm px-3 py-1 flex font-medium`}>
             {`️⭐ FEATURED ️⭐`}
           </div>
         }
-        <div className="w-full gap-4 flex-auto min-h-0 flex flex-col sm:flex-row">
-        { (featured && image) &&
-          <div className={`basis-1/2 relative flex-auto min-h-0 overflow-hidden`}>
-            <Link href={`/${urlFragment}/${slug}`}>
-            <Image
-              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
-              src={`${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${image.id}?key=small-640`}
-              alt={image.description || image.title} 
-              title={image.title}
-              loading="lazy"
-              height="500"
-              width="500"
-            />
-            </Link>
-          </div>
-        }
-
-        { (!featured && showImage) &&
-          <div className={`w-full aspect-video sm:aspect-square sm:w-40 grow-0 relative min-h-0 overflow-hidden`}>
-            <Link href={`/${urlFragment}/${slug}`}>
-            <Image
-              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
-              src={imageUrl}
-              alt={"event image"} 
-              loading="lazy"
-              height="200"
-              width="200"
-            />
-            </Link>
-          </div>
-        }
-          <div className={`basis-1/2 flex-auto text-left overflow-auto h-full styled-scrollbar p-3`}>
+        <div className="w-full sm:gap-4 flex-auto min-h-0 flex flex-col sm:flex-row">
+        <div className={`basis-1/2 flex-auto text-left overflow-auto h-full styled-scrollbar p-3`}>
             <Link href={`/${urlFragment}/${slug}`}><h3 className="text-xl mb-2 font-body font-medium">{title}</h3></Link>
             { (classification === "event" || classification === "camp") && 
               <p className="text-sm mb-1 space-x-3 flex flex-nowrap">
@@ -129,6 +99,21 @@ const EventCard = ({ event, showImage, labels }) => {
               </p>
             }
           </div>
+      
+        { (showImage && image?.id) &&
+          <div className={`w-full aspect-video sm:aspect-square sm:w-40 grow-0 relative min-h-0 overflow-hidden order-first sm:order-last`}>
+            <Link href={`/${urlFragment}/${slug}`}>
+            <Image
+              className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
+              src={imageUrl}
+              alt={"event image"} 
+              loading="lazy"
+              height="200"
+              width="200"
+            />
+            </Link>
+          </div>
+        }
         </div>
       </div>
     </div>

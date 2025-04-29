@@ -78,7 +78,7 @@ export const importEventFromUrl = async (url) => {
       
       const completion = await openai.responses.create({
         model: "gpt-3.5-turbo",
-        instructions: "You are a helpful assistant that extracts event information from webpage content. Return only valid JSON. All dates should be in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). If you cannot extract any event inforamtion, return null.",
+        instructions: "You are a helpful assistant that extracts event information from webpage content. Return only valid JSON. All dates should be in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). If you cannot extract any event information, return null.",
         input: `Extract event information from this content. Return a parseable JSON object. Do not include any other text in your response and do not wrap it with JSON md markers. The JSON object should have the following fields:
             - title: the event title
             - description: full event description
