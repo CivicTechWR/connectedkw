@@ -26,22 +26,17 @@ export default async function Home() {
                 <h1 className="mb-6 md:text-6xl font-title">
                   Connected KW
                 </h1>
-                <p className="text-lg">{`Connected KW is a volunteer-run project with the goal of creating an inclusive and comprehensive resource for families in Waterloo Region.`}</p> 
+                <p className="text-lg">{`Connected KW is the community guide you've been looking for! It's a volunteer-run project that curates events and resources for anyone living in Waterloo Region.`}</p> 
                 <p className="text-lg">Stay connected to what&apos;s happening in the community by subscribing to our <Link href="/events">events calendar</Link> and our <a href="https://instagram.com/connectedkw" target="_blank" rel="noreferrer">Instagram account</a>.</p> 
-                <p className="text-lg">{`You can get involved by creating an account and helping us to add events and info for other families!`}</p>
                 <div className="flex gap-4">
-                  {/*<a href="https://patreon.com/connectedkw?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink" target="_blank" className="btn my-6" rel="noreferrer">
-                    <i className={`mr-2 fa-solid fa-gift`}></i>
-                    Make a donation                
-                  </a>*/}
-                  <a href="https://cms.connectedkw.com/admin/register" target="_blank" className="btn my-6" rel="noreferrer">
-                    <i className={`mr-2 fa-solid fa-circle-user`}></i>
-                    Create an account                
-                  </a>
+                  <Link href="/events" className="btn my-6" rel="noreferrer">
+                    <i className={`mr-2 fa-solid fa-calendar-days`}></i>
+                    Upcoming Events              
+                  </Link>
                 </div>
               </div>
             </div>
-            <div className="hidden lg:flex max-h-[75vh] justify-center items-center relative p-12">
+            <div className="hidden lg:flex max-h-[65vh] justify-center items-center relative p-12">
               <div className="absolute -bottom-12 lg:-bottom-[5%] left-0 lg:left-[15%] bg-[url(/highlights-01.svg)] bg-contain bg-no-repeat h-1/5 w-1/5" />
               <div className="absolute top-0 lg:-top-[5%] right-0 lg:right-[15%] bg-[url(/highlights-02.svg)] bg-contain bg-no-repeat h-1/5 w-1/5" />
               <video width="480" height="960" autoPlay loop muted className="object-contain h-full w-auto max-h-[inherit] mx-auto relative">
