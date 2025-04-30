@@ -245,9 +245,16 @@ export const defaultActorInput = {
   
     const results = await Promise.all(promises)
     console.log(`Processed ${results.length} events`)
-    const source = created.length > 0 ? DATA_SOURCE_LOOKUP.find(s => s.id === created[0].data_source).name : "Apify"
+    
+    let sourceId = null
+    sourceId = created.length > 0 ? created[0]?.data_source : null
+    if (!sourceId) {
+        sourceId = failed.length > 0 ? failed[0]?.data_source : null
+    }
+    const source = sourceId ? DATA_SOURCE_LOOKUP.find(s => s.id === sourceId) : null
+    const sourceName = source?.name || "Apify"
   
-    return { created: created.length, failed: failed.length, source }
+    return { created: created.length, failed: failed.length, source: sourceName }
   }
 
   
