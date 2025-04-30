@@ -37,12 +37,22 @@ function getRandomColor(skillName) {
 }
 
 function renderSkills(profileSkillNames) {
-  
+  const maxSkillsToShow = 5; // Limit the number of skills displayed
+
   if (profileSkillNames.length === 0) {
     return <span className="text-xs text-gray-500">No skills</span>
   }
   
-  return profileSkillNames.map((skillName, index) => (
+  // For returning, set a limit of 5 skills to show on profile card just to start
+  // TODO : Add a "show more" button to show all skills
+  // TODO : Add a "show less" button to hide skills
+  // TODO : 
+
+  // if profileSkillNames.length > 5, show "show more" button
+
+  
+
+  return profileSkillNames.slice(0, maxSkillsToShow).map((skillName, index) => (
     <span
       key={index}
       style={{ backgroundColor: getRandomColor(skillName.name) }}
