@@ -20,6 +20,20 @@ import { revalidatePath } from 'next/cache'
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 const client = createDirectus(process.env.DIRECTUS_URL).with(authentication('json')).with(rest());
 
+const directusClient = (token="") => {
+  if (token) {
+    return createDirectus(process.env.DIRECTUS_URL ?? "")
+      .with(staticToken(token))
+      .with(rest())
+  }
+  return createDirectus(process.env.DIRECTUS_URL ?? "")
+    .with(
+      authentication("cookie", { credentials: "include", autoRefresh: true })
+    )
+    .with(rest())
+}
+
+
 const uploadImage = async (formData) => {
   try {
     const result = await directus.request(uploadFiles(formData));
@@ -603,8 +617,10 @@ const register = async (firstName, lastName, email, password) => {
 const loginUser = async (email, password) => {
   try {
     const response = await client.login(email, password);
+    console.log(response)
     return response;
   } catch (err) {
+    console.log(err)
     throw new Error(err.message);
   }
 };

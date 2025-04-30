@@ -3,9 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import Section from "components/layout/Section";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import { useState, Suspense } from "react";	
-
+import { signIn } from "next-auth/react";
 const VerificationMessage = () => {
 	const searchParams = useSearchParams()
 	const verification = searchParams.get('verification');
@@ -24,28 +24,29 @@ const VerificationMessage = () => {
 export default function LoginPage() {
 	const [error, setError] = useState(null);
 	const [loading, setLoading] = useState(false);
+	const router = useRouter();
 
 	const handleLogin = async (e) => {
 		e.preventDefault();
 		setLoading(true);
 		setError(null);
-
 		const email = e.target.email.value;
 		const password = e.target.password.value;
-
-		const result = await fetch("/api/login", {
-			method: "POST",
-			body: JSON.stringify({ email, password }),
-		});
-		const data = await result.json();
-		console.log(data);
-
-		if (result.ok) {
-			localStorage.setItem('access_token', data.token);
-			router.push("/")
+		console.log(email, password)
+		const res = await signIn("credentials", {
+			email: email,
+			password: password,
+			callbackUrl: `/`,
+			redirect: false,
+		})
+	  
+		if (res?.error) {
+			setError(res?.error)
+			setLoading(false)
 		} else {
-			setError("Invalid email or password");
+			router.push("/")
 		}
+
 		e.target.reset();
 		setLoading(false);
 
