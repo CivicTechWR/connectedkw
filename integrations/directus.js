@@ -910,5 +910,6 @@ export {
   getEventById,
   updateEvent,
   importImage,
-  createEvent
+  createEvent,
+  directusClient
 };

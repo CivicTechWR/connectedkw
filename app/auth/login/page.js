@@ -6,6 +6,7 @@ import Section from "components/layout/Section";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useState, Suspense } from "react";	
 import { signIn } from "next-auth/react";
+
 const VerificationMessage = () => {
 	const searchParams = useSearchParams()
 	const verification = searchParams.get('verification');
@@ -32,7 +33,7 @@ export default function LoginPage() {
 		setError(null);
 		const email = e.target.email.value;
 		const password = e.target.password.value;
-		console.log(email, password)
+
 		const res = await signIn("credentials", {
 			email: email,
 			password: password,
