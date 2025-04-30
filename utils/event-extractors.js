@@ -79,7 +79,7 @@ export const eventbriteExtractor = ({ $, request, log }) => {
         external_link: request.url,
         title,
         description,
-        location,
+        location_source_text: location,
         starts_at: startDateTime,
         ends_at: endDateTime,
         price,

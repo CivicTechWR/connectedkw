@@ -178,23 +178,18 @@ export const defaultActorInput = {
                 "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/community/"
             },
             {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=2"
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/nightlife/"
             },
             {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=3"
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/music/"
             },
             {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=4"
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/arts/"
             },
             {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=2"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=3"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=4"
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/hobbies/"
             }
+
         ],
         "pageFunction": eventbriteExtractor
       }
@@ -245,7 +240,7 @@ export const defaultActorInput = {
   
     const results = await Promise.all(promises)
     console.log(`Processed ${results.length} events`)
-    
+
     let sourceId = null
     sourceId = created.length > 0 ? created[0]?.data_source : null
     if (!sourceId) {
