@@ -3,17 +3,17 @@ import Section from 'components/layout/Section'
 const Footer = () => {
 
   return (
-      <footer className={`w-full relative bg-slate-100 py-6`}>
+      <footer className={`w-full relative bg-slate-100`}>
         <Section>
           <div className="md:grid grid-cols-2 md:gap-24">
-            <div className="mb-4 basis-1/2">
+            <div className="mb-4 md:mb-0 basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">About Connected KW</p>
-              <p className="">Connected KW is a volunteer-run project with the goal of creating an inclusive and comprehensive resource for residents of KW.</p>
-              <p className="">If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red underline">reach out!</a></p>
+              <p className="">{`Connected KW is the community guide you've been looking for! It's a volunteer-run project that curates events and resources for anyone living in Waterloo Region.`}</p>
+              <p className="">{`If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red underline">reach out!</a>`}</p>
               <a
                 href="https://instagram.com/connectedkw"
                 rel="noopener noreferrer"
-                className="my-6 block underline"
+                className="mt-6 block underline"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height="30" width="30" fill="currentColor">
                   <path
@@ -29,7 +29,7 @@ const Footer = () => {
               <p className=""><a className="underline" href="https://github.com/s-kennedy/connectedkw/issues" target="_blank" rel="noreferrer">Report a bug</a></p>
               <p className=""><a className="underline" href="https://buy.stripe.com/cN24hE161goQcZa8wx" target="_blank" rel="noreferrer">Make a donation</a></p>
               <p className=""><a className="underline" href="mailto:shay@connectedkw.com" target="_blank" rel="noreferrer">Contact shay@connectedkw.com</a></p>
-              <p className="my-6">
+              <p className="mt-6">
                 <a href="https://www.dreamsidedigital.com" className="hover:text-red order-1 sm:order-2 mb-4 underline">
                   Made by Dreamside Digital
                 </a>

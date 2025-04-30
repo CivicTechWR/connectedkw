@@ -1,8 +1,15 @@
 import { NodeHtmlMarkdown } from 'node-html-markdown'
 import { DateTime } from 'luxon'
-import { waterlooRegionMuseumExtractor, cityOfKitchenerExtractor } from 'utils/event-extractors';
+import { 
+    waterlooRegionMuseumExtractor,
+    cityOfKitchenerExtractor,
+    cityOfWaterlooExtractor,
+    cityOfCambridgeExtractor,
+    eventbriteExtractor
+} from 'utils/event-extractors';
 import { ApifyClient } from 'apify-client'
 import { createEvent } from 'integrations/directus'
+import { DATA_SOURCE_LOOKUP } from 'utils/constants'
 
 const apify = new ApifyClient({
     token: process.env.APIFY_TOKEN
@@ -11,179 +18,37 @@ const apify = new ApifyClient({
 const markdown = new NodeHtmlMarkdown()
 
 export const defaultActorInput = {
-    "breakpointLocation": "NONE",
-    "browserLog": false,
-    "closeCookieModals": false,
-    "debugLog": false,
-    "downloadCss": true,
-    "downloadMedia": true,
-    "headless": false,
-    "ignoreCorsAndCsp": false,
-    "ignoreSslErrors": false,
-    "injectJQuery": true,
-    "keepUrlFragments": false,
-    "linkSelector": "",
-    "maxPagesPerCrawl": 150,
-    "postNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept a single argument: the \"crawlingContext\" object.\n[\n    async (crawlingContext) => {\n        // ...\n    },\n]",
-    "preNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept two arguments: the \"crawlingContext\" object\n// and \"gotoOptions\".\n[\n    async (crawlingContext, gotoOptions) => {\n        // ...\n    },\n]\n",
-    "proxyConfiguration": {
-        "useApifyProxy": true
-    },
-    "runMode": "PRODUCTION",
     "startUrls": [],
-    "useChrome": false,
-    "waitUntil": [
-        "networkidle2"
+    "keepUrlFragments": false,
+    "respectRobotsTxtFile": true,
+    "globs": [],
+    "pseudoUrls": [],
+    "excludes": [
+      {
+        "glob": "/**/*.{png,jpg,jpeg,pdf}"
+      }
     ],
+    "linkSelector": "a[href]",
+    "pageFunction": "",
+    "proxyConfiguration": {
+      "useApifyProxy": true
+    },
+    "proxyRotation": "RECOMMENDED",
     "initialCookies": [],
-    "customData": {},
-    "pageFunction": ""
-  }
-  
-  export async function pageFunctionCityKitchener(context) {
-    const $ = context.jQuery;
-    const pageTitle = $('title').first().text();
-    context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
-  
-    if (!context.request.url.startsWith("https://calendar.kitchener.ca/default/Detail/")) {
-        return null
-    }
-
-    const scrapedData = cityOfKitchenerExtractor($)
-  
-    return {
-        ...scrapedData,
-        external_link: scrapedData.external_link || context.request.url
-    };
-  }
-  
-  export async function pageFunctionCityWaterloo(context) {
-    const $ = context.jQuery;
-    const pageTitle = $('title').first().text();
-    
-    // Print some information to actor log
-    context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
-  
-    if (!context.request.url.startsWith("https://events.waterloo.ca/default/Detail")) {
-        return null
-    }
-  
-    var months = ["January","February","March","April","May","June","July",
-            "August","September","October","November","December"];
-  
-    const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
-    const dateParts = dateText.split(' ')
-    const monthName = dateParts[1]
-    const monthIndex = months.indexOf(monthName)
-    const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
-    const day = dateParts[2].replace(',', '')
-    const zeroPaddedDay = `0${day}`.slice(-2)
-    const year = dateParts[3]
-    const startTime = dateParts[4]
-    const [startHour, startMinute] = startTime.split(':')
-    const startHourInt = parseInt(startHour)
-    const startHour24 = (dateParts[5] === "pm" &&  startHourInt < 12) ? (startHourInt + 12) : startHourInt
-    const endTime = dateParts[7]
-    const [endHour, endMinute] = endTime.split(':')
-    const endHourInt = parseInt(endHour)
-    const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
-    const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
-    const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
-  
-    const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
-    const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`
-    const endDateTime = `${date}T${zeroPaddedEndHour24}:${endMinute}`
-  
-    const title = $('#pageHeading h1').first().text().replace(/\t|\n/g, '')
-    $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
-    $('#description-section').find('h2.sectionHeader').remove()
-    const description = $('#description-section').html().replace(/\t|\n/g, '')
-    const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
-    const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
-    
-    return {
-        url: context.request.url,
-        title,
-        description,
-        location,
-        startDateTime,
-        endDateTime,
-        linkText: "City of Waterloo event page",
-        sourceDatabaseId: 3 // id in supabase
-    };
-  }
-  
-  export async function pageFunctionCityCambridge(context) {
-    const $ = context.jQuery;
-    const pageTitle = $('title').first().text();
-    
-    // Print some information to actor log
-    context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
-  
-    if (!context.request.url.startsWith("https://calendar.cambridge.ca/default/Detail/")) {
-        return null
-    }
-  
-    var months = ["January","February","March","April","May","June","July",
-            "August","September","October","November","December"];
-  
-    const dateText = $('.dateTime p.headerDate').first().text().replace(/\t|\n/g, '')
-    const dateParts = dateText.split(' ')
-    const monthName = dateParts[1]
-    const monthIndex = months.indexOf(monthName)
-    const zeroPaddedMonth = `0${monthIndex + 1}`.slice(-2)
-    const day = dateParts[2].replace(',', '')
-    const zeroPaddedDay = `0${day}`.slice(-2)
-    const year = dateParts[3]
-    const startTime = `${dateParts[4]} ${dateParts[5].toUpperCase()}`
-    const endTime = `${dateParts[7]} ${dateParts[8].toUpperCase()}`
-    
-    const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
-    const startDateObj = new Date(`${date} ${startTime}`)
-    const endDateObj = new Date(`${date} ${endTime}`)
-    const startDateTime = startDateObj.toISOString()
-    const endDateTime = endDateObj.toISOString()
-  
-    const title = $('#pageHeading h1').first().text().replace(/\t|\n/g, '')
-    $('h2:contains(Event Details:)').parent().attr('id', 'description-section');
-    $('#description-section').find('h2.sectionHeader').remove()
-    const description = $('#description-section').html().replace(/\t|\n/g, '')
-    const locationWithMaps = $('h2:contains(Address:)').siblings().text().replace(/\t|\n/g, '')
-    const location = locationWithMaps.split('View on Google Maps')[0].replace(/\t|\n/g, '')
-    const price = $('.calendar-details-header:contains(Fee)').next().text().replace(/\t|\n/g, '')
-  
-    // Return an object with the data extracted from the page.
-    // It will be stored to the resulting dataset.
-    return {
-        url: context.request.url,
-        title,
-        description,
-        location,
-        price,
-        startDateTime,
-        endDateTime,
-        linkText: "City of Cambridge event page",
-        sourceDatabaseId: 8 // id in supabase
-    };
-  }
-  
-  export async function pageFunctionMuseums(context) {
-    const $ = context.jQuery;
-    const pageTitle = $('title').first().text();
-    
-    // Print some information to actor log
-    context.log.info(`URL: ${context.request.url}, TITLE: ${pageTitle}`);
-  
-    if (!context.request.url.startsWith("https://calendar.waterlooregionmuseum.ca/Default/Detail/")) {
-        return null
-    }
-  
-    const scrapedData = waterlooRegionMuseumExtractor($)
-  
-    return {
-        ...scrapedData,
-        external_link: scrapedData.external_link || context.request.url
-    };
+    "additionalMimeTypes": [],
+    "forceResponseEncoding": false,
+    "ignoreSslErrors": false,
+    "preNavigationHooks": "",
+    "postNavigationHooks": "",
+    "maxRequestRetries": 3,
+    "maxPagesPerCrawl": 150,
+    "maxResultsPerCrawl": 0,
+    "maxCrawlingDepth": 0,
+    "maxConcurrency": 50,
+    "pageLoadTimeoutSecs": 60,
+    "pageFunctionTimeoutSecs": 60,
+    "debugLog": false,
+    "customData": {}
   }
   
   export async function pageFunctionEventbrite(context) {
@@ -223,12 +88,126 @@ export const defaultActorInput = {
           imageUrl
       };
   }
+
   
+  export const generateActorInput = (source) => {
+    if (source === "City of Kitchener") {
+      const today = DateTime.now().setZone("America/Toronto")
+      const queryStartDate = `${today.month}/${today.day}/${today.year}`
+      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
+      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
+      
+      return {
+        ...defaultActorInput,
+        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
+        "startUrls": [
+            {
+                "url": `https://calendar.kitchener.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&Public%20Events=City-Run%20Events&Public%20Events=Arts,%20Culture,%20Film%20and%20Music&Public%20Events=Free%20Community%20Events&Public%20Events=Children%20and%20Youth%20Friendly%20Events&Public%20Events=Downtown%20Events&Public%20Events=The%20Market&Public%20Events=Tech%20Events&limit=150`
+            }
+        ],
+        "pageFunction": cityOfKitchenerExtractor
+      }
+    } else if (source === "City of Waterloo") {
+      const today = DateTime.now().setZone("America/Toronto")
+      const queryStartDate = `${today.month}/${today.day}/${today.year}`
+      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
+      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
+      
+      return {
+        ...defaultActorInput,
+        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
+        "startUrls": [
+            {
+                "url": `https://events.waterloo.ca/default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
+            }
+        ],
+        "pageFunction": cityOfWaterlooExtractor
+      }
+    } else if (source === "City of Cambridge") {
+      const today = DateTime.now().setZone("America/Toronto")
+      const queryStartDate = `${today.month}/${today.day}/${today.year}`
+      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
+      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
+      
+      return {
+        ...defaultActorInput,
+        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
+        "startUrls": [
+            {
+                "url": `https://calendar.cambridge.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&limit=100&Events%20Calendar=Centre+for+the+Arts+Events%7cCambridge+Farmers+Market%7cCommunity+Submitted+Events%7cFestivals+and+Events`
+            }
+        ],
+        "pageFunction": cityOfCambridgeExtractor
+      }
+    } else if (source === "Region of Waterloo Museums") {
+      const today = DateTime.now().setZone("America/Toronto")
+      const queryStartDate = `${today.month}/${today.day}/${today.year}`
+      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
+      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
+      
+      return {
+        ...defaultActorInput,
+        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
+        "startUrls": [
+            {
+                "url": `https://calendar.waterlooregionmuseum.ca/Default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
+            }
+        ],
+        "pageFunction": waterlooRegionMuseumExtractor
+      }
+    } else if (source === "Eventbrite") {
+      return {
+        ...defaultActorInput,
+        "linkSelector": ".discover-search-desktop-card a.event-card-link",
+        "globs": [
+            {
+                "glob": "https://www.eventbrite.com/e/*"
+            },
+            {
+                "glob": "https://www.eventbrite.ca/e/*"
+            }
+        ],
+        "startUrls": [
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/community/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/nightlife/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/music/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/arts/"
+            },
+            {
+                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/hobbies/"
+            }
+
+        ],
+        "pageFunction": eventbriteExtractor
+      }
+    }
+  }
+  
+  export const triggerApifyScraper = async (source) => {
+    const actorInput = generateActorInput(source)
+    const run = await apify.actor("apify/cheerio-scraper").start(actorInput);
+    console.log({run})
+    return run
+  }
+
   export const saveEventsToDatabase = async(datasetItems) => {
     const created = []
     const failed = []
   
-    const events = datasetItems.filter(item => !!item.url && !!item.title)
+    const events = datasetItems.filter(item => (!!item.url || !!item.external_link) && !!item.title && !!item.starts_at)
   
     const promises = events.map(async(event) => {
       try {
@@ -261,145 +240,16 @@ export const defaultActorInput = {
   
     const results = await Promise.all(promises)
     console.log(`Processed ${results.length} events`)
-  
-    return { created: created.length, failed: failed.length, source: created[0].data_source }
-  }
-  
-  export const generateActorInput = (source) => {
-    if (source === "City of Kitchener") {
-      const today = DateTime.now().setZone("America/Toronto")
-      const queryStartDate = `${today.month}/${today.day}/${today.year}`
-      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
-      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
-      
-      return {
-        ...defaultActorInput,
-        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
-        "startUrls": [
-            {
-                "url": `https://calendar.kitchener.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&Public%20Events=City-Run%20Events&Public%20Events=Arts,%20Culture,%20Film%20and%20Music&Public%20Events=Free%20Community%20Events&Public%20Events=Children%20and%20Youth%20Friendly%20Events&Public%20Events=Downtown%20Events&Public%20Events=The%20Market&Public%20Events=Tech%20Events&limit=150`
-            }
-        ],
-        "pageFunction": pageFunctionCityKitchener
-      }
-    } else if (source === "City of Waterloo") {
-      const today = DateTime.now().setZone("America/Toronto")
-      const queryStartDate = `${today.month}/${today.day}/${today.year}`
-      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
-      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
-      
-      return {
-        ...defaultActorInput,
-        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
-        "startUrls": [
-            {
-                "url": `https://events.waterloo.ca/default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
-            }
-        ],
-        "pageFunction": pageFunctionCityWaterloo
-      }
-    } else if (source === "City of Cambridge") {
-      const today = DateTime.now().setZone("America/Toronto")
-      const queryStartDate = `${today.month}/${today.day}/${today.year}`
-      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
-      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
-      
-      return {
-        ...defaultActorInput,
-        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
-        "startUrls": [
-            {
-                "url": `https://calendar.cambridge.ca/default/_List?StartDate=${queryStartDate}&EndDate=${queryEndDate}&limit=100&Events%20Calendar=Centre+for+the+Arts+Events%7cCambridge+Farmers+Market%7cCommunity+Submitted+Events%7cFestivals+and+Events`
-            }
-        ],
-        "pageFunction": pageFunctionCityCambridge
-      }
-    } else if (source === "Region of Waterloo Museums") {
-      const today = DateTime.now().setZone("America/Toronto")
-      const queryStartDate = `${today.month}/${today.day}/${today.year}`
-      const oneMonthFromToday = DateTime.now().setZone("America/Toronto").plus({ months: 1 })
-      const queryEndDate = `${oneMonthFromToday.month}/${oneMonthFromToday.day}/${oneMonthFromToday.year}`
-      
-      return {
-        ...defaultActorInput,
-        "linkSelector": ".calendar-list-container .calendar-list-list .calendar-list-info a",
-        "startUrls": [
-            {
-                "url": `https://calendar.waterlooregionmuseum.ca/Default/_List?limit=100&StartDate=${queryStartDate}&EndDate=${queryEndDate}`
-            }
-        ],
-        "pageFunction": pageFunctionMuseums
-      }
-    } else if (source === "Eventbrite") {
-      return {
-        "breakpointLocation": "NONE",
-        "browserLog": false,
-        "closeCookieModals": false,
-        "debugLog": false,
-        "downloadCss": true,
-        "downloadMedia": false,
-        "linkSelector": ".discover-search-desktop-card a.event-card-link",
-        "globs": [
-            {
-                "glob": "https://www.eventbrite.com/e/*"
-            },
-            {
-                "glob": "https://www.eventbrite.ca/e/*"
-            }
-        ],
-        "headless": false,
-        "ignoreCorsAndCsp": false,
-        "ignoreSslErrors": false,
-        "injectJQuery": true,
-        "keepUrlFragments": false,
-        "maxPagesPerCrawl": 150,
-        "pageFunction": pageFunctionEventbrite,
-        "postNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept a single argument: the \"crawlingContext\" object.\n[\n    async (crawlingContext) => {\n        // ...\n    },\n]",
-        "preNavigationHooks": "// We need to return array of (possibly async) functions here.\n// The functions accept two arguments: the \"crawlingContext\" object\n// and \"gotoOptions\".\n[\n    async (crawlingContext, gotoOptions) => {\n        // ...\n    },\n]\n",
-        "proxyConfiguration": {
-            "useApifyProxy": true
-        },
-        "runMode": "PRODUCTION",
-        "startUrls": [
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/community/"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=2"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=3"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/kids/?page=4"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=2"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=3"
-            },
-            {
-                "url": "https://www.eventbrite.ca/d/canada--waterloo--10327/family/?page=4"
-            }
-        ],
-        "useChrome": false,
-        "waitUntil": [
-            "networkidle2"
-        ]
-      }
+
+    let sourceId = null
+    sourceId = created.length > 0 ? created[0]?.data_source : null
+    if (!sourceId) {
+        sourceId = failed.length > 0 ? failed[0]?.data_source : null
     }
-  }
+    const source = sourceId ? DATA_SOURCE_LOOKUP.find(s => s.id === sourceId) : null
+    const sourceName = source?.name || "Apify"
   
-  export const triggerApify = async (source) => {
-    const actorInput = generateActorInput(source)
-    const run = await apify.actor("apify/web-scraper").start(actorInput);
-    console.log({run})
-    return run
+    return { created: created.length, failed: failed.length, source: sourceName }
   }
+
+  

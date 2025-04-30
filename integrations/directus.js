@@ -16,6 +16,7 @@ import {
   createItem
 } from '@directus/sdk'
 
+import { revalidatePath } from 'next/cache'
 const directus = createDirectus(process.env.DIRECTUS_URL).with(rest()).with(staticToken(process.env.DIRECTUS_TOKEN));
 const client = createDirectus(process.env.DIRECTUS_URL).with(authentication('json')).with(rest());
 
@@ -850,13 +851,14 @@ const createEvent = async (eventData) => {
         link_text: eventData.link_text || "Event page",
         price: eventData.price,
         data_source: eventData.data_source || null,
-        image: image?.id,
+        image: eventData.image ? eventData.image : image?.id || null,
         image_url: eventData.image_url,
         tags: eventData.tags,
         status: eventData.status || 'draft',
       })
     );
 
+    revalidatePath('/events') 
     return event
   } catch (error) {
     console.log(error.errors)

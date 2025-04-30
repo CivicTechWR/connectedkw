@@ -25,12 +25,12 @@ export default async function Events() {
                 <h1 className="text-4 mb-6 md:text-6xl font-title">
                   Events in KW
                 </h1>
-                <p className="text-lg">{`Tired of checking multiple event calendars and still missing out?`}</p> 
-                <p className="text-lg">{`Connected KW aggregates events from the City of Kitchener, the City of Waterloo, the City of Cambridge, Explore Waterloo, Region of Waterloo Museums, Waterloo Public Library, Eventbrite, and social media.`}</p> 
-                <p className="text-lg">{`You can add events to your calendar, subscribe to get them all, or bookmark this page so you'll always know what there is to do!`}</p>
+                <p className="text-lg">{`There are plenty of events in Kitchener, Waterloo and Cambridge, but it can be hard to find out what's happening and keep track of it all!`}</p> 
+                <p className="text-lg">{`Connected KW selects events from various local event calendars, websites, and social media.`}</p> 
+                <p className="text-lg">{`You can add individual events to your calendar, subscribe to get them all, or bookmark this page so you'll always know what there is to do!`}</p>
                 <div className="flex flex-col md:flex-row gap-2 items-center">
                   <CalendarSubscriptionButton />
-                  <Link href="/events/new" className="btn btn-yellow py-[11px]">
+                  <Link href="/events/new" className="btn btn-yellow no-underline py-[11px]">
                     <i className={`mr-2 fa-solid fa-circle-user hidden sm:inline`}></i>
                     Submit an event                
                   </Link>

@@ -1,6 +1,6 @@
-import { importExploreWaterlooEvents } from 'utils/import-functions'
+import { importExploreWaterlooEvents, importWaterlooPublicLibraryEvents } from 'utils/import-functions'
 import { NextResponse } from 'next/server'
-import { triggerApify } from 'integrations/apify'
+import { triggerApifyScraper } from 'integrations/apify'
 
 const checkAuthorization = (req, done) => {
   const bearerToken = req.headers.get("authorization")
@@ -47,7 +47,7 @@ export async function POST(req) {
     }
 
     if (source === "Explore Waterloo") {
-      const result = await importExploreWaterlooEvents()
+      const result = await importExploreWaterlooEvents(source)
       
       // trigger email notification
       await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_URL, {
@@ -64,7 +64,25 @@ export async function POST(req) {
       return NextResponse.json(result)
     }
 
-    const result = await triggerApify(source)
+    if (source === "Waterloo Public Library") {
+      console.log("Importing Waterloo Public Library events")
+      const result = await importWaterlooPublicLibraryEvents(source)
+      // trigger email notification
+      await fetch(process.env.CONNECTEDKW_IMPORT_FLOW_URL, {
+        method: 'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          source: source,
+          created: result.created.length,
+          failed: result.failed.length,
+        })
+      })
+      return NextResponse.json(result)
+    }
+
+    const result = await triggerApifyScraper(source)
     console.log({result})
     return NextResponse.json({ message: "Triggered run on Apify for " + source })
 

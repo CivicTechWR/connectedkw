@@ -28,12 +28,7 @@ const Filters = ({ filters, selectedFilters, toggleFn, reset, children }) => {
         <p className="font-semibold text-xl">Filters 
         {
           anySelected && 
-          <>
           <span>{` (${numSelected})`}</span>
-          <button onClick={reset} className="mx-1 text-red">
-            <i className="fa-solid fa-check"></i>
-          </button>
-          </>
         }
         </p>
       </div>

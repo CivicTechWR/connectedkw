@@ -5,21 +5,24 @@ import * as cheerio from 'cheerio';
 import { 
   genericExtractor,
   eventbriteExtractor,
-  facebookExtractor,
   meetupExtractor,
   exploreWaterlooExtractor,
   waterlooRegionMuseumExtractor,
-  cityOfKitchenerExtractor
+  cityOfKitchenerExtractor,
+  cityOfCambridgeExtractor,
+  cityOfWaterlooExtractor
 } from 'utils/event-extractors';
 
 import { getTags } from 'integrations/directus';
+import { NodeHtmlMarkdown } from 'node-html-markdown'
+const markdown = new NodeHtmlMarkdown() 
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
 function getExtractor(url) {
-  if (url.includes('eventbrite.com')) {
+  if (url.includes('eventbrite.com') || url.includes('eventbrite.ca')) {
     return eventbriteExtractor;
   }
   if (url.includes('meetup.com')) {
@@ -33,6 +36,12 @@ function getExtractor(url) {
   }
   if (url.includes('calendar.kitchener.ca')) {
     return cityOfKitchenerExtractor;
+  }
+  if (url.includes('events.cambridge.ca')) {
+    return cityOfCambridgeExtractor;
+  }
+  if (url.includes('events.waterloo.ca')) {
+    return cityOfWaterlooExtractor;
   }
   return null;
 }
@@ -57,10 +66,10 @@ export const importEventFromUrl = async (url) => {
     const $ = cheerio.load(html);
     // Try platform-specific extractor first
     const extractor = getExtractor(url);
+    console.log({ extractor })
     let eventData = null; 
-    
     if (extractor) {
-      eventData = extractor($);
+      eventData = await extractor({ $, request: { url }, log: console });
       console.log({extracted_data: eventData})
     }
     // Fall back to GPT if platform-specific extraction fails
@@ -69,7 +78,7 @@ export const importEventFromUrl = async (url) => {
       
       const completion = await openai.responses.create({
         model: "gpt-3.5-turbo",
-        instructions: "You are a helpful assistant that extracts event information from webpage content. Return only valid JSON. All dates should be in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). If you cannot extract any event inforamtion, return null.",
+        instructions: "You are a helpful assistant that extracts event information from webpage content. Return only valid JSON. All dates should be in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ). If you cannot extract any event information, return null.",
         input: `Extract event information from this content. Return a parseable JSON object. Do not include any other text in your response and do not wrap it with JSON md markers. The JSON object should have the following fields:
             - title: the event title
             - description: full event description
@@ -96,7 +105,7 @@ export const importEventFromUrl = async (url) => {
 
     const event = {
       title: eventData.title,
-      description: eventData.description,
+      description: markdown.translate(eventData.description),
       starts_at: eventData.starts_at,
       ends_at: eventData.ends_at,
       location_name: eventData.location_name,

@@ -1,26 +1,13 @@
 import { NodeHtmlMarkdown } from 'node-html-markdown'
-import { DateTime } from 'luxon'
 import * as cheerio from "cheerio"
 import {decode} from 'html-entities';
 import { createEvent } from 'integrations/directus'
+import { DATA_SOURCE_LOOKUP } from 'utils/constants'
 
 const markdown = new NodeHtmlMarkdown()
-// const EVENTS_ENDPOINT = "https://explorewaterloo.ca/wp-json/tribe/events/v1/events"
-const EVENTS_ENDPOINT = "https://explorewaterloo.ca/wp-admin/admin-ajax.php?action=tribe_events_views_v2_fallback"
-// const tag_lookup = {
-//   "cycling": 21, 
-//   "arts-culture-heritage-live-performance": [1,6,9],
-//   "festivals": 10,
-//   "food-drink": 11,
-//   "outdoor-recreation": 21,
-//   "shopping": 20,
-//   "sports": 21,
-// }
 
-const defaultLinkText = 'Explore Waterloo event page'
-const data_source_id = 5
-
-export const importExploreWaterlooEvents = async (endpoint=EVENTS_ENDPOINT) => {
+export const importExploreWaterlooEvents = async (source) => {
+  const endpoint = "https://explorewaterloo.ca/wp-admin/admin-ajax.php?action=tribe_events_views_v2_fallback"
   try {
     const today = new Date()
     const thisMonth = today.getMonth() + 1
@@ -43,23 +30,10 @@ export const importExploreWaterlooEvents = async (endpoint=EVENTS_ENDPOINT) => {
     const $ = cheerio.load(body);
     const data = $('script[type=application/ld+json]').text()
     const json = JSON.parse(data)
+    const dataSourceId = DATA_SOURCE_LOOKUP.find(s => s.name == source)?.id || 6 // Other
+    const linkText = `${source} event page`
 
-    const results = await saveToDatabase(json)
-    return results
-
-  } catch (error) {
-    console.log(error)
-    return null
-  }
-}
-
-const saveToDatabase = async(events) => {
-
-  const created = []
-  const failed = []
-
-  const promises = events.map(async(event) => {
-    try {
+    const events = json.map(event => {
       const title = event.name?.replace(/&#(\d+);/g, (m, d) => String.fromCharCode(d))
       const originalDescription = event.description
       const decoded = decode(originalDescription)
@@ -69,24 +43,86 @@ const saveToDatabase = async(events) => {
       const description = markdown.translate(trimmed)
       const location_source_text = event.location?.name ? [event.location.name,event.location.address?.streetAddress].join(", ").replace(/&#(\d+);/g, (m, d) => String.fromCharCode(d)) : null
     
-      const eventData = {
+      return {
         title: title,
         description: description,
         starts_at: event.startDate,
         ends_at: event.endDate,
         external_link: event.url,
-        link_text: defaultLinkText,
-        data_source: data_source_id,
+        link_text: linkText,
+        data_source: dataSourceId,
         location_source_text: location_source_text,
         image_url: event.image,
       }
+    })
 
-      const result = await createEvent(eventData)
+    const results = await saveToDatabase(events, source)
+    return results
+
+  } catch (error) {
+    console.log(error)
+    return null
+  }
+}
+
+export const importWaterlooPublicLibraryEvents = async (source) => {
+  const today = new Date()
+  const dateString = `${today.getFullYear()}-${(today.getMonth() + 1)}-${today.getDate()}`
+  const dataSourceId = DATA_SOURCE_LOOKUP.find(s => s.name === source).id
+
+  const endpoint = `https://calendar.wpl.ca/eeventcaldata?event_type=0&req=%7B%22private%22%3Afalse%2C%22date%22%3A%22${dateString}%22%2C%22days%22%3A31%2C%22locations%22%3A%5B%5D%2C%22ages%22%3A%5B%5D%2C%22types%22%3A%5B%22Author%2520Events%22%2C%22Community%2520Events%22%2C%22Special%2520Events%22%5D%7D`
+  const response = await fetch(endpoint)
+
+  if (response.status !== 200) {
+    throw Error(`API call failed: ${response.status} ${response.statusText}`)
+  } 
+
+  const data = await response.json()
+  const upcomingEvents = data.filter(item => {
+    const registrationCloses = new Date(item.close_registration)
+    return registrationCloses > today
+  })
+
+  const events = upcomingEvents.map(event => {
+    const locationName = `WPL ${event.location}`
+    const description = markdown.translate(event.long_description)
+    const startDate = new Date(event.event_start)
+    const endDate = new Date(event.event_end)
+    const price = (event.registration_cost === "0") ? "Free" : event.registration_cost
+    const url = `https://wpl.libnet.info/event/${event.id}`
+    const image_url = `https://static.libnet.info/images/events/wpl/${event.event_image}`
+    const linkText = `${source} event page`
+    
+    return {
+      title: event.title,
+      description: description,
+      starts_at: startDate.toISOString(),
+      ends_at: endDate.toISOString(),
+      location_source_text: locationName,
+      external_link: url,
+      link_text: linkText,
+      price: price,
+      image_url: image_url,
+      data_source: dataSourceId,
+    }
+  })
+  const results = await saveToDatabase(events, source)
+  return results
+}
+
+const saveToDatabase = async(events, source) => {
+
+  const created = []
+  const failed = []
+
+  const promises = events.map(async(event) => {
+    try {
+      const result = await createEvent(event)
 
       if (result) {
         created.push(result)
       } else {
-        failed.push({ ...eventData, error: "Unable to create event"})
+        failed.push({ ...event, error: "Unable to create event"})
       }
 
     } catch (error) {
@@ -100,7 +136,7 @@ const saveToDatabase = async(events) => {
   const results = await Promise.all(promises)
   console.log(`Processed ${results.length} events`)
 
-  return { created, failed, source: "Explore Waterloo" }
+  return { created, failed, source }
 }
 
 

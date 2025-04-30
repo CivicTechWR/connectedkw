@@ -13,7 +13,6 @@ import dynamic from 'next/dynamic'
 
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
 
-
 export default function NewEventPage({ tags }) {
   const [url, setUrl] = useState('')
   const [loading, setLoading] = useState(false)
@@ -75,8 +74,6 @@ export default function NewEventPage({ tags }) {
 
     try {
       const { event, error, message } = await importEventFromUrl(url)
-      console.log({event})
-      console.log({error})
       if (error) {
         throw new Error(error)
       }
@@ -217,7 +214,7 @@ export default function NewEventPage({ tags }) {
                     disabled={loading || !url}
                     className={`btn btn-primary w-[92px] flex justify-center items-center ${!url ? 'opacity-50 cursor-not-allowed' : ''} ${loading ? 'bg-white hover:bg-white cursor-not-allowed' : ''}`}
                 >
-                    {loading ? <Image src="/loading.svg" width={40} height={40} alt="loading" /> : 'Import'}
+                    {loading ? <Image src="/loading.svg" width={28} height={28} alt="loading" /> : 'Import'}
                 </button>
               </div>
             </div>
@@ -333,7 +330,7 @@ export default function NewEventPage({ tags }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="external_link" className="block text-sm font-semibold mb-1">
-                Registration/Ticket Link
+                Link to Event Page
               </label>
               <input
                 type="url"
@@ -393,8 +390,8 @@ export default function NewEventPage({ tags }) {
                     file:mr-4 file:py-2 file:px-4
                     file:border-0
                     file:text-sm file:font-semibold
-                    file:bg-blue-50 file:text-blue-700
-                    hover:file:bg-blue-100
+                    file:bg-yellow file:text-black
+                    hover:file:bg-black hover:file:text-white
                     disabled:opacity-50"
                 />
                 {fileUploading && (

@@ -17,19 +17,19 @@ export default function NavigationHeader({ className, children, id }) {
                 <nav>
                     <Link href="/events" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/events`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Events`}</span>
-                <i className={`ml-1 fa-solid fa-calendar-day hidden sm:inline`}></i>
+                <span className="hidden sm:inline"><i className={`ml-1 fa-solid fa-calendar-day`}></i></span>
             </Link>
             </nav>
             <nav>
             <Link href="/articles" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/articles`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Local info`}</span>
-                <i className={`ml-1 fa-solid fa-circle-info hidden sm:inline`}></i>
+                <span className="hidden sm:inline"><i className={`ml-1 fa-solid fa-circle-info`}></i></span>
             </Link>
             </nav>
             <nav>
             <Link href="/profiles" className={`pb-1 text-black no-underline font-medium ${pathname.startsWith(`/profiles`) ? 'border-b-2 border-red' : ''}`}>
                 <span>{`Directory`}</span>
-                <i className={`ml-1 fa-solid fa-user hidden sm:inline`}></i>
+                <span className="hidden sm:inline"><i className={`ml-1 fa-solid fa-user`}></i></span>
             </Link>
             </nav>
         </div>

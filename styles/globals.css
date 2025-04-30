@@ -125,13 +125,17 @@ p {
   color: var(--theme-black);
 }
 
-/* a {
+a {
   text-decoration: underline;
-} */
+}
 
-a:hover,
-a:active {
+a:hover:not(.btn),
+a:active:not(.btn) {
   color: var(--theme-red);
+}
+
+a.no-underline, a.btn {
+  text-decoration: none;
 }
 
 a, button {
@@ -242,7 +246,7 @@ article ul {
   }
 
   .btn-yellow {
-    @apply bg-yellow text-black;
+    @apply bg-yellow text-black hover:text-white;
   }
 
   .btn-green {

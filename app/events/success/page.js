@@ -30,7 +30,7 @@ export default function EventSuccessPage() {
             Your event has been successfully submitted and will be reviewed by our team.
           </p>
 
-          <div className="space-x-4">
+          <div className="flex justify-center items-center flex-col sm:flex-row gap-4">
             <Link 
               href="/events" 
               className="btn btn-primary"
