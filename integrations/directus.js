@@ -851,7 +851,7 @@ const createEvent = async (eventData) => {
         link_text: eventData.link_text || "Event page",
         price: eventData.price,
         data_source: eventData.data_source || null,
-        image: image?.id,
+        image: eventData.image ? eventData.image : image?.id || null,
         image_url: eventData.image_url,
         tags: eventData.tags,
         status: eventData.status || 'draft',
