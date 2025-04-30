@@ -74,8 +74,6 @@ export default function NewEventPage({ tags }) {
 
     try {
       const { event, error, message } = await importEventFromUrl(url)
-      console.log({event})
-      console.log({error})
       if (error) {
         throw new Error(error)
       }
@@ -332,7 +330,7 @@ export default function NewEventPage({ tags }) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label htmlFor="external_link" className="block text-sm font-semibold mb-1">
-                Registration/Ticket Link
+                Link to Event Page
               </label>
               <input
                 type="url"
