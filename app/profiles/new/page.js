@@ -9,7 +9,7 @@ export default async function NewProfilePage() {
   console.log(user)
 
   if (!user) {
-    redirect('/auth/login')
+    redirect('/auth/login?next=/profiles/new&info=protected')
   }
 
   return (

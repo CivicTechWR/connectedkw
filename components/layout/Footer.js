@@ -9,7 +9,7 @@ const Footer = () => {
             <div className="mb-4 md:mb-0 basis-1/2">
               <p className="font-body font-medium text-xl md:text-lg ">About Connected KW</p>
               <p className="">{`Connected KW is the community guide you've been looking for! It's a volunteer-run project that curates events and resources for anyone living in Waterloo Region.`}</p>
-              <p className="">{`If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red underline">reach out!</a>`}</p>
+              <p className="">If your organization might be interested in a partnership please <a href="mailto:shay@connectedkw.com" className="hover:text-red underline">reach out!</a></p>
               <a
                 href="https://instagram.com/connectedkw"
                 rel="noopener noreferrer"

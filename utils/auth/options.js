@@ -29,25 +29,24 @@ export const options = {
         },
       },
       authorize: async function (credentials) {
-          const { email, password } = credentials
-          const auth = await loginUser(email, password)
-          const apiAuth = directusClient(auth.access_token ?? "")
-          const loggedInUser = await apiAuth.request(
-            readMe({
-              fields: ["id", "email", "first_name", "last_name"],
-            })
-          )
-          console.log(loggedInUser)
-          const user = {
-            id: loggedInUser.id,
-            first_name: loggedInUser.first_name ?? "",
-            last_name: loggedInUser.last_name ?? "",
-            email: loggedInUser.email ?? "",
-            access_token: auth.access_token ?? "",
-            expires: Math.floor(Date.now() + (auth.expires ?? 0)),
-            refresh_token: auth.refresh_token ?? "",
-          }
-          return user
+        const { email, password } = credentials
+        const auth = await loginUser(email, password)
+        const apiAuth = directusClient(auth.access_token ?? "")
+        const loggedInUser = await apiAuth.request(
+          readMe({
+            fields: ["id", "email", "first_name", "last_name"],
+          })
+        )
+        const user = {
+          id: loggedInUser.id,
+          first_name: loggedInUser.first_name ?? "",
+          last_name: loggedInUser.last_name ?? "",
+          email: loggedInUser.email ?? "",
+          access_token: auth.access_token ?? "",
+          expires: Math.floor(Date.now() + (auth.expires ?? 0)),
+          refresh_token: auth.refresh_token ?? "",
+        }
+        return user
       },
     }),
   ],

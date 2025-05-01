@@ -1,8 +1,8 @@
 import localFont from 'next/font/local';
 const slackey = localFont({ src: '../assets/fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
+import AuthProvider from 'components/auth/AuthProvider'
 import NavigationHeader from 'components/layout/NavigationHeader'
 import Footer from 'components/layout/Footer'
-import Head from 'next/head'
 import Script from 'next/script'
 import PlausibleProvider from 'next-plausible'
 
@@ -65,7 +65,7 @@ export default function RootLayout({
         <PlausibleProvider domain="connectedkw.com">
           <body className={`${slackey.variable}`}>
               <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
-                  <NavigationHeader />
+                <NavigationHeader />
                     <main className={`flex-auto snap-y`}>
 
                         {children}

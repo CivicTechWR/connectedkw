@@ -617,11 +617,10 @@ const register = async (firstName, lastName, email, password) => {
 const loginUser = async (email, password) => {
   try {
     const response = await client.login(email, password);
-    console.log(response)
     return response;
   } catch (err) {
-    console.log(err)
-    throw new Error(err.message);
+    const message = err.errors[0].message
+    throw new Error(message);
   }
 };
 
