@@ -4,8 +4,8 @@ import Section from 'components/layout/Section'
 import Link from 'next/link'
 import Image from 'next/image'
 export default async function ProfilesPage() {
-  const profiles = await getProfiles({})
-  const skills = await getProfileSkills()
+  const profiles = await getProfiles({});
+  const skills = await getProfileSkills();
 
   return (
     <>
