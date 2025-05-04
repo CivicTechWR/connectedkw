@@ -35,6 +35,32 @@ function getRandomColor(skillName) {
   return `rgb(${red}, ${green}, ${blue})`;
 }
 
+
+function renderSkills(profile, profileSkillNames) {
+  const maxSkillsToShow = 10; // Limit the number of skills displayed
+  // TODO : Add category to skills and Show More Pop up? oui
+
+  return( profile.skills ? (
+      <div className="rounded-xl overflow-hidden shadow-lg bg-white p-5">
+        <h1 className="text-2xl font-semibold mb-3 text-red">Skills</h1>
+        {profileSkillNames.length > 0 ? (
+          profileSkillNames.slice(0, maxSkillsToShow).map((skillName, index) => (
+            <span
+              key={index}
+              style={{ backgroundColor: getRandomColor(skillName.name) }}
+              className="inline-flex items-center text-white px-2 py-1 text-xs font-semibold rounded-full mr-2 mb-1"
+            >
+              {skillName.name}
+            </span>
+          ))
+        ) : (
+          <span className="text-xs text-gray-500">No skills</span>
+        )}
+      </div>
+    ) : null
+  )
+}
+
 export default async function ProfilePage({ params }) {
   const { slug } = await params;
   const profiles = await getProfiles({ slug: slug });
@@ -95,24 +121,7 @@ export default async function ProfilePage({ params }) {
         </div>
 
         <div className="col-span-12 md:col-span-5">
-          {profile.skills ? (
-            <div className="rounded-xl overflow-hidden shadow-lg bg-white p-5">
-              <h1 className="text-2xl font-semibold mb-3 text-red">Skills</h1>
-              {profileSkillNames.length > 0 ? (
-                profileSkillNames.map((skillName, index) => (
-                  <span
-                    key={index}
-                    style={{ backgroundColor: getRandomColor(skillName.name) }}
-                    className="inline-flex items-center text-white px-2 py-1 text-xs font-semibold rounded-full mr-2 mb-1"
-                  >
-                    {skillName.name}
-                  </span>
-                ))
-              ) : (
-                <span className="text-xs text-gray-500">No skills</span>
-              )}
-            </div>
-          ) : null}
+          {renderSkills(profile, profileSkillNames)}
           {profile.interests ? (
             <div className="rounded-xl overflow-hidden shadow-lg bg-white p-5 mt-4">
               <h1 className="text-2xl font-semibold mb-1 text-red">Interests</h1>
