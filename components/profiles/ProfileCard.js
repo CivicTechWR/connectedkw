@@ -42,15 +42,6 @@ function renderSkills(profileSkillNames) {
   if (profileSkillNames.length === 0) {
     return <span className="text-xs text-gray-500">No skills</span>
   }
-  
-  // For returning, set a limit of 5 skills to show on profile card just to start
-  // TODO : Add a "show more" button to show all skills
-  // TODO : Add a "show less" button to hide skills
-  // TODO : 
-
-  // if profileSkillNames.length > 5, show "show more" button
-
-  
 
   return profileSkillNames.slice(0, maxSkillsToShow).map((skillName, index) => (
     <span
