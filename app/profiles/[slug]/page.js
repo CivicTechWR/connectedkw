@@ -2,8 +2,7 @@ import Image from "next/image";
 import { getProfiles } from "integrations/directus";
 import DOMPurify from "isomorphic-dompurify";
 import Link from "next/link";
-import RenderSkills from "@components/profiles/RenderSkills.js";
-
+import RenderProfileSkills from "@components/profiles/RenderSkills.js";
 
 export default async function ProfilePage({ params }) {
   const { slug } = await params;
@@ -43,49 +42,96 @@ export default async function ProfilePage({ params }) {
           <div className="rounded-xl overflow-hidden shadow-lg bg-white px-3 py-10">
             <div className="w-40 h-40 relative rounded-full mx-auto overflow-hidden">
               {avatarURL ? (
-                <Image src={avatarURL} alt="User Avatar" fill className="object-cover" />
+                <Image
+                  src={avatarURL}
+                  alt="User Avatar"
+                  fill
+                  className="object-cover"
+                />
               ) : (
                 <div className="w-full h-full bg-gray-300" />
               )}
             </div>
-            <h1 className="text-2xl font-semibold text-center mt-4 mb-1">{profile.name}</h1>
+            <h1 className="text-2xl font-semibold text-center mt-4 mb-1">
+              {profile.name}
+            </h1>
             <p className="text-sm font-regular text-center text-gray-600">
               {profile.headline.length > 90
                 ? `${profile.headline.substring(0, 90)}...`
                 : profile.headline}
             </p>
 
-            <div className="text-sm font-regular text-center mt-8" dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(profile.bio, {
-                FORBID_ATTR: ["style"],
-                ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "ul", "ol", "li"],
-              })
-            }} />
+            <div
+              className="text-sm font-regular text-center mt-8"
+              dangerouslySetInnerHTML={{
+                __html: DOMPurify.sanitize(profile.bio, {
+                  FORBID_ATTR: ["style"],
+                  ALLOWED_TAGS: [
+                    "b",
+                    "i",
+                    "em",
+                    "strong",
+                    "a",
+                    "ul",
+                    "ol",
+                    "li",
+                  ],
+                }),
+              }}
+            />
           </div>
         </div>
 
         <div className="col-span-12 md:col-span-5">
-          <RenderSkills profileSkillNames={profileSkillNames} />
+          <RenderProfileSkills profileSkillNames={profileSkillNames} />
           {profile.interests ? (
             <div className="rounded-xl overflow-hidden shadow-lg bg-white p-5 mt-4">
-              <h1 className="text-2xl font-semibold mb-1 text-red">Interests</h1>
-              <div className="text-sm font-regular text-gray-600" dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(profile.interests, {
-                  FORBID_ATTR: ["style"],
-                  ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "ul", "ol", "li"],
-                })
-              }} />
+              <h1 className="text-2xl font-semibold mb-1 text-red">
+                Interests
+              </h1>
+              <div
+                className="text-sm font-regular text-gray-600"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(profile.interests, {
+                    FORBID_ATTR: ["style"],
+                    ALLOWED_TAGS: [
+                      "b",
+                      "i",
+                      "em",
+                      "strong",
+                      "a",
+                      "ul",
+                      "ol",
+                      "li",
+                    ],
+                  }),
+                }}
+              />
             </div>
           ) : null}
           {profile.experiences ? (
             <div className="rounded-xl overflow-hidden shadow-lg bg-white p-5 mt-4">
-              <h1 className="text-2xl font-semibold mb-1 text-red">Experiences</h1>
-              <div className="text-sm font-regular text-gray-600 markdown" dangerouslySetInnerHTML={{
-                __html: DOMPurify.sanitize(profile.experiences, {
-                  FORBID_ATTR: ["style"],
-                  ALLOWED_TAGS: ["b", "i", "em", "strong", "a", "ul", "ol", "li"],
-                })
-              }} />
+              <h1 className="text-2xl font-semibold mb-1 text-red">
+                Experiences
+              </h1>
+              <div
+                className="text-sm font-regular text-gray-600 markdown"
+                dangerouslySetInnerHTML={{
+                  __html: DOMPurify.sanitize(profile.experiences, {
+                    FORBID_ATTR: ["style"],
+                    ALLOWED_TAGS: [
+                      "b",
+                      "i",
+                      "em",
+                      "strong",
+                      "a",
+                      "ul",
+                      "ol",
+                      "li",
+                    ],
+                  }),
+                }}
+              />
             </div>
           ) : null}
         </div>
