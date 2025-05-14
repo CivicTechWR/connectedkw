@@ -12,6 +12,7 @@ const CreateProfileForm = ({ skills }) => {
   const [imageFile, setImageFile] = useState(null);
   const [formData, setFormData] = useState({
     name: "",
+    email: "",
     headline: "",
     bio: "",
     skills: [],

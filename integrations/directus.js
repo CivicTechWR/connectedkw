@@ -600,6 +600,20 @@ const getCamps = async () => {
   }
 }
 
+const registerProfile = async () => {
+  try {
+    const result = await directus.request(registerUser(email, password, {
+      first_name: firstName,
+      last_name: lastName,
+      verification_url: process.env.DIRECTUS_VERIFICATION_URL
+    }))
+
+    return result
+  } catch (error) {
+    return error
+  }
+}
+
 const register = async (firstName, lastName, email, password) => {
   try {
     const result = await directus.request(registerUser(email, password, {

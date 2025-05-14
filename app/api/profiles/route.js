@@ -1,26 +1,15 @@
 import { NextResponse } from 'next/server'
-import { createItem } from '@directus/sdk'
-import { directus } from 'integrations/directus'
+//import { createItem } from '@directus/sdk'
+import { registerProfile } from 'integrations/directus'
 
 export async function POST(request) {
   try {
-    const data = await request.json()
+    const { image,  } = await request.json();
 
-    const profile = await directus.request(
-      createItem('profiles', {
-        ...data,
-        status: 'draft',
-        is_visible: true
-      })
-    )
-
-    return NextResponse.json(profile)
+    const result = await
 
   } catch (error) {
     console.error('Error creating profile:', error)
-    return NextResponse.json(
-      { error: 'Failed to create profile' },
-      { status: 500 }
-    )
+    return NextResponse.json({ message: err }, { status: 500 });
   }
 } 
