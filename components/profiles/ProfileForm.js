@@ -102,7 +102,7 @@ export default function ProfileForm({ skills }) {
         },
         body: JSON.stringify({
           ...formData,
-          profile_picture: imageId,
+          //profile_picture: imageId,
           skills: selectedSkills.map(skillId => ({
             skills_id: skillId
           }))
