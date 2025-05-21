@@ -613,7 +613,7 @@ const registerProfile = async (profileData) => {
       bio: profileData.bio,
       skills: profileData.skills,
       profile_picture: profileData.profile_picture,
-      status: 'In Review',
+      status: 'pending',
       profile_picture: profileData.profile_picture
     }))
     //   image: profileData.title,
