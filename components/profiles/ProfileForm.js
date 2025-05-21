@@ -7,7 +7,10 @@ import RichTextEditor from 'components/RichTextEditor'
 import TagButton from 'components/TagButton'
 import { uploadImage } from 'integrations/directus'
 
+import Select from 'react-select';
+
 export default function ProfileForm({ skills }) {
+
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -25,8 +28,26 @@ export default function ProfileForm({ skills }) {
     image_url: '',
     image: null,
     experiences: '',
+    skills: [],
     preferred_contact_method: 'email'
   })
+
+  // The following functions takes skills from the directus as input
+  // and gives an output for the react-select
+  const transformSkills = (skills) => {
+    const uniqueNames = new Set();
+    return skills
+      .map((item) => {
+        const name = item.name?.trim();
+        if (name && !uniqueNames.has(name)) {
+          uniqueNames.add(name);
+          return { label: name, value: name, id: item.id };
+        }
+        return null;
+      })
+      .filter(Boolean); // remove nulls
+  };
+  const allSkills = transformSkills(skills);
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -39,7 +60,7 @@ export default function ProfileForm({ skills }) {
   const handleSkillClick = (skill) => {
     setSelectedSkills(prev => {
       const isSelected = prev.some(s => s === skill.id)
-      return isSelected 
+      return isSelected
         ? prev.filter(s => s !== skill.id)
         : [...prev, skill.id]
     })
@@ -82,6 +103,7 @@ export default function ProfileForm({ skills }) {
 
     try {
       // Upload image if selected
+<<<<<<< HEAD
       // let imageId = null
       // if (imageFile) {
       //   const formData = new FormData()
@@ -93,6 +115,21 @@ export default function ProfileForm({ skills }) {
       //   const { id } = await uploadRes.json()
       //   imageId = id
       // }
+=======
+      let imageId = null
+      if (imageFile) {
+        const formData = new FormData()
+        formData.append('file', imageFile)
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        })
+        const { id } = await uploadRes.json()
+        imageId = id
+      }
+      // Uncomment following line to log the formData
+      // console.log(formData);
+>>>>>>> fdae15a (React-Select Installed. React-select replacing the selecting of skills.)
 
       // Create profile
       const res = await fetch('/api/profiles', {
@@ -252,7 +289,7 @@ export default function ProfileForm({ skills }) {
         </label>
         <RichTextEditor
           markdown={formData.bio}
-          onBlur={(value) => handleChange({ target: { name: 'bio', value }})}
+          onBlur={(value) => handleChange({ target: { name: 'bio', value } })}
           ref={editorRef}
         />
       </div>
@@ -289,16 +326,21 @@ export default function ProfileForm({ skills }) {
         <label className="block text-sm font-semibold mb-1">
           Skills
         </label>
-        <div className="flex flex-wrap gap-2">
-          {skills.map(skill => (
-            <TagButton
-              key={skill.id}
-              tag={skill}
-              selected={selectedSkills.includes(skill.id)}
-              onClick={() => handleSkillClick(skill)}
-            />
-          ))}
-        </div>
+
+        <Select
+          isMulti
+          name="skills"
+          options={allSkills}
+          value={allSkills.filter(skill => formData.skills.includes(skill.id))}
+          onChange={(selectedOptions) => {
+            const ids = selectedOptions.map(option => option.id);
+            setFormData(prev => ({ ...prev, skills: ids }));
+            setSelectedSkills(ids);
+          }}
+          className="basic-multi-select"
+          classNamePrefix="select"
+        />
+
       </div>
 
       <div>
