@@ -103,19 +103,6 @@ export default function ProfileForm({ skills }) {
 
     try {
       // Upload image if selected
-<<<<<<< HEAD
-      // let imageId = null
-      // if (imageFile) {
-      //   const formData = new FormData()
-      //   formData.append('file', imageFile)
-      //   const uploadRes = await fetch('/api/upload', {
-      //     method: 'POST',
-      //     body: formData
-      //   })
-      //   const { id } = await uploadRes.json()
-      //   imageId = id
-      // }
-=======
       let imageId = null
       if (imageFile) {
         const formData = new FormData()
@@ -129,7 +116,6 @@ export default function ProfileForm({ skills }) {
       }
       // Uncomment following line to log the formData
       // console.log(formData);
->>>>>>> fdae15a (React-Select Installed. React-select replacing the selecting of skills.)
 
       // Create profile
       const res = await fetch('/api/profiles', {
