@@ -2,6 +2,14 @@
 
 import React, { useState } from 'react';
 import Notification from '../notifications/Notifications';
+import Select from 'react-select';
+import SearchSelect from '../search-select/SearchSelect';
+// Options for the volunteer selection dropdown *to be replaced with api call*
+const options = [
+  { value: 'No preference', label: 'No preference', category: 'volunteer' },
+  { value: 'strawberry', label: 'Strawberry', category: 'icecream' },
+  { value: 'vanilla', label: 'Vanilla', category: 'icecream' },
+];
 
 const VolunteerRequestForm = () => {
   const [formData, setFormData] = useState({
@@ -28,21 +36,6 @@ const VolunteerRequestForm = () => {
       setErrors({
         ...errors,
         [name]: '',
-      });
-    }
-  };
-
-  const handleRadioChange = (value) => {
-    setFormData({
-      ...formData,
-      knowsVolunteer: value,
-    });
-
-    // Clear error when user selects an option
-    if (errors.knowsVolunteer) {
-      setErrors({
-        ...errors,
-        knowsVolunteer: '',
       });
     }
   };
@@ -119,37 +112,15 @@ const VolunteerRequestForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Rest of your form remains the same */}
           <div className="space-y-2">
-            <label className="text-lg font-medium">
-              Do you know your volunteer?
+            {' '}
+            <label htmlFor="name" className="text-lg font-medium">
+              Do you know which volunteer you want to work with?
             </label>
-            <div className="flex space-x-8">
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="yes"
-                  name="knowsVolunteer"
-                  checked={formData.knowsVolunteer === 'yes'}
-                  onChange={() => handleRadioChange('yes')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                />
-                <label htmlFor="yes" className="ml-2 text-gray-700">
-                  Yes
-                </label>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="radio"
-                  id="no"
-                  name="knowsVolunteer"
-                  checked={formData.knowsVolunteer === 'no'}
-                  onChange={() => handleRadioChange('no')}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 focus:ring-2"
-                />
-                <label htmlFor="no" className="ml-2 text-gray-700">
-                  No
-                </label>
-              </div>
-            </div>
+            <SearchSelect options={options} />
+            <label htmlFor="name" className="text-lg font-medium">
+              Which skills are you looking for?
+            </label>
+            <SearchSelect options={options} />
             {errors.knowsVolunteer && (
               <p className="text-red-500 text-sm mt-1">
                 {errors.knowsVolunteer}
