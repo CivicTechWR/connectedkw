@@ -3,9 +3,11 @@
 import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import RichTextEditor from 'components/RichTextEditor'
 import TagButton from 'components/TagButton'
+import dynamic from 'next/dynamic'
+const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
 
+import { Suspense } from 'react'
 export default function ProfileForm({ skills }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -13,7 +15,9 @@ export default function ProfileForm({ skills }) {
   const [selectedSkills, setSelectedSkills] = useState([])
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
-  const editorRef = useRef(null)
+  const bioEditorRef = useRef(null)
+  const interestsEditorRef = useRef(null)
+  const experiencesEditorRef = useRef(null)
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -109,8 +113,8 @@ export default function ProfileForm({ skills }) {
         <label className="block text-sm font-semibold mb-1">
           Profile Picture
         </label>
-        <div className="flex items-center space-x-4">
-          <div className="w-24 h-24 relative rounded-full overflow-hidden bg-gray-100">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="w-24 h-24 aspect-square shrink-0 relative rounded-full overflow-hidden bg-gray-100">
             {imagePreview ? (
               <Image
                 src={imagePreview}
@@ -126,7 +130,13 @@ export default function ProfileForm({ skills }) {
             type="file"
             onChange={handleFileChange}
             accept="image/*"
-            className="flex-1"
+            className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-yellow file:text-black
+                    hover:file:bg-black hover:file:text-white
+                    disabled:opacity-50"
           />
         </div>
       </div>
@@ -142,7 +152,23 @@ export default function ProfileForm({ skills }) {
           required
           value={formData.name}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
+          className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="headline" className="block text-sm font-semibold mb-1">
+          Headline*
+        </label>
+        <input
+          type="text"
+          id="headline"
+          name="headline"
+          value={formData.headline}
+          onChange={handleChange}
+          required
+          placeholder="e.g. Full Stack Developer | Community Builder"
+          className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
         />
       </div>
 
@@ -154,64 +180,66 @@ export default function ProfileForm({ skills }) {
           type="text"
           id="city"
           name="city"
+          placeholder="e.g. Kitchener"
           value={formData.city}
           onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="headline" className="block text-sm font-semibold mb-1">
-          Headline
-        </label>
-        <input
-          type="text"
-          id="headline"
-          name="headline"
-          value={formData.headline}
-          onChange={handleChange}
-          placeholder="e.g. Full Stack Developer | Community Builder"
-          className="w-full px-3 py-2 border rounded"
+          className="w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline"
         />
       </div>
 
       <div>
         <label htmlFor="bio" className="block text-sm font-semibold mb-1">
-          Bio
+          Bio*
         </label>
-        <RichTextEditor
-          markdown={formData.bio}
-          onBlur={(value) => handleChange({ target: { name: 'bio', value }})}
-          ref={editorRef}
-        />
+        <p className="text-sm text-gray-500 mb-2">
+          Tell us about yourself.
+        </p>
+        <div className="border shadow h-48">
+          <Suspense fallback={<div>Loading...</div>}>
+            <RichTextEditor
+              markdown={formData.bio}
+              onBlur={(value) => handleChange({ target: { name: 'bio', value }})}
+              ref={bioEditorRef}
+              required
+            />
+          </Suspense>
+        </div>
       </div>
 
       <div>
         <label htmlFor="interests" className="block text-sm font-semibold mb-1">
           Interests
         </label>
-        <textarea
-          id="interests"
-          name="interests"
-          value={formData.interests}
-          onChange={handleChange}
-          rows={3}
-          className="w-full px-3 py-2 border rounded"
-        />
+        <p className="text-sm text-gray-500 mb-2">
+          What are you passionate about?
+        </p>
+        <div className="border shadow h-48">
+          <Suspense fallback={<div>Loading...</div>}>
+            <RichTextEditor
+              markdown={formData.interests}
+              onBlur={(value) => handleChange({ target: { name: 'interests', value }})}
+              ref={interestsEditorRef}
+            />
+          </Suspense>
+        </div>
       </div>
 
       <div>
         <label htmlFor="experiences" className="block text-sm font-semibold mb-1">
-          Experience
+          Unique Experiences
         </label>
-        <textarea
-          id="experiences"
-          name="experiences"
-          value={formData.experiences}
-          onChange={handleChange}
-          rows={3}
-          className="w-full px-3 py-2 border rounded"
-        />
+        <p className="text-sm text-gray-500 mb-2">
+          What are you proud of?
+        </p>
+        <div className="border shadow h-48">
+          <Suspense fallback={<div>Loading...</div>}>
+            <RichTextEditor
+              markdown={formData.experiences}
+              onBlur={(value) => handleChange({ target: { name: 'experiences', value }})}
+              ref={experiencesEditorRef}
+            />
+          </Suspense>
+        </div>
       </div>
 
       <div>
@@ -228,22 +256,6 @@ export default function ProfileForm({ skills }) {
             />
           ))}
         </div>
-      </div>
-
-      <div>
-        <label className="block text-sm font-semibold mb-1">
-          Preferred Contact Method
-        </label>
-        <select
-          name="preferred_contact_method"
-          value={formData.preferred_contact_method}
-          onChange={handleChange}
-          className="w-full px-3 py-2 border rounded"
-        >
-          <option value="email">Email</option>
-          <option value="phone">Phone</option>
-          <option value="slack">Slack</option>
-        </select>
       </div>
 
       <div>

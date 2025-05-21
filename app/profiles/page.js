@@ -9,13 +9,13 @@ import { redirect } from 'next/navigation'
 export default async function ProfilesPage() {
   const profiles = await getProfiles({});
   const skills = await getProfileSkills();
-  const user = await getUser();
+  // const user = await getUser();
 
-  console.log(user);
+  // console.log(user);
 
-  if (!user) {
-    redirect('/auth/login?next=/profiles&info=protected')
-  }
+  // if (!user) {
+  //   redirect('/auth/login?next=/profiles&info=protected')
+  // }
 
   return (
     <>
