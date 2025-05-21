@@ -5,12 +5,14 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import RichTextEditor from 'components/RichTextEditor'
 import TagButton from 'components/TagButton'
+import { uploadImage } from 'integrations/directus'
 
 export default function ProfileForm({ skills }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedSkills, setSelectedSkills] = useState([])
+  const [fileUploading, setFileUploading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const editorRef = useRef(null)
@@ -20,6 +22,8 @@ export default function ProfileForm({ skills }) {
     headline: '',
     bio: '',
     interests: '',
+    image_url: '',
+    image: null,
     experiences: '',
     preferred_contact_method: 'email'
   })
@@ -41,12 +45,34 @@ export default function ProfileForm({ skills }) {
     })
   }
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+  // const handleFileChange = async (e) => {
+  //   const file = e.target.files[0]
+  //   if (!file) return
 
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+  //   setImageFile(file)
+  //   setImagePreview(URL.createObjectURL(file))
+  // }
+
+
+  const handleFileChange = async(e) => {
+    if (e.target.files[0]) {
+      setFileUploading(true)
+      const formData = new FormData()
+      formData.append('file', e.target.files[0], e.target?.files[0]?.name)
+      const result = await uploadImage(formData)
+      
+      setFormData(prev => ({
+        ...prev,
+        image: result
+      }))
+      
+      setFileUploading(false)
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        image: null
+      }))
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -56,17 +82,17 @@ export default function ProfileForm({ skills }) {
 
     try {
       // Upload image if selected
-      let imageId = null
-      if (imageFile) {
-        const formData = new FormData()
-        formData.append('file', imageFile)
-        const uploadRes = await fetch('/api/upload', {
-          method: 'POST',
-          body: formData
-        })
-        const { id } = await uploadRes.json()
-        imageId = id
-      }
+      // let imageId = null
+      // if (imageFile) {
+      //   const formData = new FormData()
+      //   formData.append('file', imageFile)
+      //   const uploadRes = await fetch('/api/upload', {
+      //     method: 'POST',
+      //     body: formData
+      //   })
+      //   const { id } = await uploadRes.json()
+      //   imageId = id
+      // }
 
       // Create profile
       const res = await fetch('/api/profiles', {
@@ -106,6 +132,51 @@ export default function ProfileForm({ skills }) {
       )}
 
       <div>
+            <label className="block text-sm font-semibold mb-1">
+              Profile Picture
+            </label>
+            {formData.image_url || formData.image ? (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={formData.image_url || `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`} 
+                    alt="Preview" 
+                    className="h-20 w-20 object-cover rounded"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '', image: null }))}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Remove and upload different image
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  disabled={fileUploading}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-yellow file:text-black
+                    hover:file:bg-black hover:file:text-white
+                    disabled:opacity-50"
+                />
+                {fileUploading && (
+                  <div className="text-sm text-gray-600">
+                    Uploading...
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+      {/* <div>
         <label className="block text-sm font-semibold mb-1">
           Profile Picture
         </label>
@@ -129,7 +200,7 @@ export default function ProfileForm({ skills }) {
             className="flex-1"
           />
         </div>
-      </div>
+      </div> */}
 
       <div>
         <label htmlFor="name" className="block text-sm font-semibold mb-1">
