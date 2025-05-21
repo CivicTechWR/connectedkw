@@ -1,3 +1,9 @@
+import VolunteerRequestForm from 'components/profiles/VolunteerRequestForm';
+
 export default function Page() {
-  return <p1>request</p1>;
+  return (
+    <>
+      <VolunteerRequestForm />
+    </>
+  );
 }
