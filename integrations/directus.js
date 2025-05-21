@@ -600,18 +600,42 @@ const getCamps = async () => {
   }
 }
 
-const registerProfile = async () => {
-  try {
-    const result = await directus.request(registerUser(email, password, {
-      first_name: firstName,
-      last_name: lastName,
-      verification_url: process.env.DIRECTUS_VERIFICATION_URL
-    }))
+const registerProfile = async (profileData) => {
+  //console.log(profileData);
 
-    return result
+  //const image = await importImage(profileData.profile_picture, profileData.title);
+
+  try {
+    console.log(profileData);
+    const result = await directus.request(createItem('profiles', {
+      name: profileData.name,
+      headline: profileData.headline,
+      bio: profileData.bio,
+      skills: profileData.skills,
+      profile_picture: profileData.profile_picture,
+      status: 'In Review',
+      profile_picture: profileData.profile_picture
+    }))
+    //   image: profileData.title,
+    //   description: eventData.description,
+    //   starts_at: eventData.starts_at,
+    //   ends_at: eventData.ends_at || null,
+    //   location: eventData.location,
+    //   location_source_text: eventData.location_source_text,
+    //   external_link: eventData.external_link || eventData.url || null,
+    //   link_text: eventData.link_text || "Event page",
+    //   price: eventData.price,
+    //   data_source: eventData.data_source || null,
+    //   image: eventData.image ? eventData.image : image?.id || null,
+    //   image_url: eventData.image_url,
+    //   tags: eventData.tags,
+    //   status: eventData.status || 'draft',
+    // }))
+
   } catch (error) {
     return error
   }
+
 }
 
 const register = async (firstName, lastName, email, password) => {
@@ -913,6 +937,7 @@ export {
   getPagesByTemplate,
   getPages,
   getCamps,
+  registerProfile,
   register,
   loginUser,
   verifyEmail,

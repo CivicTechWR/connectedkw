@@ -4,12 +4,15 @@ import { registerProfile } from 'integrations/directus'
 
 export async function POST(request) {
   try {
-    const { image,  } = await request.json();
+    const profileData = await request.json();
+    //console.log(profileData);
 
-    const result = await
+    const result = await registerProfile(profileData);
+    // console.log(result);
+    return NextResponse.json({ profile: result }, { status: 201 });
 
   } catch (error) {
     console.error('Error creating profile:', error)
-    return NextResponse.json({ message: err }, { status: 500 });
+    return NextResponse.json({ message: error }, { status: 500 });
   }
 } 

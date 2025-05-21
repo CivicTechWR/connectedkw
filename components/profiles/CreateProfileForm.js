@@ -18,6 +18,8 @@ const CreateProfileForm = ({ skills }) => {
     skills: [],
     interests: "",
     experiences: "",
+    image_url: "",
+    image: null,
     city: "",
     preferred_contact_method: "email",
   });
