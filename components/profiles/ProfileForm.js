@@ -4,15 +4,23 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import TagButton from 'components/TagButton'
+<<<<<<< HEAD
 import dynamic from 'next/dynamic'
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
+=======
+import { uploadImage } from 'integrations/directus'
+
+import Select from 'react-select';
+>>>>>>> c5fc1b3532f33a88611da20df46e33ad8019fab9
 
 import { Suspense } from 'react'
 export default function ProfileForm({ skills }) {
+
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
   const [selectedSkills, setSelectedSkills] = useState([])
+  const [fileUploading, setFileUploading] = useState(false)
   const [imageFile, setImageFile] = useState(null)
   const [imagePreview, setImagePreview] = useState(null)
   const bioEditorRef = useRef(null)
@@ -24,9 +32,29 @@ export default function ProfileForm({ skills }) {
     headline: '',
     bio: '',
     interests: '',
+    image_url: '',
+    image: null,
     experiences: '',
+    skills: [],
     preferred_contact_method: 'email'
   })
+
+  // The following functions takes skills from the directus as input
+  // and gives an output for the react-select
+  const transformSkills = (skills) => {
+    const uniqueNames = new Set();
+    return skills
+      .map((item) => {
+        const name = item.name?.trim();
+        if (name && !uniqueNames.has(name)) {
+          uniqueNames.add(name);
+          return { label: name, value: name, id: item.id };
+        }
+        return null;
+      })
+      .filter(Boolean); // remove nulls
+  };
+  const allSkills = transformSkills(skills);
 
   const handleChange = (e) => {
     const { name, value } = e.target
@@ -39,18 +67,40 @@ export default function ProfileForm({ skills }) {
   const handleSkillClick = (skill) => {
     setSelectedSkills(prev => {
       const isSelected = prev.some(s => s === skill.id)
-      return isSelected 
+      return isSelected
         ? prev.filter(s => s !== skill.id)
         : [...prev, skill.id]
     })
   }
 
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0]
-    if (!file) return
+  // const handleFileChange = async (e) => {
+  //   const file = e.target.files[0]
+  //   if (!file) return
 
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+  //   setImageFile(file)
+  //   setImagePreview(URL.createObjectURL(file))
+  // }
+
+
+  const handleFileChange = async(e) => {
+    if (e.target.files[0]) {
+      setFileUploading(true)
+      const formData = new FormData()
+      formData.append('file', e.target.files[0], e.target?.files[0]?.name)
+      const result = await uploadImage(formData)
+      
+      setFormData(prev => ({
+        ...prev,
+        image: result
+      }))
+      
+      setFileUploading(false)
+    } else {
+      setFormData(prev => ({
+        ...prev,
+        image: null
+      }))
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -71,6 +121,8 @@ export default function ProfileForm({ skills }) {
         const { id } = await uploadRes.json()
         imageId = id
       }
+      // Uncomment following line to log the formData
+      // console.log(formData);
 
       // Create profile
       const res = await fetch('/api/profiles', {
@@ -80,7 +132,7 @@ export default function ProfileForm({ skills }) {
         },
         body: JSON.stringify({
           ...formData,
-          profile_picture: imageId,
+          //profile_picture: imageId,
           skills: selectedSkills.map(skillId => ({
             skills_id: skillId
           }))
@@ -110,6 +162,51 @@ export default function ProfileForm({ skills }) {
       )}
 
       <div>
+            <label className="block text-sm font-semibold mb-1">
+              Profile Picture
+            </label>
+            {formData.image_url || formData.image ? (
+              <div className="space-y-2">
+                <div className="flex items-center space-x-4">
+                  <img 
+                    src={formData.image_url || `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`} 
+                    alt="Preview" 
+                    className="h-20 w-20 object-cover rounded"
+                  />
+                  <button 
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, image_url: '', image: null }))}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Remove and upload different image
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <input
+                  type="file"
+                  onChange={handleFileChange}
+                  accept="image/*"
+                  disabled={fileUploading}
+                  className="block w-full text-sm text-gray-500
+                    file:mr-4 file:py-2 file:px-4
+                    file:border-0
+                    file:text-sm file:font-semibold
+                    file:bg-yellow file:text-black
+                    hover:file:bg-black hover:file:text-white
+                    disabled:opacity-50"
+                />
+                {fileUploading && (
+                  <div className="text-sm text-gray-600">
+                    Uploading...
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+      {/* <div>
         <label className="block text-sm font-semibold mb-1">
           Profile Picture
         </label>
@@ -139,7 +236,7 @@ export default function ProfileForm({ skills }) {
                     disabled:opacity-50"
           />
         </div>
-      </div>
+      </div> */}
 
       <div>
         <label htmlFor="name" className="block text-sm font-semibold mb-1">
@@ -191,6 +288,7 @@ export default function ProfileForm({ skills }) {
         <label htmlFor="bio" className="block text-sm font-semibold mb-1">
           Bio*
         </label>
+<<<<<<< HEAD
         <p className="text-sm text-gray-500 mb-2">
           Tell us about yourself.
         </p>
@@ -204,6 +302,13 @@ export default function ProfileForm({ skills }) {
             />
           </Suspense>
         </div>
+=======
+        <RichTextEditor
+          markdown={formData.bio}
+          onBlur={(value) => handleChange({ target: { name: 'bio', value } })}
+          ref={editorRef}
+        />
+>>>>>>> c5fc1b3532f33a88611da20df46e33ad8019fab9
       </div>
 
       <div>
@@ -246,16 +351,21 @@ export default function ProfileForm({ skills }) {
         <label className="block text-sm font-semibold mb-1">
           Skills
         </label>
-        <div className="flex flex-wrap gap-2">
-          {skills.map(skill => (
-            <TagButton
-              key={skill.id}
-              tag={skill}
-              selected={selectedSkills.includes(skill.id)}
-              onClick={() => handleSkillClick(skill)}
-            />
-          ))}
-        </div>
+
+        <Select
+          isMulti
+          name="skills"
+          options={allSkills}
+          value={allSkills.filter(skill => formData.skills.includes(skill.id))}
+          onChange={(selectedOptions) => {
+            const ids = selectedOptions.map(option => option.id);
+            setFormData(prev => ({ ...prev, skills: ids }));
+            setSelectedSkills(ids);
+          }}
+          className="basic-multi-select"
+          classNamePrefix="select"
+        />
+
       </div>
 
       <div>

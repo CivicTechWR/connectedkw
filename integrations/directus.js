@@ -607,14 +607,17 @@ const registerProfile = async (profileData) => {
 
   try {
     console.log(profileData);
+    // const cur_user = await directus.user()
+    // console.log(cur_user);
     const result = await directus.request(createItem('profiles', {
       name: profileData.name,
       headline: profileData.headline,
       bio: profileData.bio,
       skills: profileData.skills,
-      profile_picture: profileData.profile_picture,
-      status: 'In Review',
-      profile_picture: profileData.profile_picture
+      //contact: 
+      profile_picture: profileData.image,
+      status: 'pending',
+      //profile_picture: profileData.profile_picture
     }))
     //   image: profileData.title,
     //   description: eventData.description,
