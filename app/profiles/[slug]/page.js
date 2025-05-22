@@ -2,7 +2,6 @@ import Image from "next/image";
 import { getProfiles } from "integrations/directus";
 import DOMPurify from "isomorphic-dompurify";
 import Link from "next/link";
-import ContactButton from './ContactButton';
 
 function hashStringToSeed(str) {
   let hash = 0;
@@ -137,9 +136,6 @@ export default async function ProfilePage({ params }) {
             </div>
           ) : null}
         </div>
-      </div>
-      <div className="mt-8">
-        <ContactButton profile={profile} />
       </div>
     </section>
   );
