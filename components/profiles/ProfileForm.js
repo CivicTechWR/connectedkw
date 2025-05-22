@@ -4,14 +4,11 @@ import { useState, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import TagButton from 'components/TagButton'
-<<<<<<< HEAD
 import dynamic from 'next/dynamic'
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
-=======
 import { uploadImage } from 'integrations/directus'
 
 import Select from 'react-select';
->>>>>>> c5fc1b3532f33a88611da20df46e33ad8019fab9
 
 import { Suspense } from 'react'
 export default function ProfileForm({ skills }) {
@@ -288,7 +285,6 @@ export default function ProfileForm({ skills }) {
         <label htmlFor="bio" className="block text-sm font-semibold mb-1">
           Bio*
         </label>
-<<<<<<< HEAD
         <p className="text-sm text-gray-500 mb-2">
           Tell us about yourself.
         </p>
@@ -302,13 +298,6 @@ export default function ProfileForm({ skills }) {
             />
           </Suspense>
         </div>
-=======
-        <RichTextEditor
-          markdown={formData.bio}
-          onBlur={(value) => handleChange({ target: { name: 'bio', value } })}
-          ref={editorRef}
-        />
->>>>>>> c5fc1b3532f33a88611da20df46e33ad8019fab9
       </div>
 
       <div>
