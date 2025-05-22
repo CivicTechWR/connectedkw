@@ -22,10 +22,7 @@ const VerificationMessage = () => {
 	}
 }
 
-
-export default function LoginPage() {
-	const [error, setError] = useState(null);
-	const [loading, setLoading] = useState(false);
+const LoginForm = ({ loading,setError, setLoading }) => {
 	const router = useRouter();
 	const searchParams = useSearchParams()
 	const next = searchParams.get('next');
@@ -55,6 +52,80 @@ export default function LoginPage() {
 		setLoading(false);
 
 	}
+
+	return (
+		<div className="flex justify-center items-center">
+			<form className="w-[90%] md:w-[80%] bg-white shadow-md rounded pt-6 px-8 mb-2 md:mb-8 pb-8" onSubmit={handleLogin}>
+				<div className="mb-4">
+					<h2>Login</h2>
+				</div>
+				<VerificationMessage />
+				
+				<div className="mb-4">
+					<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+						Email
+					</label>
+					<input
+						className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+						id="email"
+						type="text"
+						placeholder="janedoe@gmail.com"
+					/>
+				</div>
+				<div className="mb-4 md:mb-6">
+					<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
+						Password
+					</label>
+					<input
+						className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+						id="password"
+						type="password"
+						placeholder="******************"
+					/>
+					{/* The following is the error side. */}
+					{/* <p className="text-red-500 text-xs italic">Enter your password here</p> */}
+				</div>
+				<div className="md:flex md:items-center md:justify-between justify-items-center">
+				{
+						loading ? (
+							<Image src="/loading.svg" width={40} height={40} alt="loading" />
+						) : (
+							<button
+								className="bg-red text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto md:mx-0"
+						type="submit"
+							>
+								Sign In
+							</button>
+						)
+					}
+					<div className="md:flex md:items-center md:justify-between md:gap-3 mt-4">
+						<div className="text-center">
+							<Link
+								className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+								href="/auth/register"
+							>
+								Register
+							</Link>
+						</div>
+						<div  className="text-center">
+							<a
+								className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
+								href="#"
+							>
+								Forgot Password?
+							</a>
+						</div>
+					</div>
+				</div>
+			</form>
+		</div>
+	)
+}
+
+
+export default function LoginPage() {
+	const [error, setError] = useState(null);
+	const [loading, setLoading] = useState(false);
 
 	return (
 		<>
@@ -88,73 +159,9 @@ export default function LoginPage() {
 							/>
 						</video>
 					</div>
-					<div className="flex justify-center items-center">
-						<form className="w-[90%] md:w-[80%] bg-white shadow-md rounded pt-6 px-8 mb-2 md:mb-8 pb-8" onSubmit={handleLogin}>
-							<div className="mb-4">
-								<h2>Login</h2>
-							</div>
-							<Suspense fallback={<div>Loading...</div>}>
-								<VerificationMessage />
-							</Suspense>
-							
-							<div className="mb-4">
-								<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-									Email
-								</label>
-								<input
-									className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-									id="email"
-									type="text"
-									placeholder="janedoe@gmail.com"
-								/>
-							</div>
-							<div className="mb-4 md:mb-6">
-								<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-									Password
-								</label>
-								<input
-									className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-									id="password"
-									type="password"
-									placeholder="******************"
-								/>
-								{/* The following is the error side. */}
-								{/* <p className="text-red-500 text-xs italic">Enter your password here</p> */}
-							</div>
-							<div className="md:flex md:items-center md:justify-between justify-items-center">
-							{
-									loading ? (
-										<Image src="/loading.svg" width={40} height={40} alt="loading" />
-									) : (
-										<button
-											className="bg-red text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto md:mx-0"
-									type="submit"
-										>
-											Sign In
-										</button>
-									)
-								}
-								<div className="md:flex md:items-center md:justify-between md:gap-3 mt-4">
-									<div className="text-center">
-										<Link
-											className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-											href="/auth/register"
-										>
-											Register
-										</Link>
-									</div>
-									<div  className="text-center">
-										<a
-											className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
-											href="#"
-										>
-											Forgot Password?
-										</a>
-									</div>
-								</div>
-							</div>
-						</form>
-					</div>
+					<Suspense fallback={<div>Loading...</div>}>
+						<LoginForm loading={loading} setError={setError} setLoading={setLoading} />
+					</Suspense>
 				</div>
 			</Section>
 		</>
