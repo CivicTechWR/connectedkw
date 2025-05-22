@@ -27,7 +27,7 @@ export default function EventSuccessPage() {
           </h1>
           
           <p className="text-gray-600 mb-8">
-            We've sent you a verification email. Please check your inbox and click the link to verify your account.
+            {`We've sent you a verification email. Please check your inbox and click the link to verify your account.`}
           </p>
 
           <div className="flex justify-center items-center flex-col sm:flex-row gap-4">
