@@ -5,6 +5,7 @@ import NavigationHeader from 'components/layout/NavigationHeader'
 import Footer from 'components/layout/Footer'
 import Script from 'next/script'
 import PlausibleProvider from 'next-plausible'
+import InfoNotification from 'components/notifications/InfoNotification'
 
 import '../styles/globals.css'
 
@@ -63,16 +64,17 @@ export default function RootLayout({
       <html lang="en">
         <Script src="https://kit.fontawesome.com/231142308d.js" async crossOrigin="anonymous"></Script>
         <PlausibleProvider domain="connectedkw.com">
-          <body className={`${slackey.variable}`}>
+          <body className={`${slackey.variable}`} position="relative">
               <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
-                <NavigationHeader />
-                    <main className={`flex-auto snap-y`}>
+                <AuthProvider>
+                  <NavigationHeader />
+                  <InfoNotification />
+                  <main className="flex-auto snap-y">
+                    {children}
+                  </main>
+                  <Footer />
+                </AuthProvider>
 
-                        {children}
-
-                    </main>
-
-                <Footer />
             </div>
           </body>
         </PlausibleProvider>
