@@ -31,9 +31,8 @@ export default function InfoNotification() {
       const infoMessage = generateMessage(info, session)
       setMessage(infoMessage)
 
-      // const timer = setTimeout(() => setShow(false), 5000)
-
-      // return () => clearTimeout(timer)
+      const timer = setTimeout(() => setShow(false), 5000)
+      return () => clearTimeout(timer)
     }
   }, [info, session])
 
@@ -42,8 +41,8 @@ export default function InfoNotification() {
 
   return (
     <div
-      className={`fixed top-20 left-1/2 transform -translate-x-1/2 z-[1000] transition-opacity duration-500 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        } w-xl px-4`}
+      className={`fixed top-6 left-1/2 transform -translate-x-1/2 z-[1000] transition-opacity duration-500 ${show ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        } w-full lg:w-1/2 px-4`}
     >
       <div className="flex items-center justify-between bg-yellow text-black px-4 py-2 rounded-md shadow-md w-full">
         <div className="flex items-center">
