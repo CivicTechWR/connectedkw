@@ -15,9 +15,7 @@ export default async function NavigationHeader() {
             <div className="container max-w-screen-xl mx-auto px-5 flex justify-between items-center text-black max-sm:text-sm">
                 <div className="flex gap-4 lg:gap-6 items-center">
                     <Link href="/">
-                        <Link href="/">
-                            <Image src="/icon-03.svg" height="80" width="80" alt="Connected KW" />
-                        </Link>
+                        <Image src="/icon-03.svg" height="80" width="80" alt="Connected KW" />
                     </Link>
                 </div>
                 <div className="flex gap-4 lg:gap-6 items-center">
