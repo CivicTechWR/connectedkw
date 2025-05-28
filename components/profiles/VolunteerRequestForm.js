@@ -143,11 +143,10 @@ const VolunteerRequestForm = () => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${
-                errors.name
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${errors.name
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
-              }`}
+                }`}
             />
             {errors.name && (
               <p className="text-red-500 text-sm mt-1">{errors.name}</p>
@@ -164,11 +163,10 @@ const VolunteerRequestForm = () => {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${
-                errors.email
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${errors.email
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
-              }`}
+                }`}
             />
             {errors.email && (
               <p className="text-red-500 text-sm mt-1">{errors.email}</p>
@@ -198,11 +196,10 @@ const VolunteerRequestForm = () => {
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className={`w-full shadow appearance-none border flex-1 py-2 px-3 h-32 text-black focus:outline-none focus:shadow-outline ${
-                errors.description
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 h-32 text-black focus:outline-none focus:shadow-outline ${errors.description
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
-              }`}
+                }`}
             />
             {errors.description && (
               <p className="text-red-500 text-sm mt-1">{errors.description}</p>
