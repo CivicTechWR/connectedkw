@@ -13,12 +13,12 @@ const options = [
 
 const VolunteerRequestForm = () => {
   const [formData, setFormData] = useState({
-    knowsVolunteer: '',
     name: '',
     email: '',
     description: '',
   });
   const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
   const [notification, setNotification] = useState({
     type: null, // 'error', 'success', 'info'
     message: '',
@@ -43,10 +43,6 @@ const VolunteerRequestForm = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.knowsVolunteer) {
-      newErrors.knowsVolunteer = 'Please select if you know your volunteer.';
-    }
-
     if (!formData.name.trim()) {
       newErrors.name = 'Please enter your name.';
     }
@@ -66,8 +62,10 @@ const VolunteerRequestForm = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setErrors({});
 
     // Validate form
     if (!validateForm()) {
@@ -79,8 +77,32 @@ const VolunteerRequestForm = () => {
       return;
     }
 
-    // submit the data here...
-    // to do
+    try {
+      const res = await fetch("/api/requests", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          ...formData,
+        }),
+      });
+
+      if (!res.ok) {
+        throw new Error("Failed to create volunteer request");
+      }
+
+      const { id } = await res.json();
+      router.push(`/requests/${id}`);
+    } catch (error) {
+      setNotification({
+        type: 'error',
+        message: error.message,
+        show: true,
+      });
+    } finally {
+      setLoading(false);
+    }
 
     // Show success notification
     setNotification({
@@ -91,7 +113,6 @@ const VolunteerRequestForm = () => {
 
     // Reset form
     setFormData({
-      knowsVolunteer: '',
       name: '',
       email: '',
       description: '',
@@ -111,22 +132,6 @@ const VolunteerRequestForm = () => {
       <div className="w-full max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Rest of your form remains the same */}
-          <div className="space-y-2">
-            {' '}
-            <label htmlFor="name" className="text-lg font-medium">
-              Do you know which volunteer you want to work with?
-            </label>
-            <SearchSelect options={options} />
-            <label htmlFor="name" className="text-lg font-medium">
-              Which skills are you looking for?
-            </label>
-            <SearchSelect options={options} />
-            {errors.knowsVolunteer && (
-              <p className="text-red-500 text-sm mt-1">
-                {errors.knowsVolunteer}
-              </p>
-            )}
-          </div>
 
           <div className="space-y-2">
             <label htmlFor="name" className="text-lg font-medium">
@@ -138,7 +143,7 @@ const VolunteerRequestForm = () => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-gray-200 border-0 rounded-md focus:outline-none focus:ring-2 ${
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${
                 errors.name
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
@@ -159,7 +164,7 @@ const VolunteerRequestForm = () => {
               name="email"
               value={formData.email}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-gray-200 border-0 rounded-md focus:outline-none focus:ring-2 ${
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 text-black focus:outline-none focus:shadow-outline ${
                 errors.email
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
@@ -171,16 +176,29 @@ const VolunteerRequestForm = () => {
           </div>
 
           <div className="space-y-2">
+            {' '}
+            <label htmlFor="name" className="text-lg font-medium">
+              Is there a specific volunteer you'd like to connect with?
+            </label>
+            <SearchSelect options={options} />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-lg font-medium">
+              Which skills are you looking for?
+            </label>
+            <SearchSelect options={options} />
+          </div>
+
+          <div className="space-y-2">
             <label htmlFor="description" className="text-lg font-medium">
-              What do you want the volunteer to help you with. Please provide a
-              small description.
+              {`What kind of collaboration are you looking for? Please give us a short description of your needs.`}
             </label>
             <textarea
               id="description"
               name="description"
               value={formData.description}
               onChange={handleInputChange}
-              className={`w-full px-3 py-2 bg-gray-200 border-0 rounded-md resize-none h-32 focus:outline-none focus:ring-2 ${
+              className={`w-full shadow appearance-none border flex-1 py-2 px-3 h-32 text-black focus:outline-none focus:shadow-outline ${
                 errors.description
                   ? 'ring-2 ring-red-500 focus:ring-red-500'
                   : 'focus:ring-blue-500'
@@ -194,7 +212,7 @@ const VolunteerRequestForm = () => {
           <div>
             <button
               type="submit"
-              className="w-40 h-12 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-gray-400 transition-colors"
+              className="btn"
             >
               Submit
             </button>

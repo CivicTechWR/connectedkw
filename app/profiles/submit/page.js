@@ -9,8 +9,10 @@ export default async function Page() {
   return (
     <Section className="bg-slate-100">
       <div>
-        <h1>Create Profile</h1>
-        <p>Share your skills and interests with the Civic Tech WR community</p>
+        <h1 className="text-4 mb-6 md:text-6xl font-title">
+          Create Profile
+        </h1>
+        <p className="text-lg">Share your skills and interests with the Civic Tech WR community</p>
 
         <CreateProfileForm skills={skills} />
       </div>
