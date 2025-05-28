@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Notification from '../notifications/Notifications';
 import Select from 'react-select';
 import SearchSelect from '../search-select/SearchSelect';
@@ -12,6 +13,7 @@ const options = [
 ];
 
 const VolunteerRequestForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -78,10 +80,10 @@ const VolunteerRequestForm = () => {
     }
 
     try {
-      const res = await fetch("/api/requests", {
-        method: "POST",
+      const res = await fetch('/api/requests', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
@@ -89,11 +91,11 @@ const VolunteerRequestForm = () => {
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create volunteer request");
+        throw new Error('Failed to create volunteer request');
       }
 
       const { id } = await res.json();
-      router.push(`/requests/${id}`);
+      router.push(`/profiles/request/success`);
     } catch (error) {
       setNotification({
         type: 'error',
@@ -210,10 +212,7 @@ const VolunteerRequestForm = () => {
           </div>
 
           <div>
-            <button
-              type="submit"
-              className="btn"
-            >
+            <button type="submit" className="btn">
               Submit
             </button>
           </div>
