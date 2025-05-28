@@ -1,28 +1,29 @@
-'use client'
+'use client';
 
-import { useState, useRef } from 'react'
-import { useRouter } from 'next/navigation'
-import Image from 'next/image'
-import TagButton from 'components/TagButton'
-import dynamic from 'next/dynamic'
-const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
-import { uploadImage } from 'integrations/directus'
+import { useState, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import TagButton from 'components/TagButton';
+import dynamic from 'next/dynamic';
+const RichTextEditor = dynamic(() => import('components/RichTextEditor'), {
+  ssr: false,
+});
+import { uploadImage } from 'integrations/directus';
 
 import Select from 'react-select';
 
-import { Suspense } from 'react'
+import { Suspense } from 'react';
 export default function ProfileForm({ skills }) {
-
-  const router = useRouter()
-  const [loading, setLoading] = useState(false)
-  const [error, setError] = useState(null)
-  const [selectedSkills, setSelectedSkills] = useState([])
-  const [fileUploading, setFileUploading] = useState(false)
-  const [imageFile, setImageFile] = useState(null)
-  const [imagePreview, setImagePreview] = useState(null)
-  const bioEditorRef = useRef(null)
-  const interestsEditorRef = useRef(null)
-  const experiencesEditorRef = useRef(null)
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [fileUploading, setFileUploading] = useState(false);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const bioEditorRef = useRef(null);
+  const interestsEditorRef = useRef(null);
+  const experiencesEditorRef = useRef(null);
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -33,8 +34,8 @@ export default function ProfileForm({ skills }) {
     image: null,
     experiences: '',
     skills: [],
-    preferred_contact_method: 'email'
-  })
+    preferred_contact_method: 'email',
+  });
 
   // The following functions takes skills from the directus as input
   // and gives an output for the react-select
@@ -54,21 +55,21 @@ export default function ProfileForm({ skills }) {
   const allSkills = transformSkills(skills);
 
   const handleChange = (e) => {
-    const { name, value } = e.target
-    setFormData(prev => ({
+    const { name, value } = e.target;
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
-    }))
-  }
+      [name]: value,
+    }));
+  };
 
   const handleSkillClick = (skill) => {
-    setSelectedSkills(prev => {
-      const isSelected = prev.some(s => s === skill.id)
+    setSelectedSkills((prev) => {
+      const isSelected = prev.some((s) => s === skill.id);
       return isSelected
-        ? prev.filter(s => s !== skill.id)
-        : [...prev, skill.id]
-    })
-  }
+        ? prev.filter((s) => s !== skill.id)
+        : [...prev, skill.id];
+    });
+  };
 
   // const handleFileChange = async (e) => {
   //   const file = e.target.files[0]
@@ -78,45 +79,44 @@ export default function ProfileForm({ skills }) {
   //   setImagePreview(URL.createObjectURL(file))
   // }
 
-
-  const handleFileChange = async(e) => {
+  const handleFileChange = async (e) => {
     if (e.target.files[0]) {
-      setFileUploading(true)
-      const formData = new FormData()
-      formData.append('file', e.target.files[0], e.target?.files[0]?.name)
-      const result = await uploadImage(formData)
-      
-      setFormData(prev => ({
+      setFileUploading(true);
+      const formData = new FormData();
+      formData.append('file', e.target.files[0], e.target?.files[0]?.name);
+      const result = await uploadImage(formData);
+
+      setFormData((prev) => ({
         ...prev,
-        image: result
-      }))
-      
-      setFileUploading(false)
+        image: result,
+      }));
+
+      setFileUploading(false);
     } else {
-      setFormData(prev => ({
+      setFormData((prev) => ({
         ...prev,
-        image: null
-      }))
+        image: null,
+      }));
     }
-  }
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    setLoading(true)
-    setError(null)
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
 
     try {
       // Upload image if selected
-      let imageId = null
+      let imageId = null;
       if (imageFile) {
-        const formData = new FormData()
-        formData.append('file', imageFile)
+        const formData = new FormData();
+        formData.append('file', imageFile);
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
-          body: formData
-        })
-        const { id } = await uploadRes.json()
-        imageId = id
+          body: formData,
+        });
+        const { id } = await uploadRes.json();
+        imageId = id;
       }
       // Uncomment following line to log the formData
       // console.log(formData);
@@ -125,83 +125,87 @@ export default function ProfileForm({ skills }) {
       const res = await fetch('/api/profiles', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
           //profile_picture: imageId,
-          skills: selectedSkills.map(skillId => ({
-            skills_id: skillId
-          }))
-        })
-      })
+          skills: selectedSkills.map((skillId) => ({
+            skills_id: skillId,
+          })),
+        }),
+      });
 
       if (!res.ok) {
-        throw new Error('Failed to create profile')
+        throw new Error('Failed to create profile');
       }
 
-      const { id } = await res.json()
-      router.push(`/profiles/${id}`)
-
+      const { id } = await res.json();
+      router.push(`/profiles/${id}`);
     } catch (err) {
-      setError(err.message)
+      setError(err.message);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="bg-red-50 text-red-500 p-4 rounded">
-          {error}
-        </div>
+        <div className="bg-red-50 text-red-500 p-4 rounded">{error}</div>
       )}
 
       <div>
-            <label className="block text-sm font-semibold mb-1">
-              Profile Picture
-            </label>
-            {formData.image_url || formData.image ? (
-              <div className="space-y-2">
-                <div className="flex items-center space-x-4">
-                  <img 
-                    src={formData.image_url || `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`} 
-                    alt="Preview" 
-                    className="h-20 w-20 object-cover rounded"
-                  />
-                  <button 
-                    type="button"
-                    onClick={() => setFormData(prev => ({ ...prev, image_url: '', image: null }))}
-                    className="text-blue-600 hover:text-blue-800"
-                  >
-                    Remove and upload different image
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <input
-                  type="file"
-                  onChange={handleFileChange}
-                  accept="image/*"
-                  disabled={fileUploading}
-                  className="block w-full text-sm text-gray-500
+        <label className="block text-sm font-semibold mb-1">
+          Profile Picture
+        </label>
+        {formData.image_url || formData.image ? (
+          <div className="space-y-2">
+            <div className="flex items-center space-x-4">
+              <img
+                src={
+                  formData.image_url ||
+                  `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`
+                }
+                alt="Preview"
+                className="h-20 w-20 object-cover rounded"
+              />
+              <button
+                type="button"
+                onClick={() =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    image_url: '',
+                    image: null,
+                  }))
+                }
+                className="text-blue-600 hover:text-blue-800"
+              >
+                Remove and upload different image
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*"
+              disabled={fileUploading}
+              className="block w-full text-sm text-gray-500
                     file:mr-4 file:py-2 file:px-4
                     file:border-0
                     file:text-sm file:font-semibold
                     file:bg-yellow file:text-black
                     hover:file:bg-black hover:file:text-white
                     disabled:opacity-50"
-                />
-                {fileUploading && (
-                  <div className="text-sm text-gray-600">
-                    Uploading...
-                  </div>
-                )}
-              </div>
+            />
+            {fileUploading && (
+              <div className="text-sm text-gray-600">Uploading...</div>
             )}
           </div>
+        )}
+      </div>
 
       {/* <div>
         <label className="block text-sm font-semibold mb-1">
@@ -285,14 +289,14 @@ export default function ProfileForm({ skills }) {
         <label htmlFor="bio" className="block text-sm font-semibold mb-1">
           Bio*
         </label>
-        <p className="text-sm text-gray-500 mb-2">
-          Tell us about yourself.
-        </p>
-        <div className="border shadow h-48">
+        <p className="text-sm text-gray-500 mb-2">Tell us about yourself.</p>
+        <div className="border shadow h-48 overflow-auto">
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.bio}
-              onBlur={(value) => handleChange({ target: { name: 'bio', value }})}
+              onBlur={(value) =>
+                handleChange({ target: { name: 'bio', value } })
+              }
               ref={bioEditorRef}
               required
             />
@@ -307,11 +311,13 @@ export default function ProfileForm({ skills }) {
         <p className="text-sm text-gray-500 mb-2">
           What are you passionate about?
         </p>
-        <div className="border shadow h-48">
+        <div className="border shadow h-48 overflow-auto">
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.interests}
-              onBlur={(value) => handleChange({ target: { name: 'interests', value }})}
+              onBlur={(value) =>
+                handleChange({ target: { name: 'interests', value } })
+              }
               ref={interestsEditorRef}
             />
           </Suspense>
@@ -319,17 +325,20 @@ export default function ProfileForm({ skills }) {
       </div>
 
       <div>
-        <label htmlFor="experiences" className="block text-sm font-semibold mb-1">
+        <label
+          htmlFor="experiences"
+          className="block text-sm font-semibold mb-1"
+        >
           Unique Experiences
         </label>
-        <p className="text-sm text-gray-500 mb-2">
-          What are you proud of?
-        </p>
-        <div className="border shadow h-48">
+        <p className="text-sm text-gray-500 mb-2">What are you proud of?</p>
+        <div className="border shadow h-48 overflow-auto">
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.experiences}
-              onBlur={(value) => handleChange({ target: { name: 'experiences', value }})}
+              onBlur={(value) =>
+                handleChange({ target: { name: 'experiences', value } })
+              }
               ref={experiencesEditorRef}
             />
           </Suspense>
@@ -337,24 +346,23 @@ export default function ProfileForm({ skills }) {
       </div>
 
       <div>
-        <label className="block text-sm font-semibold mb-1">
-          Skills
-        </label>
+        <label className="block text-sm font-semibold mb-1">Skills</label>
 
         <Select
           isMulti
           name="skills"
           options={allSkills}
-          value={allSkills.filter(skill => formData.skills.includes(skill.id))}
+          value={allSkills.filter((skill) =>
+            formData.skills.includes(skill.id)
+          )}
           onChange={(selectedOptions) => {
-            const ids = selectedOptions.map(option => option.id);
-            setFormData(prev => ({ ...prev, skills: ids }));
+            const ids = selectedOptions.map((option) => option.id);
+            setFormData((prev) => ({ ...prev, skills: ids }));
             setSelectedSkills(ids);
           }}
           className="basic-multi-select"
           classNamePrefix="select"
         />
-
       </div>
 
       <div>
@@ -371,5 +379,5 @@ export default function ProfileForm({ skills }) {
         </button>
       </div>
     </form>
-  )
-} 
+  );
+}
