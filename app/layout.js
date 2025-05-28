@@ -5,6 +5,8 @@ import NavigationHeader from 'components/layout/NavigationHeader'
 import Footer from 'components/layout/Footer'
 import Script from 'next/script'
 import PlausibleProvider from 'next-plausible'
+import InfoNotification from 'components/notifications/InfoNotification'
+import { Suspense } from 'react'
 
 import '../styles/globals.css'
 
@@ -23,12 +25,12 @@ export const metadata = {
     locale: 'en_CA',
     type: 'website',
     images: [
-        {
-            url: 'https://www.connectedkw.com/opengraph-image.png',
-            width: 1200,
-            height: 630,
-            alt: 'Connected KW',
-        },
+      {
+        url: 'https://www.connectedkw.com/opengraph-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Connected KW',
+      },
     ],
   },
   robots: {
@@ -40,7 +42,7 @@ export const metadata = {
       follow: true,
       noimageindex: false
     },
-  },    
+  },
   twitter: {
     card: 'summary_large_image',
     title: 'Connected KW',
@@ -55,30 +57,31 @@ export const viewport = {
 }
 
 export default function RootLayout({
-    // Layouts must accept a children prop.
-    // This will be populated with nested layouts or pages
-    children,
-  }) {
-    return (
-      <html lang="en">
-        <Script src="https://kit.fontawesome.com/231142308d.js" async crossOrigin="anonymous"></Script>
-        <PlausibleProvider domain="connectedkw.com">
-          <body className={`${slackey.variable}`}>
-              <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
-                <NavigationHeader />
-                    <main className={`flex-auto snap-y`}>
+  // Layouts must accept a children prop.
+  // This will be populated with nested layouts or pages
+  children,
+}) {
+  return (
+    <html lang="en">
+      <Script src="https://kit.fontawesome.com/231142308d.js" async crossOrigin="anonymous"></Script>
+      <PlausibleProvider domain="connectedkw.com">
+        <body className={`${slackey.variable}`} position="relative">
+          <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
+            <AuthProvider>
+              <NavigationHeader />
+              <Suspense fallback={null}>
+                <InfoNotification />
+              </Suspense>
+              <main className="flex-auto snap-y">
+                {children}
+              </main>
+              <Footer />
+            </AuthProvider>
+          </div>
+        </body>
+      </PlausibleProvider>
+    </html >
+  )
+}
 
-                        {children}
 
-                    </main>
-
-                <Footer />
-            </div>
-          </body>
-        </PlausibleProvider>
-      </html>
-    )
-  }
-
-
-  
