@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import Section from "components/layout/Section";
 import CreateRequestForm from "components/profiles/CreateRequestForm";
 
@@ -14,5 +15,14 @@ export default async function Page() {
         <CreateRequestForm />
       </div>
     </Section>
+=======
+import VolunteerRequestForm from 'components/profiles/VolunteerRequestForm';
+
+export default function Page() {
+  return (
+    <>
+      <VolunteerRequestForm />
+    </>
+>>>>>>> request-form
   );
 }

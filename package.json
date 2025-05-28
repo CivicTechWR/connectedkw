@@ -68,6 +68,7 @@
   "devDependencies": {
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.3",
+    "prettier": "^3.5.3",
     "supabase": "^1.110.1",
     "tailwindcss": "^4.1.3"
   }
