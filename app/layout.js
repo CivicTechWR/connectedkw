@@ -6,6 +6,7 @@ import Footer from 'components/layout/Footer'
 import Script from 'next/script'
 import PlausibleProvider from 'next-plausible'
 import InfoNotification from 'components/notifications/InfoNotification'
+import { Suspense } from 'react'
 
 import '../styles/globals.css'
 
@@ -68,7 +69,9 @@ export default function RootLayout({
           <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
             <AuthProvider>
               <NavigationHeader />
-              <InfoNotification />
+              <Suspense fallback={null}>
+                <InfoNotification />
+              </Suspense>
               <main className="flex-auto snap-y">
                 {children}
               </main>
@@ -77,7 +80,7 @@ export default function RootLayout({
           </div>
         </body>
       </PlausibleProvider>
-    </html>
+    </html >
   )
 }
 

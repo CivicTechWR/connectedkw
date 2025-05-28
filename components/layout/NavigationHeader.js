@@ -6,6 +6,7 @@ import AuthProvider from 'components/auth/AuthProvider';
 import InfoNotification from 'components/notifications/InfoNotification';
 import AuthButtons from 'components/auth/AuthButtons';
 import NavigationLinks from 'components/layout/NavigationLinks';
+import { Suspense } from 'react';
 
 export default async function NavigationHeader() {
     const session = await getServerSession(options);
@@ -22,7 +23,6 @@ export default async function NavigationHeader() {
                     <NavigationLinks />
                     <AuthProvider session={session}>
                         <AuthButtons />
-                        <InfoNotification />
                     </AuthProvider>
                 </div>
             </div>
