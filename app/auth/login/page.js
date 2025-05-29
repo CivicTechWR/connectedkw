@@ -5,13 +5,13 @@ import Link from "next/link";
 import Section from "components/layout/Section";
 import ErrorNotification from 'components/notifications/ErrorNotification'
 import { useSearchParams, useRouter } from "next/navigation";
-import { useState, Suspense } from "react";	
+import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 
 const VerificationMessage = () => {
 	const searchParams = useSearchParams()
 	const verification = searchParams.get('verification');
-	
+
 	if (verification === "success") {
 		return (
 			<div className="mb-4">
@@ -22,7 +22,7 @@ const VerificationMessage = () => {
 	}
 }
 
-const LoginForm = ({ loading,setError, setLoading }) => {
+const LoginForm = ({ loading, setError, setLoading }) => {
 	const router = useRouter();
 	const searchParams = useSearchParams()
 	const next = searchParams.get('next');
@@ -40,12 +40,12 @@ const LoginForm = ({ loading,setError, setLoading }) => {
 			redirect: false,
 		})
 
-	  
+
 		if (res?.error) {
 			setError(res?.error)
 			setLoading(false)
 		} else {
-			router.push(`${next || "/"}?info=loggedin`)
+			window.location.href = `${next || "/"}?info=loggedin`;
 		}
 
 		e.target.reset();
@@ -60,7 +60,7 @@ const LoginForm = ({ loading,setError, setLoading }) => {
 					<h2>Login</h2>
 				</div>
 				<VerificationMessage />
-				
+
 				<div className="mb-4">
 					<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
 						Email
@@ -86,13 +86,13 @@ const LoginForm = ({ loading,setError, setLoading }) => {
 					{/* <p className="text-red-500 text-xs italic">Enter your password here</p> */}
 				</div>
 				<div className="md:flex md:items-center md:justify-between justify-items-center">
-				{
+					{
 						loading ? (
 							<Image src="/loading.svg" width={40} height={40} alt="loading" />
 						) : (
 							<button
 								className="bg-red text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline mx-auto md:mx-0"
-						type="submit"
+								type="submit"
 							>
 								Sign In
 							</button>
@@ -107,7 +107,7 @@ const LoginForm = ({ loading,setError, setLoading }) => {
 								Register
 							</Link>
 						</div>
-						<div  className="text-center">
+						<div className="text-center">
 							<a
 								className="inline-block align-baseline font-bold text-sm text-blue-500 hover:text-blue-800"
 								href="#"
@@ -130,9 +130,9 @@ export default function LoginPage() {
 	return (
 		<>
 			{error && (
-				<ErrorNotification 
-					message={error} 
-					onClose={() => setError(null)} 
+				<ErrorNotification
+					message={error}
+					onClose={() => setError(null)}
 				/>
 			)}
 			<Section>
