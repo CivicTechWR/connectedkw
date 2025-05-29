@@ -12,7 +12,7 @@ const filterOption = (option, inputValue) => {
   const search = inputValue.toLowerCase();
   return (
     option.label.toLowerCase().includes(search) ||
-    option.data.category.toLowerCase().includes(search)
+    option.data.data.category.toLowerCase().includes(search)
   );
 };
 

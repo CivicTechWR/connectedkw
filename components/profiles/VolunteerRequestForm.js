@@ -1,14 +1,18 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Notification from '../notifications/Notifications';
 import Select from 'react-select';
 import SearchSelect from '../search-select/SearchSelect';
-// Options for the volunteer selection dropdown *to be replaced with api call*
-const options = [
-  { value: 'No preference', label: 'No preference', category: 'volunteer' },
-  { value: 'strawberry', label: 'Strawberry', category: 'icecream' },
-  { value: 'vanilla', label: 'Vanilla', category: 'icecream' },
+
+// Static options for volunteer dropdown (first dropdown)
+const volunteerOptions = [
+  {
+    value: 'No preference',
+    label: 'No preference',
+    data: { category: 'volunteer' },
+  },
+  // Add more volunteers later
 ];
 
 const VolunteerRequestForm = () => {
@@ -16,14 +20,45 @@ const VolunteerRequestForm = () => {
     name: '',
     email: '',
     description: '',
+    preferredVolunteer: null,
+    requiredSkills: [], // Add skills to form data
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
+  const [skills, setSkills] = useState([]); // State for skills
+  const [skillsLoading, setSkillsLoading] = useState(true); // Loading state for skills
   const [notification, setNotification] = useState({
-    type: null, // 'error', 'success', 'info'
+    type: null,
     message: '',
     show: false,
   });
+
+  // Fetch skills on component mount
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setSkillsLoading(true);
+        const response = await fetch('/api/skills');
+        if (!response.ok) {
+          throw new Error('Failed to fetch skills');
+        }
+        const skillsData = await response.json();
+        setSkills(skillsData);
+        // console.log('Fetched skills:', skillsData);
+      } catch (error) {
+        console.error('Error fetching skills:', error);
+        setNotification({
+          type: 'error',
+          message: 'Failed to load skills',
+          show: true,
+        });
+      } finally {
+        setSkillsLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, []);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -38,6 +73,22 @@ const VolunteerRequestForm = () => {
         [name]: '',
       });
     }
+  };
+
+  // Handle volunteer selection (first dropdown)
+  const handleVolunteerChange = (selectedOption) => {
+    setFormData({
+      ...formData,
+      preferredVolunteer: selectedOption,
+    });
+  };
+
+  // Handle skills selection (second dropdown)
+  const handleSkillsChange = (selectedSkills) => {
+    setFormData({
+      ...formData,
+      requiredSkills: selectedSkills || [],
+    });
   };
 
   const validateForm = () => {
@@ -67,33 +118,50 @@ const VolunteerRequestForm = () => {
     setLoading(true);
     setErrors({});
 
-    // Validate form
     if (!validateForm()) {
       setNotification({
         type: 'error',
         message: 'Please fix the errors in the form.',
         show: true,
       });
+      setLoading(false);
       return;
     }
 
     try {
-      const res = await fetch("/api/requests", {
-        method: "POST",
+      const res = await fetch('/api/requests', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
+          preferredVolunteer: formData.preferredVolunteer?.value,
+          requiredSkills: formData.requiredSkills.map((skill) => skill.value), // Send skill IDs
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create volunteer request");
+        throw new Error('Failed to create volunteer request');
       }
 
       const { id } = await res.json();
-      router.push(`/requests/${id}`);
+      // router.push(`/requests/${id}`);
+
+      setNotification({
+        type: 'success',
+        message: 'Your volunteer request has been submitted!',
+        show: true,
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        description: '',
+        preferredVolunteer: null,
+        requiredSkills: [],
+      });
     } catch (error) {
       setNotification({
         type: 'error',
@@ -103,20 +171,6 @@ const VolunteerRequestForm = () => {
     } finally {
       setLoading(false);
     }
-
-    // Show success notification
-    setNotification({
-      type: 'success',
-      message: 'Your volunteer request has been submitted!',
-      show: true,
-    });
-
-    // Reset form
-    setFormData({
-      name: '',
-      email: '',
-      description: '',
-    });
   };
 
   return (
@@ -131,8 +185,6 @@ const VolunteerRequestForm = () => {
 
       <div className="w-full max-w-lg mx-auto">
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Rest of your form remains the same */}
-
           <div className="space-y-2">
             <label htmlFor="name" className="text-lg font-medium">
               Your Name
@@ -175,23 +227,41 @@ const VolunteerRequestForm = () => {
             )}
           </div>
 
+          {/* First dropdown - Volunteers (static for now) */}
           <div className="space-y-2">
-            {' '}
-            <label htmlFor="name" className="text-lg font-medium">
-              {`Is there a specific volunteer you'd like to connect with?`}
+            <label className="text-lg font-medium">
+              Is there a specific volunteer you'd like to connect with?
             </label>
-            <SearchSelect options={options} />
+            <SearchSelect
+              options={volunteerOptions}
+              value={formData.preferredVolunteer}
+              onChange={handleVolunteerChange}
+              placeholder="Search for a volunteer or select 'No preference'"
+            />
           </div>
+
+          {/* Second dropdown - Skills (from database) */}
           <div className="space-y-2">
-            <label htmlFor="name" className="text-lg font-medium">
-              {`Which skills are you looking for?`}
+            <label className="text-lg font-medium">
+              Which skills are you looking for?
             </label>
-            <SearchSelect options={options} />
+            {skillsLoading ? (
+              <div className="text-gray-500">Loading skills...</div>
+            ) : (
+              <SearchSelect
+                options={skills} // Use fetched skills
+                value={formData.requiredSkills}
+                onChange={handleSkillsChange}
+                isMulti // Allow multiple skill selection
+                placeholder="Search for skills or categories"
+              />
+            )}
           </div>
 
           <div className="space-y-2">
             <label htmlFor="description" className="text-lg font-medium">
-              {`What kind of collaboration are you looking for? Please give us a short description of your needs.`}
+              What kind of collaboration are you looking for? Please give us a
+              short description of your needs.
             </label>
             <textarea
               id="description"
@@ -212,9 +282,10 @@ const VolunteerRequestForm = () => {
           <div>
             <button
               type="submit"
-              className="btn"
+              disabled={loading || skillsLoading}
+              className="btn disabled:opacity-50"
             >
-              Submit
+              {loading ? 'Submitting...' : 'Submit'}
             </button>
           </div>
         </form>

@@ -1,14 +1,16 @@
-import Section from 'components/layout/Section'
-import ProfileForm from 'components/profiles/ProfileForm'
-import { getProfileSkills } from 'integrations/directus'
-import { getUser } from 'utils/auth/session'
-import { redirect } from 'next/navigation'
+import Section from 'components/layout/Section';
+import ProfileForm from 'components/profiles/ProfileForm';
+import { getProfileSkills } from 'integrations/directus';
+import { getUser } from 'utils/auth/session';
+import { redirect } from 'next/navigation';
 export default async function NewProfilePage() {
-  const skills = await getProfileSkills()
-  const user = await getUser()
+  const skills = await getProfileSkills();
+  const user = await getUser();
+
+  console.log('skills', skills);
 
   if (!user) {
-    redirect('/auth/login?next=/profiles/new&info=protected')
+    redirect('/auth/login?next=/profiles/new&info=protected');
   }
 
   return (
@@ -27,5 +29,5 @@ export default async function NewProfilePage() {
         <ProfileForm skills={skills} user={user} />
       </Section>
     </>
-  )
-} 
+  );
+}

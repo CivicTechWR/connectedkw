@@ -1,4 +1,4 @@
-"use server";
+'use server';
 
 import {
   createDirectus,
@@ -14,25 +14,25 @@ import {
   uploadFiles,
   importFile,
   createItem,
-} from "@directus/sdk";
+} from '@directus/sdk';
 
-import { revalidatePath } from "next/cache";
+import { revalidatePath } from 'next/cache';
 const directus = createDirectus(process.env.DIRECTUS_URL)
   .with(rest())
   .with(staticToken(process.env.DIRECTUS_TOKEN));
 const client = createDirectus(process.env.DIRECTUS_URL)
-  .with(authentication("json"))
+  .with(authentication('json'))
   .with(rest());
 
-const directusClient = (token = "") => {
+const directusClient = (token = '') => {
   if (token) {
-    return createDirectus(process.env.DIRECTUS_URL ?? "")
+    return createDirectus(process.env.DIRECTUS_URL ?? '')
       .with(staticToken(token))
       .with(rest());
   }
-  return createDirectus(process.env.DIRECTUS_URL ?? "")
+  return createDirectus(process.env.DIRECTUS_URL ?? '')
     .with(
-      authentication("cookie", { credentials: "include", autoRefresh: true })
+      authentication('cookie', { credentials: 'include', autoRefresh: true })
     )
     .with(rest());
 };
@@ -50,15 +50,15 @@ const uploadImage = async (formData) => {
 const getActivities = async (limit = -1, offset = 0) => {
   try {
     const events = await directus.request(
-      readItems("events", {
+      readItems('events', {
         fields:
-          "*,location,location.*,categories.categories_id.*,tags.tags_id.*,image.*",
+          '*,location,location.*,categories.categories_id.*,tags.tags_id.*,image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           classification: {
-            _eq: "activity",
+            _eq: 'activity',
           },
           _and: [
             {
@@ -91,7 +91,7 @@ const getActivities = async (limit = -1, offset = 0) => {
             },
           ],
         },
-        sort: ["starts_at", "ends_at"],
+        sort: ['starts_at', 'ends_at'],
         limit: limit,
       })
     );
@@ -114,15 +114,15 @@ const getActivities = async (limit = -1, offset = 0) => {
 const getEvents = async (limit = -1, offset = 0) => {
   try {
     const events = await directus.request(
-      readItems("events", {
+      readItems('events', {
         fields:
-          "id,slug,featured,title,starts_at,ends_at,external_link,link_text,price,data_source,classification,location_source_text,location,location.name,location.map_point,categories.categories_id.name,categories.categories_id.id,tags.tags_id.id,tags.tags_id.name,image.*",
+          'id,slug,featured,title,starts_at,ends_at,external_link,link_text,price,data_source,classification,location_source_text,location,location.name,location.map_point,categories.categories_id.name,categories.categories_id.id,tags.tags_id.id,tags.tags_id.name,image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           classification: {
-            _eq: "event",
+            _eq: 'event',
           },
           _or: [
             {
@@ -169,7 +169,7 @@ const getEvents = async (limit = -1, offset = 0) => {
             },
           ],
         },
-        sort: ["starts_at"],
+        sort: ['starts_at'],
         limit: limit,
         offset: offset,
       })
@@ -195,11 +195,11 @@ const getEventCategories = async (events) => {
 
   try {
     const result = await directus.request(
-      readItems("categories", {
-        fields: "id,name,description,slug",
+      readItems('categories', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           events: {
             events_id: {
@@ -220,11 +220,11 @@ const getEventCategories = async (events) => {
 const getCategories = async (category_group) => {
   try {
     const result = await directus.request(
-      readItems("categories", {
-        fields: "id,name,description,slug",
+      readItems('categories', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           category_group: {
             group: {
@@ -247,11 +247,11 @@ const getEventTags = async (events) => {
 
   try {
     const result = await directus.request(
-      readItems("tags", {
-        fields: "id,name,description,slug",
+      readItems('tags', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           events: {
             events_id: {
@@ -271,11 +271,11 @@ const getEventTags = async (events) => {
 const getTags = async (tag_group) => {
   try {
     const result = await directus.request(
-      readItems("tags", {
-        fields: "id,name,description,slug",
+      readItems('tags', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           tag_group: {
             group: {
@@ -295,11 +295,11 @@ const getTags = async (tag_group) => {
 const getDataSources = async () => {
   try {
     const result = await directus.request(
-      readItems("data_sources", {
-        fields: "*",
+      readItems('data_sources', {
+        fields: '*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
         },
       })
@@ -315,12 +315,12 @@ const getDataSources = async () => {
 const getEventBySlug = async (slug) => {
   try {
     const events = await directus.request(
-      readItems("events", {
+      readItems('events', {
         fields:
-          "*,location,location.*,categories.categories_id.*,tags.tags_id.*,image.*",
+          '*,location,location.*,categories.categories_id.*,tags.tags_id.*,image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           slug: {
             _eq: slug,
@@ -340,7 +340,7 @@ const getEventBySlug = async (slug) => {
     if (result[0]) {
       return result[0];
     } else {
-      throw Error("No results returned for query");
+      throw Error('No results returned for query');
     }
   } catch (error) {
     console.log({ error });
@@ -351,12 +351,12 @@ const getEventBySlug = async (slug) => {
 const getCollectionBySlug = async (slug) => {
   try {
     const results = await directus.request(
-      readItems("collections", {
+      readItems('collections', {
         fields:
-          "*, events.events_id.*, events.events_id.image.*, points_of_interest.points_of_interest_id.*, points_of_interest.points_of_interest_id.image.*",
+          '*, events.events_id.*, events.events_id.image.*, points_of_interest.points_of_interest_id.*, points_of_interest.points_of_interest_id.image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           slug: {
             _eq: slug,
@@ -378,7 +378,7 @@ const getCollectionBySlug = async (slug) => {
     if (items[0]) {
       return items[0];
     } else {
-      throw Error("No results returned for query");
+      throw Error('No results returned for query');
     }
   } catch (error) {
     console.log({ error });
@@ -389,12 +389,12 @@ const getCollectionBySlug = async (slug) => {
 const getFeaturesByCollection = async (collectionId) => {
   try {
     const features = await directus.request(
-      readItems("points_of_interest", {
+      readItems('points_of_interest', {
         fields:
-          "*,location.*,categories.categories_id.*,tags.tags_id.*,images.directus_files_id.*",
+          '*,location.*,categories.categories_id.*,tags.tags_id.*,images.directus_files_id.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           collections: {
             collections_id: {
@@ -429,11 +429,11 @@ const getFeaturesTags = async (features) => {
 
   try {
     const result = await directus.request(
-      readItems("tags", {
-        fields: "id,name,description,slug",
+      readItems('tags', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           points_of_interest: {
             points_of_interest_id: {
@@ -455,11 +455,11 @@ const getFeaturesCategories = async (features) => {
 
   try {
     const result = await directus.request(
-      readItems("categories", {
-        fields: "id,name,description,slug",
+      readItems('categories', {
+        fields: 'id,name,description,slug',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           points_of_interest: {
             points_of_interest_id: {
@@ -479,17 +479,17 @@ const getFeaturesCategories = async (features) => {
 const getCategoriesByGroup = async (group) => {
   try {
     const result = await directus.request(
-      readItems("categories", {
-        fields: "id,name,description,slug,group,colour",
+      readItems('categories', {
+        fields: 'id,name,description,slug,group,colour',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           category_group: {
             _eq: group,
           },
         },
-        sort: ["sort"],
+        sort: ['sort'],
       })
     );
     return result;
@@ -502,12 +502,12 @@ const getCategoriesByGroup = async (group) => {
 const getPageData = async (slug) => {
   try {
     const result = await directus.request(
-      readItems("pages", {
+      readItems('pages', {
         fields:
-          "*,collection.id,collection.preview,collection.category_group.*,collection.tag_group.*,share_image.*",
+          '*,collection.id,collection.preview,collection.category_group.*,collection.tag_group.*,share_image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           slug: {
             _eq: slug,
@@ -531,17 +531,17 @@ const getPageData = async (slug) => {
 const getPagesByTemplate = async (template) => {
   try {
     const result = await directus.request(
-      readItems("pages", {
-        fields: "slug,title,description,date_created,main_image.*",
+      readItems('pages', {
+        fields: 'slug,title,description,date_created,main_image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           template: {
             _eq: template,
           },
         },
-        sort: ["-date_created"],
+        sort: ['-date_created'],
         limit: -1,
       })
     );
@@ -556,14 +556,14 @@ const getPagesByTemplate = async (template) => {
 const getPages = async () => {
   try {
     const result = await directus.request(
-      readItems("pages", {
-        fields: "slug,title,description,date_created,main_image.*,template",
+      readItems('pages', {
+        fields: 'slug,title,description,date_created,main_image.*,template',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
         },
-        sort: ["-date_created"],
+        sort: ['-date_created'],
         limit: -1,
       })
     );
@@ -578,18 +578,18 @@ const getPages = async () => {
 const getCamps = async () => {
   try {
     const events = await directus.request(
-      readItems("events", {
+      readItems('events', {
         fields:
-          "*,location,location.*,categories.categories_id.name,categories.categories_id.id,tags.tags_id.id,tags.tags_id.name,image.*",
+          '*,location,location.*,categories.categories_id.name,categories.categories_id.id,tags.tags_id.id,tags.tags_id.name,image.*',
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
           classification: {
-            _eq: "camp",
+            _eq: 'camp',
           },
         },
-        sort: ["title"],
+        sort: ['title'],
         limit: -1,
         offset: 0,
       })
@@ -619,16 +619,18 @@ const registerProfile = async (profileData) => {
     console.log(profileData);
     // const cur_user = await directus.user()
     // console.log(cur_user);
-    const result = await directus.request(createItem('profiles', {
-      name: profileData.name,
-      headline: profileData.headline,
-      bio: profileData.bio,
-      skills: profileData.skills,
-      //contact: 
-      profile_picture: profileData.image,
-      status: 'pending',
-      //profile_picture: profileData.profile_picture
-    }));
+    const result = await directus.request(
+      createItem('profiles', {
+        name: profileData.name,
+        headline: profileData.headline,
+        bio: profileData.bio,
+        skills: profileData.skills,
+        //contact:
+        profile_picture: profileData.image,
+        status: 'pending',
+        //profile_picture: profileData.profile_picture
+      })
+    );
     //   image: profileData.title,
     //   description: eventData.description,
     //   starts_at: eventData.starts_at,
@@ -652,7 +654,7 @@ const registerProfile = async (profileData) => {
 export async function registerRequest(requestData) {
   try {
     const result = await directus.request(
-      createItem("requests", {
+      createItem('requests', {
         name: requestData.name,
         email: requestData.email,
         is_known: requestData.is_known,
@@ -702,7 +704,7 @@ const getProfiles = async ({ skillID = -1, slug }) => {
   try {
     //Changed this filter to reference the SKILL ID insteadf of the ID in the junction table
     const filters = {
-      status: { _eq: "public" },
+      status: { _eq: 'public' },
       ...(skillID != -1 && {
         skills: {
           skills_id: {
@@ -716,26 +718,26 @@ const getProfiles = async ({ skillID = -1, slug }) => {
     };
 
     const result = await directus.request(
-      readItems("profiles", {
+      readItems('profiles', {
         fields: [
-          "id",
-          "slug",
-          "city",
-          "is_visible",
-          "is_verified",
-          "name",
-          "headline",
-          "bio",
-          "interests",
-          "experiences",
-          "profile_picture",
-          "preferred_contact_method",
-          "status",
-          "user_created",
-          "skills.*.*",
+          'id',
+          'slug',
+          'city',
+          'is_visible',
+          'is_verified',
+          'name',
+          'headline',
+          'bio',
+          'interests',
+          'experiences',
+          'profile_picture',
+          'preferred_contact_method',
+          'status',
+          'user_created',
+          'skills.*.*',
         ],
         filter: filters,
-        sort: ["name"],
+        sort: ['name'],
         limit: -1,
       })
     );
@@ -743,7 +745,7 @@ const getProfiles = async ({ skillID = -1, slug }) => {
     //console.log(result);
     return result.data || result;
   } catch (error) {
-    console.error("Error fetching profiles:", error);
+    console.error('Error fetching profiles:', error);
     return [];
   }
 };
@@ -751,14 +753,31 @@ const getProfiles = async ({ skillID = -1, slug }) => {
 const getProfileSkills = async () => {
   try {
     const result = await directus.request(
-      readItems("skills", {
-        fields: "id,name",
-        sort: ["id"],
+      readItems('skill_categories', {
+        fields: 'name,skills.*', // Get skills with their details, not just IDs
+        sort: ['name'],
         limit: -1,
       })
     );
 
-    return result;
+    // Transform the data to flatten skills with their categories
+    const formattedSkills = [];
+
+    result.forEach((category) => {
+      if (category.skills && Array.isArray(category.skills)) {
+        category.skills.forEach((skill) => {
+          formattedSkills.push({
+            value: skill.id || skill, // Use skill ID if available
+            label: skill.name || skill, // Use skill name if available, fallback to skill itself
+            data: {
+              category: category.name, // Category name for searching
+            },
+          });
+        });
+      }
+    });
+
+    return formattedSkills;
   } catch (error) {
     console.log({ error });
     return [];
@@ -804,8 +823,8 @@ const getProfileSkills = async () => {
 const searchVenues = async (query) => {
   try {
     const locations = await directus.request(
-      readItems("locations", {
-        fields: ["id"],
+      readItems('locations', {
+        fields: ['id'],
         search: query,
         limit: 1,
       })
@@ -821,18 +840,18 @@ const searchVenues = async (query) => {
 export async function getMapList() {
   try {
     const maps = await directus.request(
-      readItems("maps", {
-        sort: ["title"],
+      readItems('maps', {
+        sort: ['title'],
         filter: {
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
         },
       })
     );
     return maps;
   } catch (error) {
-    console.error("Error fetching maps:", error);
+    console.error('Error fetching maps:', error);
     return [];
   }
 }
@@ -840,13 +859,13 @@ export async function getMapList() {
 export async function getMapBySlug(slug) {
   try {
     const maps = await directus.request(
-      readItems("maps", {
+      readItems('maps', {
         filter: {
           slug: {
             _eq: slug,
           },
           status: {
-            _eq: "published",
+            _eq: 'published',
           },
         },
         limit: 1,
@@ -854,18 +873,18 @@ export async function getMapBySlug(slug) {
     );
     return maps?.[0] || null;
   } catch (error) {
-    console.error("Error fetching map:", error);
+    console.error('Error fetching map:', error);
     return null;
   }
 }
 
 const getEventById = async (id) => {
-  const event = await directus.request(readItem("events", id));
+  const event = await directus.request(readItem('events', id));
   return event;
 };
 
 const updateEvent = async (id, data) => {
-  const event = await directus.request(updateItem("events", id, data));
+  const event = await directus.request(updateItem('events', id, data));
   return event;
 };
 
@@ -886,8 +905,8 @@ const importImage = async (url, title) => {
 
 const searchLocation = async (locationText) => {
   const locations = await directus.request(
-    readItems("locations", {
-      fields: ["id"],
+    readItems('locations', {
+      fields: ['id'],
       search: locationText,
       limit: 1,
     })
@@ -908,7 +927,7 @@ const createEvent = async (eventData) => {
       eventData.location_source_text,
     ]
       .filter(Boolean)
-      .join(", ");
+      .join(', ');
     const locationId = await searchLocation(locationText);
 
     if (locationId) {
@@ -922,7 +941,7 @@ const createEvent = async (eventData) => {
     const image = await importImage(eventData.image_url, eventData.title);
 
     const event = await directus.request(
-      createItem("events", {
+      createItem('events', {
         title: eventData.title,
         description: eventData.description,
         starts_at: eventData.starts_at,
@@ -930,17 +949,17 @@ const createEvent = async (eventData) => {
         location: eventData.location,
         location_source_text: eventData.location_source_text,
         external_link: eventData.external_link || eventData.url || null,
-        link_text: eventData.link_text || "Event page",
+        link_text: eventData.link_text || 'Event page',
         price: eventData.price,
         data_source: eventData.data_source || null,
         image: eventData.image ? eventData.image : image?.id || null,
         image_url: eventData.image_url,
         tags: eventData.tags,
-        status: eventData.status || "draft",
+        status: eventData.status || 'draft',
       })
     );
 
-    revalidatePath("/events");
+    revalidatePath('/events');
     return event;
   } catch (error) {
     console.log(error.errors);
