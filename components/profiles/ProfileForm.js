@@ -141,7 +141,7 @@ export default function ProfileForm({ skills }) {
       }
 
       const { id } = await res.json();
-      router.push(`/profiles/${id}`);
+      router.push(`/profiles`);
     } catch (err) {
       setError(err.message);
     } finally {
