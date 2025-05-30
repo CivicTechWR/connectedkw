@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Notification from '../notifications/Notifications';
 import Select from 'react-select';
 import SearchSelect from '../search-select/SearchSelect';
@@ -16,6 +17,7 @@ const volunteerOptions = [
 ];
 
 const VolunteerRequestForm = () => {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -146,22 +148,22 @@ const VolunteerRequestForm = () => {
       }
 
       const { id } = await res.json();
-      // router.push(`/requests/${id}`);
+      router.push(`/profiles/request/success`);
 
-      setNotification({
-        type: 'success',
-        message: 'Your volunteer request has been submitted!',
-        show: true,
-      });
+      // setNotification({
+      //   type: 'success',
+      //   message: 'Your volunteer request has been submitted!',
+      //   show: true,
+      // });
 
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        description: '',
-        preferredVolunteer: null,
-        requiredSkills: [],
-      });
+      // // Reset form
+      // setFormData({
+      //   name: '',
+      //   email: '',
+      //   description: '',
+      //   preferredVolunteer: null,
+      //   requiredSkills: [],
+      // });
     } catch (error) {
       setNotification({
         type: 'error',
@@ -280,12 +282,8 @@ const VolunteerRequestForm = () => {
           </div>
 
           <div>
-            <button
-              type="submit"
-              disabled={loading || skillsLoading}
-              className="btn disabled:opacity-50"
-            >
-              {loading ? 'Submitting...' : 'Submit'}
+            <button type="submit" className="btn">
+              Submit
             </button>
           </div>
         </form>
