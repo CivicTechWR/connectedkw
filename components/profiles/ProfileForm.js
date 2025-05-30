@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import TagButton from 'components/TagButton';
@@ -9,6 +9,7 @@ const RichTextEditor = dynamic(() => import('components/RichTextEditor'), {
   ssr: false,
 });
 import { uploadImage } from 'integrations/directus';
+import SearchSelect from 'components/search-select/SearchSelect';
 
 import Select from 'react-select';
 
@@ -24,6 +25,8 @@ export default function ProfileForm({ skills }) {
   const bioEditorRef = useRef(null);
   const interestsEditorRef = useRef(null);
   const experiencesEditorRef = useRef(null);
+  const [skillsLoading, setSkillsLoading] = useState(true);
+  const [skillOptions, setSkillOptions] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -37,22 +40,32 @@ export default function ProfileForm({ skills }) {
     preferred_contact_method: 'email',
   });
 
-  // The following functions takes skills from the directus as input
-  // and gives an output for the react-select
-  const transformSkills = (skills) => {
-    const uniqueNames = new Set();
-    return skills
-      .map((item) => {
-        const name = item.name?.trim();
-        if (name && !uniqueNames.has(name)) {
-          uniqueNames.add(name);
-          return { label: name, value: name, id: item.id };
+  // Format skills for SearchSelect on component mount
+  useEffect(() => {
+    if (skills && Array.isArray(skills)) {
+      setSkillOptions(skills);
+      setSkillsLoading(false);
+    } else {
+      // Fallback: fetch skills if not provided as prop
+      const fetchSkills = async () => {
+        try {
+          setSkillsLoading(true);
+          const response = await fetch('/api/skills');
+          if (!response.ok) {
+            throw new Error('Failed to fetch skills');
+          }
+          const skillsData = await response.json();
+          setSkillOptions(skillsData);
+        } catch (error) {
+          console.error('Error fetching skills:', error);
+          setError('Failed to load skills');
+        } finally {
+          setSkillsLoading(false);
         }
-        return null;
-      })
-      .filter(Boolean); // remove nulls
-  };
-  const allSkills = transformSkills(skills);
+      };
+      fetchSkills();
+    }
+  }, [skills]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -62,22 +75,9 @@ export default function ProfileForm({ skills }) {
     }));
   };
 
-  const handleSkillClick = (skill) => {
-    setSelectedSkills((prev) => {
-      const isSelected = prev.some((s) => s === skill.id);
-      return isSelected
-        ? prev.filter((s) => s !== skill.id)
-        : [...prev, skill.id];
-    });
+  const handleSkillsChange = (selectedSkills) => {
+    setSelectedSkills(selectedSkills || []);
   };
-
-  // const handleFileChange = async (e) => {
-  //   const file = e.target.files[0]
-  //   if (!file) return
-
-  //   setImageFile(file)
-  //   setImagePreview(URL.createObjectURL(file))
-  // }
 
   const handleFileChange = async (e) => {
     if (e.target.files[0]) {
@@ -118,8 +118,6 @@ export default function ProfileForm({ skills }) {
         const { id } = await uploadRes.json();
         imageId = id;
       }
-      // Uncomment following line to log the formData
-      // console.log(formData);
 
       // Create profile
       const res = await fetch('/api/profiles', {
@@ -129,9 +127,8 @@ export default function ProfileForm({ skills }) {
         },
         body: JSON.stringify({
           ...formData,
-          //profile_picture: imageId,
-          skills: selectedSkills.map((skillId) => ({
-            skills_id: skillId,
+          skills: selectedSkills.map((skill) => ({
+            skills_id: skill.value, // Extract skill ID from SearchSelect format
           })),
         }),
       });
@@ -206,38 +203,6 @@ export default function ProfileForm({ skills }) {
           </div>
         )}
       </div>
-
-      {/* <div>
-        <label className="block text-sm font-semibold mb-1">
-          Profile Picture
-        </label>
-        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-          <div className="w-24 h-24 aspect-square shrink-0 relative rounded-full overflow-hidden bg-gray-100">
-            {imagePreview ? (
-              <Image
-                src={imagePreview}
-                alt="Profile preview"
-                fill
-                className="object-cover"
-              />
-            ) : (
-              <div className="w-full h-full bg-gray-200" />
-            )}
-          </div>
-          <input
-            type="file"
-            onChange={handleFileChange}
-            accept="image/*"
-            className="block w-full text-sm text-gray-500
-                    file:mr-4 file:py-2 file:px-4
-                    file:border-0
-                    file:text-sm file:font-semibold
-                    file:bg-yellow file:text-black
-                    hover:file:bg-black hover:file:text-white
-                    disabled:opacity-50"
-          />
-        </div>
-      </div> */}
 
       <div>
         <label htmlFor="name" className="block text-sm font-semibold mb-1">
@@ -347,22 +312,17 @@ export default function ProfileForm({ skills }) {
 
       <div>
         <label className="block text-sm font-semibold mb-1">Skills</label>
-
-        <Select
-          isMulti
-          name="skills"
-          options={allSkills}
-          value={allSkills.filter((skill) =>
-            formData.skills.includes(skill.id)
-          )}
-          onChange={(selectedOptions) => {
-            const ids = selectedOptions.map((option) => option.id);
-            setFormData((prev) => ({ ...prev, skills: ids }));
-            setSelectedSkills(ids);
-          }}
-          className="basic-multi-select"
-          classNamePrefix="select"
-        />
+        {skillsLoading ? (
+          <div className="text-gray-500">Loading skills...</div>
+        ) : (
+          <SearchSelect
+            options={skillOptions}
+            value={selectedSkills}
+            onChange={handleSkillsChange}
+            isMulti
+            placeholder="Search for skills..."
+          />
+        )}
       </div>
 
       <div>

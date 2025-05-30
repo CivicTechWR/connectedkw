@@ -5,16 +5,9 @@ import { useRouter } from 'next/navigation';
 import Notification from '../notifications/Notifications';
 import Select from 'react-select';
 import SearchSelect from '../search-select/SearchSelect';
+import { getProfiles } from 'integrations/directus';
 
 // Static options for volunteer dropdown (first dropdown)
-const volunteerOptions = [
-  {
-    value: 'No preference',
-    label: 'No preference',
-    data: { category: 'volunteer' },
-  },
-  // Add more volunteers later
-];
 
 const VolunteerRequestForm = () => {
   const router = useRouter();
@@ -34,6 +27,8 @@ const VolunteerRequestForm = () => {
     message: '',
     show: false,
   });
+  const [volunteerOptions, setVolunteerOptions] = useState([]);
+  const [volunteersLoading, setVolunteersLoading] = useState(true);
 
   // Fetch skills on component mount
   useEffect(() => {
@@ -60,7 +55,41 @@ const VolunteerRequestForm = () => {
     };
 
     fetchSkills();
-  }, []);
+
+    // Fetch volunteers for the first dropdown
+    const fetchProfiles = async () => {
+      try {
+        setVolunteersLoading(true);
+        const profiles = await getProfiles({});
+        console.log('fetched profiles:', profiles);
+
+        // Transform profiles to the format expected by SearchSelect
+        const formattedProfiles = profiles.map((profile) => ({
+          value: profile.id,
+          label: profile.name,
+        }));
+
+        // Add "No preference" option
+        const optionsWithNoPreference = [
+          { value: null, label: 'No preference' },
+          ...formattedProfiles,
+        ];
+
+        setVolunteerOptions(optionsWithNoPreference);
+      } catch (error) {
+        console.error('Error fetching profiles:', error);
+        setNotification({
+          type: 'error',
+          message: 'Failed to load volunteers',
+          show: true,
+        });
+      } finally {
+        setVolunteersLoading(false);
+      }
+    };
+
+    fetchProfiles();
+  }, [skills, volunteerOptions]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

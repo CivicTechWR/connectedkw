@@ -1,31 +1,60 @@
-"use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import SkillEntry from "./SkillFilterWithSearch";
-import Image from "next/image";
+'use client';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import SearchSelect from '../search-select/SearchSelect';
 
 const CreateProfileForm = ({ skills }) => {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [userSkills, setUserSkill] = useState([]);
+  const [userSkills, setUserSkills] = useState([]);
   const [imageFile, setImageFile] = useState(null);
+  const [skillOptions, setSkillOptions] = useState([]);
+  const [skillsLoading, setSkillsLoading] = useState(true);
   const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    headline: "",
-    bio: "",
+    name: '',
+    email: '',
+    headline: '',
+    bio: '',
     skills: [],
-    interests: "",
-    experiences: "",
-    image_url: "",
+    interests: '',
+    experiences: '',
+    image_url: '',
     image: null,
-    city: "",
-    preferred_contact_method: "email",
+    city: '',
+    preferred_contact_method: '',
   });
 
-  const handleSkills = (data) => {
-    setUserSkill(data);
+  // Fetch skills on component mount
+  useEffect(() => {
+    const fetchSkills = async () => {
+      try {
+        setSkillsLoading(true);
+        const response = await fetch('/api/skills');
+        if (!response.ok) {
+          throw new Error('Failed to fetch skills');
+        }
+        const skillsData = await response.json();
+        setSkills(skillsData);
+        // console.log('Fetched skills:', skillsData);
+      } catch (error) {
+        console.error('Error fetching skills:', error);
+        setNotification({
+          type: 'error',
+          message: 'Failed to load skills',
+          show: true,
+        });
+      } finally {
+        setSkillsLoading(false);
+      }
+    };
+
+    fetchSkills();
+  }, [skills]);
+
+  const handleSkillsChange = (selectedSkills) => {
+    setUserSkills(selectedSkills || []);
   };
 
   const handleChange = (e) => {
@@ -35,6 +64,7 @@ const CreateProfileForm = ({ skills }) => {
       [name]: value,
     }));
   };
+
   const handleFileChange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -51,32 +81,32 @@ const CreateProfileForm = ({ skills }) => {
       let imageId = null;
       if (imageFile) {
         const formData = new FormData();
-        formData.append("file", imageFile);
-        const uploadRes = await fetch("/api/upload", {
-          method: "POST",
+        formData.append('file', imageFile);
+        const uploadRes = await fetch('/api/upload', {
+          method: 'POST',
           body: formData,
         });
         const { id } = await uploadRes.json();
         imageId = id;
       }
 
-      //   Create Profile
-      const res = await fetch("/api/profiles", {
-        method: "POST",
+      // Create Profile
+      const res = await fetch('/api/profiles', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           ...formData,
           profile_picture: imageId,
           skills: {
-            skills_id: userSkills,
+            skills_id: userSkills.map((skill) => skill.value), // Extract skill IDs
           },
         }),
       });
 
       if (!res.ok) {
-        throw new Error("Failed to create profile");
+        throw new Error('Failed to create profile');
       }
 
       const { id } = await res.json();
@@ -89,8 +119,8 @@ const CreateProfileForm = ({ skills }) => {
   };
 
   return (
-    <form className="flex flex-col gap-6 my-12" onClick={handleSubmit}>
-      {/* Error */}{" "}
+    <form className="flex flex-col gap-6 my-12" onSubmit={handleSubmit}>
+      {/* Error */}
       {error && (
         <div className="bg-red-50 text-red-500 p-4 rounded">{error}</div>
       )}
@@ -137,7 +167,20 @@ const CreateProfileForm = ({ skills }) => {
         ></textarea>
       </div>
       {/* Skills */}
-      <SkillEntry allSkills={skills} skillHandler={handleSkills} />
+      <div className="flex flex-col">
+        <label className="text-sm">Skills</label>
+        {skillsLoading ? (
+          <div className="text-gray-500">Loading skills...</div>
+        ) : (
+          <SearchSelect
+            options={skills} // Use fetched skills
+            value={formData.requiredSkills}
+            onChange={handleSkillsChange}
+            isMulti // Allow multiple skill selection
+            placeholder="Search for skills or categories"
+          />
+        )}
+      </div>
       {/* Interests */}
       <div className="flex flex-col">
         <label className="text-sm" htmlFor="interests">
@@ -201,14 +244,14 @@ const CreateProfileForm = ({ skills }) => {
           id="contact-method"
           className="border-1 p-2"
           onChange={handleChange}
+          value={formData.preferred_contact_method}
         >
-          <option>Select method of contact</option>
-          <option>Email</option>
-          <option>Mobile</option>
-          <option>Slack</option>
+          <option value="">Select method of contact</option>
+          <option value="Email">Email</option>
+          <option value="Mobile">Mobile</option>
+          <option value="Slack">Slack</option>
         </select>
       </div>
-      {/* Slug - Slug gets created with flow in Directus */}
       {/* Submit */}
       <div className="flex mt-8">
         {!loading ? (
