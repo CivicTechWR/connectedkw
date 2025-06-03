@@ -272,7 +272,7 @@ const VolunteerRequestForm = () => {
           {/* First dropdown - Volunteers (static for now) */}
           <div className="space-y-2">
             <label className="text-lg font-medium">
-              Is there a specific volunteer you'd like to connect with?
+              {`Is there a specific volunteer you'd like to connect with?`}
             </label>
             {volunteersLoading ? (
               <div className="text-gray-500">Loading volunteers...</div>
@@ -289,7 +289,7 @@ const VolunteerRequestForm = () => {
           {/* Second dropdown - Skills (from database) */}
           <div className="space-y-2">
             <label className="text-lg font-medium">
-              Which skills are you looking for?
+              {`Which skills are you looking for?`}
             </label>
             {skillsLoading ? (
               <div className="text-gray-500">Loading skills...</div>
@@ -306,7 +306,7 @@ const VolunteerRequestForm = () => {
 
           <div className="space-y-2">
             <label htmlFor="description" className="text-lg font-medium">
-              What kind of help are you looking for? Tell us about your needs or the project you have in mind.* 
+              {`What kind of help are you looking for? Tell us about your needs or the project you have in mind.* `}
             </label>
             <textarea
               required
