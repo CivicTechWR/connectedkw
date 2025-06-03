@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import TagButton from 'components/TagButton';
 import dynamic from 'next/dynamic';
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), {
   ssr: false,
@@ -11,10 +10,8 @@ const RichTextEditor = dynamic(() => import('components/RichTextEditor'), {
 import { uploadImage } from 'integrations/directus';
 import SearchSelect from 'components/search-select/SearchSelect';
 
-import Select from 'react-select';
-
 import { Suspense } from 'react';
-import { BIO_IS_REQUIRED, INTERESTS_ARE_REQUIRED, EXPERIENCES_ARE_REQUIRED } from './constants';
+import { BIO_IS_REQUIRED, INTERESTS_ARE_REQUIRED } from './constants';
 
 export default function ProfileForm({ skills }) {
   const router = useRouter();
@@ -32,7 +29,6 @@ export default function ProfileForm({ skills }) {
   // To track if RichTextEditor fields have been touched by the user
   const [isBioTouched, setIsBioTouched] = useState(false);
   const [isInterestsTouched, setIsInterestsTouched] = useState(false);
-  const [isExperiencesTouched, setIsExperiencesTouched] = useState(false);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -40,11 +36,9 @@ export default function ProfileForm({ skills }) {
     headline: '',
     bio: '',
     interests: '',
-    image_url: '',
-    image: null,
+    profile_picture: null,
     experiences: '',
     skills: [],
-    preferred_contact_method: 'email',
   });
 
   // Format skills for SearchSelect on component mount
@@ -82,6 +76,29 @@ export default function ProfileForm({ skills }) {
     }));
   };
 
+  const handleBioChange = (e) => {
+    const content = bioEditorRef.current.getMarkdown()
+    setFormData(prev => ({
+      ...prev,
+      bio: content
+    }))
+  }
+
+  const handleInterestsChange = (e) => {  
+    const content = interestsEditorRef.current.getMarkdown()
+    setFormData(prev => ({
+      ...prev,
+      interests: content
+    }))
+  }
+
+  const handleExperiencesChange = (e) => {
+    const content = experiencesEditorRef.current.getMarkdown()
+    setFormData(prev => ({
+      ...prev,
+      experiences: content
+    }))
+  }
   const handleSkillsChange = (selectedSkills) => {
     setSelectedSkills(selectedSkills || []);
   };
@@ -95,14 +112,14 @@ export default function ProfileForm({ skills }) {
 
       setFormData((prev) => ({
         ...prev,
-        image: result,
+        profile_picture: result,
       }));
 
       setFileUploading(false);
     } else {
       setFormData((prev) => ({
         ...prev,
-        image: null,
+        profile_picture: null,
       }));
     }
   };
@@ -136,15 +153,6 @@ export default function ProfileForm({ skills }) {
       setError(null);
     }
 
-    // Experiences validation
-    if (!formData.experiences) {
-      setError(EXPERIENCES_ARE_REQUIRED);
-      setIsExperiencesTouched(true); // Force experiences warning to show on submit attempt
-      hasCustomValidationError = true;
-    } else if (error === EXPERIENCES_ARE_REQUIRED) { // Clear experiences error if now valid
-      setError(null);
-    }
-
     if (hasCustomValidationError) {
       return; // Stop submission if any custom validation fails
     }
@@ -168,6 +176,7 @@ export default function ProfileForm({ skills }) {
       }
 
       // Create profile
+      console.log({formData})
       const res = await fetch('/api/profiles', {
         method: 'POST',
         headers: {
@@ -185,8 +194,9 @@ export default function ProfileForm({ skills }) {
         throw new Error('Failed to create profile');
       }
 
-      const { id } = await res.json();
-      router.push(`/profiles`);
+      const { slug } = await res.json();
+      console.log('Profile created successfully');
+      router.push(`/profiles/success`);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -199,8 +209,7 @@ export default function ProfileForm({ skills }) {
       {/* General error message at the top, ensuring it doesn't conflict with specific field errors */}
       {error &&
         error !== BIO_IS_REQUIRED &&
-        error !== INTERESTS_ARE_REQUIRED &&
-        error !== EXPERIENCES_ARE_REQUIRED && (
+        error !== INTERESTS_ARE_REQUIRED && (
           <div className="bg-red-50 text-red-500 p-4 rounded">
             {error}
           </div>
@@ -210,13 +219,12 @@ export default function ProfileForm({ skills }) {
         <label className="block text-sm font-semibold mb-1">
           Profile Picture
         </label>
-        {formData.image_url || formData.image ? (
+        {formData.profile_picture ? (
           <div className="space-y-2">
             <div className="flex items-center space-x-4">
               <img
                 src={
-                  formData.image_url ||
-                  `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.image.id}`
+                  `${process.env.NEXT_PUBLIC_DIRECTUS_URL}/assets/${formData.profile_picture.id}`
                 }
                 alt="Preview"
                 className="h-20 w-20 object-cover rounded"
@@ -226,8 +234,7 @@ export default function ProfileForm({ skills }) {
                 onClick={() =>
                   setFormData((prev) => ({
                     ...prev,
-                    image_url: '',
-                    image: null,
+                    profile_picture: null,
                   }))
                 }
                 className="text-blue-600 hover:text-blue-800"
@@ -316,8 +323,8 @@ export default function ProfileForm({ skills }) {
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.bio}
-              onBlur={(value) => {
-                handleChange({ target: { name: 'bio', value } });
+              onBlur={() => {
+                handleBioChange()
                 setIsBioTouched(true);
               }}
               ref={bioEditorRef}
@@ -331,7 +338,7 @@ export default function ProfileForm({ skills }) {
           Interests*
         </label>
         <p className="text-sm text-gray-500 mb-2">
-          What are you passionate about?
+         {`What lights you up? Is there a cause you're interested in or something you'd like to learn more about?`}
         </p>
         <div
           className={`border shadow h-48 overflow-auto ${
@@ -342,8 +349,8 @@ export default function ProfileForm({ skills }) {
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.interests}
-              onBlur={(value) => {
-                handleChange({ target: { name: 'interests', value } });
+              onBlur={() => {
+                handleInterestsChange()
                 setIsInterestsTouched(true); // Mark as touched on blur
               }}
               ref={interestsEditorRef}
@@ -359,22 +366,16 @@ export default function ProfileForm({ skills }) {
         >
           Unique Experiences
         </label>
-        <p className="text-sm text-gray-500 mb-2">What are you proud of?</p>
+        <p className="text-sm text-gray-500 mb-2">
+          {`Do you have any unique experiences you'd like to share? They don't need to be professional or volunteer experiences, it can be anything that you think is worth sharing.`}
+        </p>
         <div
-          className={`border shadow h-48 overflow-auto ${
-            // Apply red border if experiences are empty AND has been touched
-            isExperiencesTouched && !formData.experiences
-              ? 'border-red-500'
-              : ''
-            }`}
+          className={`border shadow h-48 overflow-auto`}
         >
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.experiences}
-              onBlur={(value) => {
-                handleChange({ target: { name: 'experiences', value } });
-                setIsExperiencesTouched(true); // Mark as touched on blur
-              }}
+              onBlur={handleExperiencesChange}
               ref={experiencesEditorRef}
             />
           </Suspense>

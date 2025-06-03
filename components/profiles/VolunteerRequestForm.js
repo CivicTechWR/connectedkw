@@ -15,8 +15,8 @@ const VolunteerRequestForm = () => {
     name: '',
     email: '',
     description: '',
-    preferredVolunteer: null,
-    requiredSkills: [], // Add skills to form data
+    profile_requested: null,
+    skills_requested: [], // Add skills to form data
   });
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
@@ -32,6 +32,9 @@ const VolunteerRequestForm = () => {
 
   // Fetch skills on component mount
   useEffect(() => {
+    if (skills.length > 0) {
+      return;
+    }
     const fetchSkills = async () => {
       try {
         setSkillsLoading(true);
@@ -53,11 +56,13 @@ const VolunteerRequestForm = () => {
         setSkillsLoading(false);
       }
     };
-
     fetchSkills();
 
     // Fetch volunteers for the first dropdown
     const fetchProfiles = async () => {
+      if (volunteerOptions.length > 0) {
+        return;
+      }
       try {
         setVolunteersLoading(true);
         const profiles = await getProfiles({});
@@ -110,7 +115,7 @@ const VolunteerRequestForm = () => {
   const handleVolunteerChange = (selectedOption) => {
     setFormData({
       ...formData,
-      preferredVolunteer: selectedOption,
+      profile_requested: selectedOption,
     });
   };
 
@@ -118,7 +123,7 @@ const VolunteerRequestForm = () => {
   const handleSkillsChange = (selectedSkills) => {
     setFormData({
       ...formData,
-      requiredSkills: selectedSkills || [],
+      skills_requested: selectedSkills || [],
     });
   };
 
@@ -160,21 +165,25 @@ const VolunteerRequestForm = () => {
     }
 
     try {
+      const body = {
+        ...formData,
+        profile_requested: formData.profile_requested?.value,
+        skills_requested: formData.skills_requested.map((skill) => ({ skills_id: skill.value})), // Send skill IDs
+      }
+      console.log('body:', body);
       const res = await fetch('/api/requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ...formData,
-          preferredVolunteer: formData.preferredVolunteer?.value,
-          requiredSkills: formData.requiredSkills.map((skill) => skill.value), // Send skill IDs
-        }),
+        body: JSON.stringify(body),
       });
 
       if (!res.ok) {
         throw new Error('Failed to create volunteer request');
       }
+
+      console.log('res:', res);
 
       const { id } = await res.json();
       router.push(`/profiles/request/success`);
@@ -218,9 +227,10 @@ const VolunteerRequestForm = () => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
             <label htmlFor="name" className="text-lg font-medium">
-              Your Name
+              Your Name*
             </label>
             <input
+              required
               type="text"
               id="name"
               name="name"
@@ -239,9 +249,10 @@ const VolunteerRequestForm = () => {
 
           <div className="space-y-2">
             <label htmlFor="email" className="text-lg font-medium">
-              Your Email
+              Your Email*
             </label>
             <input
+              required
               type="email"
               id="email"
               name="email"
@@ -263,12 +274,16 @@ const VolunteerRequestForm = () => {
             <label className="text-lg font-medium">
               Is there a specific volunteer you'd like to connect with?
             </label>
-            <SearchSelect
-              options={volunteerOptions}
-              value={formData.preferredVolunteer}
-              onChange={handleVolunteerChange}
-              placeholder="Search for a volunteer or select 'No preference'"
-            />
+            {volunteersLoading ? (
+              <div className="text-gray-500">Loading volunteers...</div>
+            ) : (
+              <SearchSelect
+                options={volunteerOptions}
+                value={formData.profile_requested}
+                onChange={handleVolunteerChange}
+                placeholder="Search for a volunteer or select 'No preference'"
+              />
+            )}
           </div>
 
           {/* Second dropdown - Skills (from database) */}
@@ -281,7 +296,7 @@ const VolunteerRequestForm = () => {
             ) : (
               <SearchSelect
                 options={skills} // Use fetched skills
-                value={formData.requiredSkills}
+                value={formData.skills_requested}
                 onChange={handleSkillsChange}
                 isMulti // Allow multiple skill selection
                 placeholder="Search for skills or categories"
@@ -291,10 +306,10 @@ const VolunteerRequestForm = () => {
 
           <div className="space-y-2">
             <label htmlFor="description" className="text-lg font-medium">
-              What kind of collaboration are you looking for? Please give us a
-              short description of your needs.
+              What kind of help are you looking for? Tell us about your needs or the project you have in mind.* 
             </label>
             <textarea
+              required
               id="description"
               name="description"
               value={formData.description}

@@ -5,7 +5,7 @@ import { registerProfile } from 'integrations/directus'
 export async function POST(request) {
   try {
     const profileData = await request.json();
-    //console.log(profileData);
+    console.log(profileData);
 
     const result = await registerProfile(profileData);
     // console.log(result);

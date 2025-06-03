@@ -11,8 +11,8 @@ export default function SkillFilter({ skills, selectedSkill, onChange }) {
       >
         <option value="">All skills</option>
         {skills.map((skill) => (
-          <option key={`${skill.id}skill`} value={skill.id}>
-            {skill.name}
+          <option key={`${skill.value}skill`} value={skill.value}>
+            {skill.label}
           </option>
         ))}
       </select>

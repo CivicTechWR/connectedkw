@@ -16,6 +16,9 @@ import {
   createItem,
 } from '@directus/sdk';
 
+import { getServerSession } from "next-auth"
+import { options } from "utils/auth/options"
+
 import { revalidatePath } from 'next/cache';
 const directus = createDirectus(process.env.DIRECTUS_URL)
   .with(rest())
@@ -611,41 +614,25 @@ const getCamps = async () => {
 };
 
 const registerProfile = async (profileData) => {
-  //console.log(profileData);
-
-  //const image = await importImage(profileData.profile_picture, profileData.title);
+  const session = await getServerSession(options)
+  const api = directusClient(session?.access_token)
 
   try {
-    console.log(profileData);
-    // const cur_user = await directus.user()
-    // console.log(cur_user);
-    const result = await directus.request(
+    const result = await api.request(
       createItem('profiles', {
         name: profileData.name,
         headline: profileData.headline,
+        city: profileData.city,
         bio: profileData.bio,
+        interests: profileData.interests,
+        experiences: profileData.experiences,
         skills: profileData.skills,
-        //contact:
-        profile_picture: profileData.image,
+        profile_picture: profileData.profile_picture ? profileData.profile_picture.id : null,
         status: 'pending',
-        //profile_picture: profileData.profile_picture
       })
     );
-    //   image: profileData.title,
-    //   description: eventData.description,
-    //   starts_at: eventData.starts_at,
-    //   ends_at: eventData.ends_at || null,
-    //   location: eventData.location,
-    //   location_source_text: eventData.location_source_text,
-    //   external_link: eventData.external_link || eventData.url || null,
-    //   link_text: eventData.link_text || "Event page",
-    //   price: eventData.price,
-    //   data_source: eventData.data_source || null,
-    //   image: eventData.image ? eventData.image : image?.id || null,
-    //   image_url: eventData.image_url,
-    //   tags: eventData.tags,
-    //   status: eventData.status || 'draft',
-    // }))
+    console.log({result})
+    return result;
   } catch (error) {
     return error;
   }
@@ -657,8 +644,9 @@ export async function registerRequest(requestData) {
       createItem('requests', {
         name: requestData.name,
         email: requestData.email,
-        is_known: requestData.is_known,
         description: requestData.description,
+        profile_requested: requestData.profile_requested,
+        skills_requested: requestData.skills_requested,
       })
     );
     return result;

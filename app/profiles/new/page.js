@@ -7,8 +7,6 @@ export default async function NewProfilePage() {
   const skills = await getProfileSkills();
   const user = await getUser();
 
-  console.log('skills', skills);
-
   if (!user) {
     redirect('/auth/login?next=/profiles/new&info=protected');
   }
