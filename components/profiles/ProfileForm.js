@@ -14,6 +14,8 @@ import SearchSelect from 'components/search-select/SearchSelect';
 import Select from 'react-select';
 
 import { Suspense } from 'react';
+import { BIO_IS_REQUIRED, INTERESTS_ARE_REQUIRED, EXPERIENCES_ARE_REQUIRED } from './constants';
+
 export default function ProfileForm({ skills }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -27,6 +29,11 @@ export default function ProfileForm({ skills }) {
   const experiencesEditorRef = useRef(null);
   const [skillsLoading, setSkillsLoading] = useState(true);
   const [skillOptions, setSkillOptions] = useState([]);
+  // To track if RichTextEditor fields have been touched by the user
+  const [isBioTouched, setIsBioTouched] = useState(false);
+  const [isInterestsTouched, setIsInterestsTouched] = useState(false);
+  const [isExperiencesTouched, setIsExperiencesTouched] = useState(false);
+
   const [formData, setFormData] = useState({
     name: '',
     city: '',
@@ -102,8 +109,49 @@ export default function ProfileForm({ skills }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setLoading(true);
+
+    // Trigger HTML5 validation for standard inputs first (Name, Headline)
+    if (!e.currentTarget.checkValidity()) {
+      return; // Stop the function if browser validation fails
+    }
+
+    // Custom validation for RichTextEditor fields (Bio, Interests, Experiences)
+    let hasCustomValidationError = false;
+
+    // Bio validation
+    if (!formData.bio) {
+      setError(BIO_IS_REQUIRED);
+      setIsBioTouched(true); // Force bio warning to show on submit attempt
+      hasCustomValidationError = true;
+    } else if (error === BIO_IS_REQUIRED) { // Clear bio error if now valid
+      setError(null);
+    }
+
+    // Interests validation
+    if (!formData.interests) {
+      setError(INTERESTS_ARE_REQUIRED);
+      setIsInterestsTouched(true); // Force interests warning to show on submit attempt
+      hasCustomValidationError = true;
+    } else if (error === INTERESTS_ARE_REQUIRED) { // Clear interests error if now valid
+      setError(null);
+    }
+
+    // Experiences validation
+    if (!formData.experiences) {
+      setError(EXPERIENCES_ARE_REQUIRED);
+      setIsExperiencesTouched(true); // Force experiences warning to show on submit attempt
+      hasCustomValidationError = true;
+    } else if (error === EXPERIENCES_ARE_REQUIRED) { // Clear experiences error if now valid
+      setError(null);
+    }
+
+    if (hasCustomValidationError) {
+      return; // Stop submission if any custom validation fails
+    }
+
+    // Clear any general form errors before proceeding to submission
     setError(null);
+    setLoading(true);
 
     try {
       // Upload image if selected
@@ -148,9 +196,15 @@ export default function ProfileForm({ skills }) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <div className="bg-red-50 text-red-500 p-4 rounded">{error}</div>
-      )}
+      {/* General error message at the top, ensuring it doesn't conflict with specific field errors */}
+      {error &&
+        error !== BIO_IS_REQUIRED &&
+        error !== INTERESTS_ARE_REQUIRED &&
+        error !== EXPERIENCES_ARE_REQUIRED && (
+          <div className="bg-red-50 text-red-500 p-4 rounded">
+            {error}
+          </div>
+        )}
 
       <div>
         <label className="block text-sm font-semibold mb-1">
@@ -255,15 +309,18 @@ export default function ProfileForm({ skills }) {
           Bio*
         </label>
         <p className="text-sm text-gray-500 mb-2">Tell us about yourself.</p>
-        <div className="border shadow h-48 overflow-auto">
+        <div
+          className={`border shadow h-48 overflow-auto ${isBioTouched && !formData.bio ? 'border-red-500' : ''
+            }`}
+        >
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.bio}
-              onBlur={(value) =>
-                handleChange({ target: { name: 'bio', value } })
-              }
+              onBlur={(value) => {
+                handleChange({ target: { name: 'bio', value } });
+                setIsBioTouched(true);
+              }}
               ref={bioEditorRef}
-              required
             />
           </Suspense>
         </div>
@@ -271,18 +328,24 @@ export default function ProfileForm({ skills }) {
 
       <div>
         <label htmlFor="interests" className="block text-sm font-semibold mb-1">
-          Interests
+          Interests*
         </label>
         <p className="text-sm text-gray-500 mb-2">
           What are you passionate about?
         </p>
-        <div className="border shadow h-48 overflow-auto">
+        <div
+          className={`border shadow h-48 overflow-auto ${
+            // Apply red border if interests are empty AND has been touched
+            isInterestsTouched && !formData.interests ? 'border-red-500' : ''
+            }`}
+        >
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.interests}
-              onBlur={(value) =>
-                handleChange({ target: { name: 'interests', value } })
-              }
+              onBlur={(value) => {
+                handleChange({ target: { name: 'interests', value } });
+                setIsInterestsTouched(true); // Mark as touched on blur
+              }}
               ref={interestsEditorRef}
             />
           </Suspense>
@@ -297,13 +360,21 @@ export default function ProfileForm({ skills }) {
           Unique Experiences
         </label>
         <p className="text-sm text-gray-500 mb-2">What are you proud of?</p>
-        <div className="border shadow h-48 overflow-auto">
+        <div
+          className={`border shadow h-48 overflow-auto ${
+            // Apply red border if experiences are empty AND has been touched
+            isExperiencesTouched && !formData.experiences
+              ? 'border-red-500'
+              : ''
+            }`}
+        >
           <Suspense fallback={<div>Loading...</div>}>
             <RichTextEditor
               markdown={formData.experiences}
-              onBlur={(value) =>
-                handleChange({ target: { name: 'experiences', value } })
-              }
+              onBlur={(value) => {
+                handleChange({ target: { name: 'experiences', value } });
+                setIsExperiencesTouched(true); // Mark as touched on blur
+              }}
               ref={experiencesEditorRef}
             />
           </Suspense>
