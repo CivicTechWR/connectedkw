@@ -64,8 +64,8 @@ export const eventbriteExtractor = ({ $, request, log }) => {
     }
 
     const description = $('.event-details__main-inner .eds-text--left').html()?.replace(/\t|\n/g, '')
-    const startDateTime = $('meta[property="event:start_time"]').attr('content')
-    const endDateTime = $('meta[property="event:end_time"]').attr('content')
+    const startDateTime = ($('meta[property="event:start_time"]').attr('content')).slice(0, 19)
+    const endDateTime = ($('meta[property="event:end_time"]').attr('content')).slice(0, 19)
     const locationTitle = $('.location-info__address-text').text()
     const locationAddress = $('meta[name="twitter:data1"]').attr('value')
     const location = [locationTitle, locationAddress].join(", ")
@@ -175,8 +175,8 @@ export async function waterlooRegionMuseumExtractor ({ $, request, log }) {
     const [endHour, endMinute] = endTime.split(':')
     const endHourInt = parseInt(endHour)
     const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
-    const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
-    const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
+    const zeroPaddedStartHour24 = `0${startHour24}`.slice(-2)
+    const zeroPaddedEndHour24 = `0${endHour24}`.slice(-2)
 
 
     const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
@@ -237,8 +237,8 @@ export async function cityOfKitchenerExtractor ({ $, request, log }) {
     const [endHour, endMinute] = endTime.split(':')
     const endHourInt = parseInt(endHour)
     const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
-    const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
-    const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
+    const zeroPaddedStartHour24 = `0${startHour24}`.slice(-2)
+    const zeroPaddedEndHour24 = `0${endHour24}`.slice(-2)
 
     const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
     const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`
@@ -296,8 +296,8 @@ export async function cityOfWaterlooExtractor ({ $, request, log }) {
     const [endHour, endMinute] = endTime.split(':')
     const endHourInt = parseInt(endHour)
     const endHour24 = dateParts[8] === "pm" && endHourInt < 12? (endHourInt + 12) : endHourInt
-    const zeroPaddedStartHour24 = `0${startHour24 + 1}`.slice(-2)
-    const zeroPaddedEndHour24 = `0${endHour24 + 1}`.slice(-2)
+    const zeroPaddedStartHour24 = `0${startHour24}`.slice(-2)
+    const zeroPaddedEndHour24 = `0${endHour24}`.slice(-2)
   
     const date = `${year}-${zeroPaddedMonth}-${zeroPaddedDay}`
     const startDateTime = `${date}T${zeroPaddedStartHour24}:${startMinute}`

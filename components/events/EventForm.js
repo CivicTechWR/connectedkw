@@ -10,6 +10,7 @@ import Section from 'components/layout/Section'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import dynamic from 'next/dynamic'
+import { DateTime } from 'luxon'
 
 const RichTextEditor = dynamic(() => import('components/RichTextEditor'), { ssr: false })
 
@@ -89,8 +90,8 @@ export default function NewEventPage({ tags }) {
       setFormData({
         title: event.title || '',
         description: event.description || '',
-        starts_at: event.starts_at ? new Date(event.starts_at).toISOString().slice(0, 16) : '', // Format for datetime-local input
-        ends_at: event.ends_at ? new Date(event.ends_at).toISOString().slice(0, 16) : '',
+        starts_at: event.starts_at,
+        ends_at: event.ends_at || '',
         location_name: event.location_name || '',
         location_address: event.location_address || '',
         location_source_text: event.location_source_text || '',
