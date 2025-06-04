@@ -4,18 +4,18 @@ export default function SkillFilter({ skills, selectedSkill, onChange }) {
       <label className="block text-sm font-semibold mb-2">
         Filter by skill
       </label>
-      <select 
-        value={selectedSkill || ''} 
+      <select
+        value={selectedSkill || ''}
         onChange={(e) => onChange(e.target.value || null)}
         className="w-full md:w-auto px-4 py-2 border rounded-md"
       >
         <option value="">All skills</option>
-        {skills.map(skill => (
-          <option key={skill.id} value={skill.id}>
-            {skill.name}
+        {skills.map((skill) => (
+          <option key={`${skill.value}skill`} value={skill.value}>
+            {skill.label}
           </option>
         ))}
       </select>
     </div>
-  )
-} 
+  );
+}

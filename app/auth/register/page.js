@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Link from "next/link";
 import { Suspense } from "react";
+import { useRouter } from "next/navigation";
 
 const VerificationMessage = () => {
 	const searchParams = useSearchParams()
@@ -21,15 +22,14 @@ const VerificationMessage = () => {
 	}
 }
 
-export default function LoginPage({}) {
+export default function RegisterPage({}) {
 	const [firstName, setFirstName] = useState("");
 	const [lastName, setLastName] = useState("");
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [loading, setLoading] = useState(false);
-	const [success, setSuccess] = useState(null);
-
+	const router = useRouter();
 	// Error Messages
 	const [error, setError] = useState("");
 	const resetForm = () => {
@@ -42,7 +42,6 @@ export default function LoginPage({}) {
 
 	const handleRegister = async (e) => {
 		setError(null);
-		setSuccess(null);
 		setLoading(true);
 		e.preventDefault();
 
@@ -68,7 +67,7 @@ export default function LoginPage({}) {
 		}
 		if (password.length < 8) {
 			setLoading(false);
-			setError("Password must be atleast 8 characters long");
+			setError("Password must be at least 8 characters long");
 			return;
 		}
 		if (password !== confirmPassword) {
@@ -77,15 +76,27 @@ export default function LoginPage({}) {
 			return;
 		}
 
-		const result = await fetch("/api/register", {
+		const res = await fetch("/api/register", {
 			method: "POST",
 			body: JSON.stringify({ first_name: firstName, last_name: lastName, email, password }),
 		});
 
-		// TODO: check result for errors and display them
+		if (res.status === 201) {
+			setLoading(false);
+			resetForm();
+			router.push("/auth/verification-sent");
+		}
+
+		const { message } = await res.json();
+		console.log({ message });
+
+		if (res.status !== 201) {
+			setLoading(false);
+			setError(message);
+			return;
+		}
 
 		setLoading(false);
-		setSuccess(true);
 		resetForm();
 	};
 
@@ -132,14 +143,6 @@ export default function LoginPage({}) {
 										<p className="text-red">{error}</p>
 									</div>
 								)}
-								{success && (
-									<div className="mb-4">
-										<p className="text-green">
-											Thanks for signing up! Please check your email for verification
-											instructions.
-										</p>
-									</div>
-								)}
 								<div className="mb-4">
 									<label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="firstName">
 										First Name*
@@ -184,7 +187,7 @@ export default function LoginPage({}) {
 										Password*
 									</label>
 									<input
-										className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+										className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
 										id="password"
 										type="password"
 										placeholder="******************"
@@ -202,7 +205,7 @@ export default function LoginPage({}) {
 										Confirm Password*
 									</label>
 									<input
-										className="shadow appearance-none border border-red-500 rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+										className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
 										id="confirm-password"
 										type="password"
 										placeholder="******************"
