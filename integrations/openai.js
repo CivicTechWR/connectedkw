@@ -82,7 +82,7 @@ export const importEventFromUrl = async (url) => {
         input: `Extract event information from this content. Return a parseable JSON object. Do not include any other text in your response and do not wrap it with JSON md markers. The JSON object should have the following fields:
             - title: the event title
             - description: full event description
-            - starts_at: datetime in ISO format (YYYY-MM-DDTHH:mm:ss.sssZ)
+            - starts_at: datetime in ISO format (YYYY-MM-DDTHH:mm)
             - ends_at: datetime in ISO format (if available)
             - location_name: name of the physical location of the event
             - location_address: address of the physical location of the event
