@@ -6,8 +6,8 @@ from pathlib import Path
 def filter_geojson():
     # File paths
     script_dir = Path(__file__).parent
-    input_path = script_dir.parent / 'data' / 'fsa_2021.geojson'
-    output_path = script_dir.parent / 'data' / 'fsa_2021_waterloo.geojson'
+    input_path = script_dir.parent / 'data' / 'fsa_2021_reprojected.geojson'
+    output_path = script_dir.parent / 'data' / 'fsa_2021_waterloo.json'
     waterloo_region_fsa_codes = [
         "N1P",
         "N1R",
