@@ -955,6 +955,16 @@ const createEvent = async (eventData) => {
   }
 };
 
+const getFSAs = async () => {
+  const FSAs = await directus.request(
+    readItems('UNCONFIRMED_FSA_WatRegion1', {
+      fields: 'DGUID,city,fsa,population',
+    })
+  );
+
+  return FSAs;
+}
+
 export {
   getEvents,
   getEventCategories,
@@ -986,4 +996,5 @@ export {
   importImage,
   createEvent,
   directusClient,
+  getFSAs,
 };
