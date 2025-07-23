@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ConnectedKW - Park Equity Analysis</title>
+    <meta name="description" content="Interactive map showing park access distribution across Kitchener-Waterloo as we grow toward 1 million people">
+    
+    <!-- External CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- Preload critical fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+</head>
+<body>
+    <div class="header">
+        <div class="version-badge">ConnectedKW v1.0</div>
+        <h1>K-W Parks</h1>
+        <p></p>
+        <div class="feature-notice">
+            <!-- 🌱 <strong>Community Focus:</strong> Data-driven insights for equitable park development across our region -->
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Regional Overview</h2>
+            </div>
+            <div class="sidebar-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-fsas">-</div>
+                        <div class="stat-label">Total Areas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-population">-</div>
+                        <div class="stat-label">Total Population</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-parks">-</div>
+                        <div class="stat-label">Total Parks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="regional-average">-</div>
+                        <div class="stat-label">Parks per 1000</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h3>Parks</h3>
+                    <div class="legend-item" data-equity="critical">
+                        <div class="legend-color critical" aria-label="Critical gap - zero parks"></div>
+                        <div class="legend-text">No Parks (0)</div>
+                    </div>
+                    <div class="legend-item" data-equity="underserved">
+                        <div class="legend-color underserved" aria-label="Underserved - less than 1 park per 1000 people"></div>
+                        <div class="legend-text">Underserved (0.1-1.0)</div>
+                    </div>
+                    <div class="legend-item" data-equity="below-avg">
+                        <div class="legend-color below-avg" aria-label="Below average - 1.0 to 1.62 parks per 1000 people"></div>
+                        <div class="legend-text">Below Average (1.0-1.62)</div>
+                    </div>
+                    <div class="legend-item" data-equity="above-avg">
+                        <div class="legend-color above-avg" aria-label="Above average - 1.62 to 3.0 parks per 1000 people"></div>
+                        <div class="legend-text">Above Average (1.62-3.0)</div>
+                    </div>
+                    <div class="legend-item" data-equity="excellent">
+                        <div class="legend-color excellent" aria-label="Excellent - more than 3 parks per 1000 people"></div>
+                        <div class="legend-text">Excellent (3.0+)</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">View Mode</label>
+                        <button class="toggle-button active" 
+                                onclick="setViewMode('equity')" 
+                                aria-label="Show park equity distribution">
+                            Park Equity
+                        </button>
+                        <button class="toggle-button" 
+                                onclick="setViewMode('population')" 
+                                aria-label="Show population density">
+                            Population Density
+                        </button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Focus Areas</label>
+                        <button class="toggle-button" 
+                                onclick="toggleFilter('underserved')" 
+                                aria-label="Highlight areas with less than 1.62 parks per 1000 people">
+                            Show Only Underserved
+                        </button>
+                        <button class="toggle-button" 
+                                onclick="toggleFilter('zero-parks')" 
+                                aria-label="Highlight areas with zero parks">
+                            Show Only Zero Parks
+                        </button>
+                        <button class="toggle-button" 
+                                onclick="toggleFilter('excellent')" 
+                                aria-label="Highlight areas with excellent park coverage">
+                            Show Only Excellent
+                        </button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Data Stories</label>
+                        <button class="btn-secondary story-path" 
+                                onclick="showStoryPath('equity-gap')" 
+                                aria-label="View the equity gap story">
+                            🎯 The Equity Gap
+                        </button>
+                        <button class="btn-secondary story-path" 
+                                onclick="showStoryPath('success-stories')" 
+                                aria-label="View success stories">
+                            ✨ Success Stories
+                        </button>
+                    </div>
+                </div>
+
+                <div id="area-details" class="area-details" style="display: none;" role="region" aria-label="Selected area details">
+                    <h4 id="selected-fsa">Select an area</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Population:</span>
+                        <span class="detail-value" id="selected-population">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Parks:</span>
+                        <span class="detail-value" id="selected-parks">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Parks per 1000:</span>
+                        <span class="detail-value" id="selected-density">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">People per Park:</span>
+                        <span class="detail-value" id="selected-ratio">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Equity Status:</span>
+                        <span class="detail-value" id="selected-equity-status">-</span>
+                    </div>
+                </div>
+
+                <!-- Story Mode Panel -->
+                <div id="story-panel" class="story-panel" style="display: none;" role="region" aria-label="Data story">
+                    <div class="story-header">
+                        <h4 id="story-title">Data Story</h4>
+                        <button class="btn-close" onclick="closeStoryMode()" aria-label="Close story mode">×</button>
+                    </div>
+                    <div class="story-content">
+                        <p id="story-description">Exploring the data...</p>
+                        <div class="story-stats">
+                            <div class="story-stat">
+                                <span class="story-stat-value" id="story-stat-1-value">-</span>
+                                <span class="story-stat-label" id="story-stat-1-label">Metric 1</span>
+                            </div>
+                            <div class="story-stat">
+                                <span class="story-stat-value" id="story-stat-2-value">-</span>
+                                <span class="story-stat-label" id="story-stat-2-label">Metric 2</span>
+                            </div>
+                        </div>
+                        <button class="btn-primary story-action" onclick="nextStoryStep()" id="story-action-btn">
+                            Next →
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="loading" class="loading" role="status" aria-label="Loading map data">
+                <div class="loading-animation">
+                    <div class="loading-spinner"></div>
+                </div>
+                <p>Loading ConnectedKW park equity data...</p>
+                <small>Analyzing park access across Kitchener-Waterloo</small>
+            </div>
+            <div id="map" role="application" aria-label="Interactive park equity map"></div>
+            
+            <!-- Map Controls Overlay -->
+            <div class="map-controls" role="toolbar" aria-label="Map view controls">
+                <button class="map-control-btn" onclick="resetMapView()" aria-label="Reset map to default view" title="Reset View">
+                    🏠
+                </button>
+                <button class="map-control-btn" onclick="toggleFullscreen()" aria-label="Toggle fullscreen mode" title="Fullscreen">
+                    ⛶
+                </button>
+                <button class="map-control-btn" onclick="exportMap()" aria-label="Export map as image" title="Export Map">
+                    📷
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help -->
+    <div id="shortcuts-help" class="shortcuts-help" style="display: none;" role="dialog" aria-label="Keyboard shortcuts">
+        <div class="shortcuts-content">
+            <h3>Keyboard Shortcuts</h3>
+            <div class="shortcut-list">
+                <div class="shortcut-item">
+                    <kbd>E</kbd> <span>Toggle Equity View</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>P</kbd> <span>Toggle Population View</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>Z</kbd> <span>Show Zero Parks</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>U</kbd> <span>Show Underserved</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>R</kbd> <span>Reset Map View</span>
+                </div>
+                <div class="shortcut-item">
+                    <kbd>?</kbd> <span>Toggle This Help</span>
+                </div>
+            </div>
+            <button class="btn-primary" onclick="toggleShortcutsHelp()">Close</button>
+        </div>
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script src="map-script.js"></script>
+
+    <!-- Analytics placeholder for One Million Neighbours -->
+    <script>
+        // Placeholder for analytics integration
+        window.addEventListener('load', function() {
+            console.log('ConnectedKW Map loaded successfully');
+            // TODO: Add One Million Neighbours analytics tracking
+        });
+    </script>
+</body>
+</html>

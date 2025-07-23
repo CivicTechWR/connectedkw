@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Waterloo Region Park Equity Analysis - Mapbox</title>
+    
+    <!-- Mapbox GL CSS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f8fafc;
+            color: #334155;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            color: white;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .header h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .version-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .api-notice {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.75rem;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            margin-top: 0.5rem;
+        }
+
+        .container {
+            display: flex;
+            height: calc(100vh - 140px);
+            gap: 1rem;
+            padding: 1rem;
+        }
+
+        .sidebar {
+            width: 350px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-header {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            padding: 1.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .sidebar-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+
+        .map-container {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            position: relative;
+        }
+
+        #map {
+            height: 100%;
+            width: 100%;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            padding: 1.25rem;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            transition: all 0.2s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .legend {
+            margin-bottom: 1.5rem;
+        }
+
+        .legend h3 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .legend-item:hover {
+            background-color: #f8fafc;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            margin-right: 1rem;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .legend-text {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .controls {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .control-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #374151;
+        }
+
+        .toggle-button {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #d1d5db;
+            padding: 0.75rem 1.25rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .toggle-button.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            color: white;
+            border-color: #3b82f6;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+        }
+
+        .toggle-button:hover {
+            background: linear-gradient(135deg, #e2e8f0 0%, #cbd5e1 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .toggle-button.active:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .area-details {
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1rem;
+            box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .area-details h4 {
+            font-size: 1.125rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+            font-size: 0.875rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #64748b;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-weight: 700;
+            color: #1e293b;
+        }
+
+        .loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .error {
+            color: #dc2626;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+            border: 1px solid #fecaca;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin: 1rem;
+        }
+
+        /* Enhanced popup styling for Mapbox */
+        .mapboxgl-popup-content {
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            border: none;
+            padding: 0;
+            font-family: inherit;
+        }
+
+        .popup-content {
+            padding: 1.5rem;
+        }
+
+        .popup-fsa {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+        }
+
+        .popup-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+        }
+
+        .popup-stat {
+            text-align: center;
+            padding: 0.75rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .popup-stat-value {
+            font-weight: 700;
+            font-size: 1.125rem;
+            color: #1e40af;
+        }
+
+        .popup-stat-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 0.25rem;
+            font-weight: 500;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .sidebar {
+                width: 100%;
+                order: 2;
+            }
+            
+            .map-container {
+                height: 400px;
+                order: 1;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .version-badge {
+                position: static;
+                display: inline-block;
+                margin-top: 0.5rem;
+            }
+        }
+
+        /* Mapbox control styling */
+        .mapboxgl-ctrl-group {
+            border-radius: 8px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .mapboxgl-ctrl {
+            border: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="version-badge">Mapbox Version</div>
+        <h1>Waterloo Region Park Equity Analysis</h1>
+        <p>Interactive map showing park access distribution across Forward Sortation Areas (postal codes)</p>
+        <div class="api-notice">
+            📍 <strong>Mapbox Features:</strong> Vector tiles, smooth animations, advanced styling, 3D capabilities
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidebar-header">
+                <h2>Regional Overview</h2>
+            </div>
+            <div class="sidebar-content">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-fsas">-</div>
+                        <div class="stat-label">Total Areas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-population">-</div>
+                        <div class="stat-label">Total Population</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="total-parks">-</div>
+                        <div class="stat-label">Total Parks</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="regional-average">-</div>
+                        <div class="stat-label">Parks per 1000</div>
+                    </div>
+                </div>
+
+                <div class="legend">
+                    <h3>Park Equity Levels</h3>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #d73027;"></div>
+                        <div class="legend-text">No Parks (0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fc8d59;"></div>
+                        <div class="legend-text">Underserved (0.1-1.0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #fee08b;"></div>
+                        <div class="legend-text">Below Average (1.0-1.62)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #a6d96a;"></div>
+                        <div class="legend-text">Above Average (1.62-3.0)</div>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color" style="background-color: #1a9850;"></div>
+                        <div class="legend-text">Excellent (3.0+)</div>
+                    </div>
+                </div>
+
+                <div class="controls">
+                    <div class="control-group">
+                        <label class="control-label">Map Style</label>
+                        <button class="toggle-button active" onclick="setMapStyle('streets')">Streets</button>
+                        <button class="toggle-button" onclick="setMapStyle('satellite')">Satellite</button>
+                        <button class="toggle-button" onclick="setMapStyle('outdoors')">Outdoors</button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">View Mode</label>
+                        <button class="toggle-button active" onclick="setViewMode('equity')">Park Equity</button>
+                        <button class="toggle-button" onclick="setViewMode('population')">Population Density</button>
+                    </div>
+                    <div class="control-group">
+                        <label class="control-label">Filter</label>
+                        <button class="toggle-button" onclick="toggleFilter('underserved')">Show Only Underserved</button>
+                        <button class="toggle-button" onclick="toggleFilter('zero-parks')">Show Only Zero Parks</button>
+                    </div>
+                </div>
+
+                <div id="area-details" class="area-details" style="display: none;">
+                    <h4 id="selected-fsa">Select an area</h4>
+                    <div class="detail-row">
+                        <span class="detail-label">Population:</span>
+                        <span class="detail-value" id="selected-population">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Parks:</span>
+                        <span class="detail-value" id="selected-parks">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">Parks per 1000:</span>
+                        <span class="detail-value" id="selected-density">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-label">People per Park:</span>
+                        <span class="detail-value" id="selected-ratio">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="loading" class="loading">
+                <p>Loading park equity data...</p>
+                <p style="font-size: 0.875rem; margin-top: 0.5rem; color: #64748b;">
+                    Note: This demo uses a public token. For production, you'll need your own Mapbox API key.
+                </p>
+            </div>
+            <div id="map"></div>
+        </div>
+    </div>
+
+    <!-- Mapbox GL JavaScript -->
+    <script src="https://api.mapbox.com/mapbox-gl-js/v3.0.1/mapbox-gl.js"></script>
+
+    <script>
+        // Mapbox access token (public token for demo - replace with your own)
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZiangifQ.-g_vE53SD2WrJ6tFX7QHmA';
+
+        // Global variables
+        let map;
+        let currentViewMode = 'equity';
+        let currentFilter = null;
+        let currentMapStyle = 'streets';
+        let fsaData = null;
+
+        // Map style URLs
+        const mapStyles = {
+            streets: 'mapbox://styles/mapbox/streets-v12',
+            satellite: 'mapbox://styles/mapbox/satellite-streets-v12',
+            outdoors: 'mapbox://styles/mapbox/outdoors-v12'
+        };
+
+        // Initialize the map
+        function initMap() {
+            map = new mapboxgl.Map({
+                container: 'map',
+                style: mapStyles.streets,
+                center: [-80.5204, 43.4643],
+                zoom: 9.5,
+                antialias: true
+            });
+
+            // Add navigation control
+            map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+
+            // Add fullscreen control
+            map.addControl(new mapboxgl.FullscreenControl(), 'top-right');
+
+            map.on('load', function() {
+                loadData();
+            });
+        }
+
+        // Color scales (same as Leaflet version)
+        function getEquityColor(parksPerThousand) {
+            if (parksPerThousand === 0) return '#d73027';
+            if (parksPerThousand <= 1.0) return '#fc8d59';
+            if (parksPerThousand <= 1.62) return '#fee08b';
+            if (parksPerThousand <= 3.0) return '#a6d96a';
+            return '#1a9850';
+        }
+
+        function getPopulationColor(population) {
+            if (population < 10000) return '#ffffcc';
+            if (population < 20000) return '#c7e9b4';
+            if (population < 30000) return '#7fcdbb';
+            if (population < 40000) return '#41b6c4';
+            return '#2c7fb8';
+        }
+
+        // Create popup content
+        function createPopupContent(properties) {
+            const fsa = properties.CFSAUID || 'Unknown';
+            const parks = properties.parkCount || 0;
+            const population = properties.population || 0;
+            const parksPerThousand = properties.parksPerThousand || 0;
+            const peoplePerPark = properties.populationPerPark || 'N/A';
+            
+            return `
+                <div class="popup-content">
+                    <div class="popup-fsa">${fsa}</div>
+                    <div class="popup-stats">
+                        <div class="popup-stat">
+                            <div class="popup-stat-value">${parks}</div>
+                            <div class="popup-stat-label">Parks</div>
+                        </div>
+                        <div class="popup-stat">
+                            <div class="popup-stat-value">${population.toLocaleString()}</div>
+                            <div class="popup-stat-label">Population</div>
+                        </div>
+                        <div class="popup-stat">
+                            <div class="popup-stat-value">${parksPerThousand.toFixed(2)}</div>
+                            <div class="popup-stat-label">Parks/1000</div>
+                        </div>
+                        <div class="popup-stat">
+                            <div class="popup-stat-value">${peoplePerPark === 'N/A' ? 'N/A' : Math.round(peoplePerPark)}</div>
+                            <div class="popup-stat-label">People/Park</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Update area details in sidebar
+        function updateAreaDetails(properties) {
+            const fsa = properties.CFSAUID || 'Unknown';
+            const parks = properties.parkCount || 0;
+            const population = properties.population || 0;
+            const parksPerThousand = properties.parksPerThousand || 0;
+            const peoplePerPark = properties.populationPerPark || 'N/A';
+            
+            document.getElementById('selected-fsa').textContent = `FSA ${fsa}`;
+            document.getElementById('selected-population').textContent = population.toLocaleString();
+            document.getElementById('selected-parks').textContent = parks;
+            document.getElementById('selected-density').textContent = parksPerThousand.toFixed(2);
+            document.getElementById('selected-ratio').textContent = peoplePerPark === 'N/A' ? 'N/A' : Math.round(peoplePerPark);
+            
+            document.getElementById('area-details').style.display = 'block';
+        }
+
+        // Update regional statistics
+        function updateRegionalStats(data) {
+            const features = data.features.filter(f => f.properties.population > 0);
+            
+            const totalFsas = features.length;
+            const totalPopulation = features.reduce((sum, f) => sum + (f.properties.population || 0), 0);
+            const totalParks = features.reduce((sum, f) => sum + (f.properties.parkCount || 0), 0);
+            const regionalAverage = totalParks / totalPopulation * 1000;
+            
+            document.getElementById('total-fsas').textContent = totalFsas;
+            document.getElementById('total-population').textContent = totalPopulation.toLocaleString();
+            document.getElementById('total-parks').textContent = totalParks;
+            document.getElementById('regional-average').textContent = regionalAverage.toFixed(2);
+        }
+
+        // Add data to map
+        function addDataToMap() {
+            if (!fsaData) return;
+
+            // Add source
+            map.addSource('fsa-data', {
+                type: 'geojson',
+                data: fsaData
+            });
+
+            // Add fill layer
+            map.addLayer({
+                id: 'fsa-fill',
+                type: 'fill',
+                source: 'fsa-data',
+                paint: {
+                    'fill-color': [
+                        'case',
+                        ['==', currentViewMode, 'equity'],
+                        [
+                            'case',
+                            ['==', ['get', 'parksPerThousand'], 0], '#d73027',
+                            ['<=', ['get', 'parksPerThousand'], 1.0], '#fc8d59',
+                            ['<=', ['get', 'parksPerThousand'], 1.62], '#fee08b',
+                            ['<=', ['get', 'parksPerThousand'], 3.0], '#a6d96a',
+                            '#1a9850'
+                        ],
+                        [
+                            'case',
+                            ['<', ['get', 'population'], 10000], '#ffffcc',
+                            ['<', ['get', 'population'], 20000], '#c7e9b4',
+                            ['<', ['get', 'population'], 30000], '#7fcdbb',
+                            ['<', ['get', 'population'], 40000], '#41b6c4',
+                            '#2c7fb8'
+                        ]
+                    ],
+                    'fill-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'filtered'], false], 0.1,
+                        ['boolean', ['feature-state', 'hover'], false], 0.9,
+                        0.7
+                    ]
+                }
+            });
+
+            // Add border layer
+            map.addLayer({
+                id: 'fsa-border',
+                type: 'line',
+                source: 'fsa-data',
+                paint: {
+                    'line-color': '#ffffff',
+                    'line-width': [
+                        'case',
+                        ['boolean', ['feature-state', 'hover'], false], 3,
+                        2
+                    ],
+                    'line-opacity': [
+                        'case',
+                        ['boolean', ['feature-state', 'filtered'], false], 0.3,
+                        1
+                    ]
+                }
+            });
+
+            // Fit bounds to data
+            const bounds = new mapboxgl.LngLatBounds();
+            fsaData.features.forEach(feature => {
+                if (feature.geometry.type === 'Polygon') {
+                    feature.geometry.coordinates[0].forEach(coord => bounds.extend(coord));
+                } else if (feature.geometry.type === 'MultiPolygon') {
+                    feature.geometry.coordinates.forEach(polygon => {
+                        polygon[0].forEach(coord => bounds.extend(coord));
+                    });
+                }
+            });
+            map.fitBounds(bounds, { padding: 50 });
+
+            // Add interactivity
+            let hoveredFeatureId = null;
+
+            map.on('mouseenter', 'fsa-fill', (e) => {
+                map.getCanvas().style.cursor = 'pointer';
+                
+                if (hoveredFeatureId !== null) {
+                    map.setFeatureState({ source: 'fsa-data', id: hoveredFeatureId }, { hover: false });
+                }
+                
+                hoveredFeatureId = e.features[0].id;
+                map.setFeatureState({ source: 'fsa-data', id: hoveredFeatureId }, { hover: true });
+            });
+
+            map.on('mouseleave', 'fsa-fill', () => {
+                map.getCanvas().style.cursor = '';
+                
+                if (hoveredFeatureId !== null) {
+                    map.setFeatureState({ source: 'fsa-data', id: hoveredFeatureId }, { hover: false });
+                }
+                hoveredFeatureId = null;
+            });
+
+            map.on('click', 'fsa-fill', (e) => {
+                const properties = e.features[0].properties;
+                
+                // Update sidebar
+                updateAreaDetails(properties);
+                
+                // Show popup
+                new mapboxgl.Popup()
+                    .setLngLat(e.lngLat)
+                    .setHTML(createPopupContent(properties))
+                    .addTo(map);
+            });
+        }
+
+        // Map style controls
+        function setMapStyle(style) {
+            currentMapStyle = style;
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.control-group:first-child .toggle-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Change map style
+            map.setStyle(mapStyles[style]);
+            
+            // Re-add data when style loads
+            map.once('styledata', () => {
+                if (fsaData) {
+                    addDataToMap();
+                    updateMapFilter();
+                }
+            });
+        }
+
+        // View mode controls
+        function setViewMode(mode) {
+            currentViewMode = mode;
+            
+            // Update button states
+            const buttons = document.querySelectorAll('.control-group:nth-child(2) .toggle-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update map colors
+            if (map.getLayer('fsa-fill')) {
+                map.setPaintProperty('fsa-fill', 'fill-color', [
+                    'case',
+                    ['==', mode, 'equity'],
+                    [
+                        'case',
+                        ['==', ['get', 'parksPerThousand'], 0], '#d73027',
+                        ['<=', ['get', 'parksPerThousand'], 1.0], '#fc8d59',
+                        ['<=', ['get', 'parksPerThousand'], 1.62], '#fee08b',
+                        ['<=', ['get', 'parksPerThousand'], 3.0], '#a6d96a',
+                        '#1a9850'
+                    ],
+                    [
+                        'case',
+                        ['<', ['get', 'population'], 10000], '#ffffcc',
+                        ['<', ['get', 'population'], 20000], '#c7e9b4',
+                        ['<', ['get', 'population'], 30000], '#7fcdbb',
+                        ['<', ['get', 'population'], 40000], '#41b6c4',
+                        '#2c7fb8'
+                    ]
+                ]);
+            }
+        }
+
+        // Filter controls
+        function toggleFilter(filterType) {
+            const button = event.target;
+            
+            if (currentFilter === filterType) {
+                // Turn off filter
+                currentFilter = null;
+                button.classList.remove('active');
+            } else {
+                // Turn on filter
+                currentFilter = filterType;
+                const buttons = document.querySelectorAll('.control-group:nth-child(3) .toggle-button');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+            }
+            
+            updateMapFilter();
+        }
+
+        function updateMapFilter() {
+            if (!map.getSource('fsa-data')) return;
+            
+            fsaData.features.forEach((feature, index) => {
+                const props = feature.properties;
+                let filtered = false;
+                
+                if (currentFilter === 'underserved') {
+                    filtered = (props.parksPerThousand || 0) >= 1.62;
+                } else if (currentFilter === 'zero-parks') {
+                    filtered = (props.parkCount || 0) > 0;
+                }
+                
+                map.setFeatureState(
+                    { source: 'fsa-data', id: index },
+                    { filtered: filtered }
+                );
+            });
+        }
+
+        // Load and display data
+        async function loadData() {
+            try {
+                // Load the generated FSA analysis data
+                const response = await fetch('../scripts/data/fsa_park_density_analysis.geojson');
+                
+                if (!response.ok) {
+                    throw new Error(`Failed to load data: ${response.status} ${response.statusText}`);
+                }
+                
+                fsaData = await response.json();
+                
+                // Add IDs to features for state management
+                fsaData.features.forEach((feature, index) => {
+                    feature.id = index;
+                });
+                
+                // Add data to map
+                addDataToMap();
+                
+                // Update statistics
+                updateRegionalStats(fsaData);
+                
+                // Hide loading indicator
+                document.getElementById('loading').style.display = 'none';
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                document.getElementById('loading').innerHTML = `
+                    <div class="error">
+                        <h3>Error Loading Data</h3>
+                        <p>Failed to load park equity data. Please check that the data file exists at:</p>
+                        <code>../scripts/data/fsa_park_density_analysis.geojson</code>
+                        <p style="margin-top: 1rem;"><strong>Note:</strong> This demo uses a public Mapbox token. For production, you'll need your own API key.</p>
+                        <p style="margin-top: 0.5rem;">Error: ${error.message}</p>
+                    </div>
+                `;
+            }
+        }
+
+        // Initialize everything when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            initMap();
+        });
+    </script>
+</body>
+</html>
