@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server'
 //import { createItem } from '@directus/sdk'
-import { getFSAs } from 'integrations/directus'
+import { getFSAData, getFSAGeoData } from 'integrations/directus'
 
 export async function GET() {
   try {
-    const FSAs = await getFSAs();
-    return NextResponse.json(FSAs, { 
+    const [fsaData, fsaGeoData] = await Promise.all([await getFSAData(), await getFSAGeoData()])
+    
+    return NextResponse.json({ fsaGeoData, fsaData }, { 
       status: 200,
     });
   } catch (err) {
