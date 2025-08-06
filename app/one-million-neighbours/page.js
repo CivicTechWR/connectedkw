@@ -1,5 +1,4 @@
-import FsaMap from "components/maps/FsaMap"
-import { getFSAGeoData } from 'integrations/directus';
+import { getFSAGeoData, getFSAData } from 'integrations/directus';
 import LeafletMap from "components/maps/LeafletMap"
 
 const defaultGeoJSON = {
@@ -16,10 +15,12 @@ const defaultGeoJSON = {
 
 export default async function OneMillionNeighboursPage() {
   const FSAs = await getFSAGeoData()
+  const FSAData = await getFSAData()
+
   let features = []
   try {
     features = FSAs.map(fsa => {
-      console.log(fsa)
+      const fsaData = FSAData.find(f => f.DGUID === fsa.DGUID)
       return {
         "type": "Feature",
         "properties": {
@@ -27,7 +28,8 @@ export default async function OneMillionNeighboursPage() {
           "DGUID": fsa.DGUID,
           "id": fsa.id,
           "PRNAME": "Ontario",
-          "LANDAREA": fsa.LANDAREA
+          "LANDAREA": fsa.LANDAREA,
+          ...fsaData
         },
         geometry: JSON.parse(fsa.geometry)
       }
@@ -36,7 +38,6 @@ export default async function OneMillionNeighboursPage() {
     console.error(error)
   }
   
-  console.log(features)
   const fsaGeoJSON = {
     ...defaultGeoJSON,
     features: features
@@ -45,8 +46,7 @@ export default async function OneMillionNeighboursPage() {
   return (
       <div className="container mx-auto px-4 py-16">
         <h1 className="text-4xl font-bold mb-8">One Million Neighbours</h1>
-        {/* <FsaMap /> */}
-        <LeafletMap fsaGeoJSON={fsaGeoJSON} />
+        <LeafletMap geojson={fsaGeoJSON} fsaData={FSAData} />
       </div>
   )
 }

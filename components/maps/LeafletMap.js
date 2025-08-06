@@ -19,8 +19,9 @@ const GeoJSON = dynamic(() => import('react-leaflet').then(mod => mod.GeoJSON), 
 //   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 // })
 
-export default function LeafletMap({fsaGeoJSON}) {
-  const [fsaData, setFsaData] = useState(fsaGeoJSON)
+export default function LeafletMap({geojson, fsaData}) {
+  const [selectedFSA, setSelectedFSA] = useState(null)
+
   // const [loading, setLoading] = useState(true)
 
   // useEffect(() => {
@@ -37,14 +38,27 @@ export default function LeafletMap({fsaGeoJSON}) {
   //     })
   // }, [])
 
+  useEffect(() => {
+    if (selectedFSA) {
+      console.log(selectedFSA)
+    }
+  }, [selectedFSA])
+
   const onEachFeature = (feature, layer) => {
-    if (feature.properties && feature.properties.CFSAUID) {
+    if (feature.properties) {
       layer.bindPopup(
         `<div>
-          <h3 class="font-semibold">FSA: ${feature.properties.CFSAUID}</h3>
-          <p class="text-sm text-gray-600">Forward Sortation Area</p>
+          <h3 class="font-semibold">${feature.properties.GEO_DISPLAY_NAME}</h3>
+          <p class="text-sm text-gray-600">FSA: ${feature.properties.CFSAUID}</p>
+          <p class="text-sm text-gray-600">Population: ${feature.properties.Population}</p>
+          <p class="text-sm text-gray-600">Median age: ${feature.properties.Median_age_of_the_population}</p>
+          <p class="text-sm text-gray-600">Total private dwellings: ${feature.properties.Total_private_dwellings}</p>
         </div>`
       )
+
+      layer.on('click', () => {
+        setSelectedFSA(feature.properties)
+      })
     }
   }
 
@@ -79,9 +93,9 @@ export default function LeafletMap({fsaGeoJSON}) {
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {fsaData && (
+        {geojson && (
           <GeoJSON
-            data={fsaData}
+            data={geojson}
             style={style}
             onEachFeature={onEachFeature}
           />
