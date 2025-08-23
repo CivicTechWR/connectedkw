@@ -17,10 +17,17 @@ export default async function OneMillionNeighboursPage() {
   const FSAs = await getFSAGeoData()
   const FSAData = await getFSAData()
 
+  const featuresWithRanking = FSAData.map((feature, index) => {
+    return {
+      ...feature,
+      ranking: feature.combined_rank < 9 ? 'top' : feature.combined_rank < 17 ? 'middle' : 'bottom',
+    }
+  })
+
   let features = []
   try {
     features = FSAs.map(fsa => {
-      const fsaData = FSAData.find(f => f.DGUID === fsa.DGUID)
+      const fsaData = featuresWithRanking.find(f => f.DGUID === fsa.DGUID)
       return {
         "type": "Feature",
         "properties": {
