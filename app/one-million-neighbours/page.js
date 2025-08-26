@@ -1,5 +1,5 @@
 import { getFSAGeoData, getFSAData } from 'integrations/directus';
-import LeafletMap from "components/maps/LeafletMap"
+import OneMillionNeighboursComponent from 'components/OneMillionNeighboursComponent';
 
 const defaultGeoJSON = {
   "type": "FeatureCollection",
@@ -44,16 +44,16 @@ export default async function OneMillionNeighboursPage() {
   } catch (error) {
     console.error(error)
   }
-  
-  const fsaGeoJSON = {
+
+  const FSAGeoJSON = {
     ...defaultGeoJSON,
     features: features
   }
 
   return (
-      <div className="container mx-auto px-4 py-16">
-        <h1 className="text-4xl font-bold mb-8">One Million Neighbours</h1>
-        <LeafletMap geojson={fsaGeoJSON} fsaData={FSAData} />
-      </div>
+    <div className="container mx-auto px-4 py-16">
+      <h1 className="text-4xl font-bold mb-8">One Million Neighbours</h1>
+      <OneMillionNeighboursComponent FSAData={FSAData} FSAGeoJSON={FSAGeoJSON} />
+    </div>
   )
 }
