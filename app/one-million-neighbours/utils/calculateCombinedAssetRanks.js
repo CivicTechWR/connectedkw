@@ -1,8 +1,8 @@
-export default function calculateCombinedAssetRanks(data) {
+export default function calculateCombinedAssetRanks(FSAData) {
     
     // If there are less than 2 neighbourhoods, return the original data with a combined_rank of 1
-    if (data.length < 2) {
-        return data.map((fsa) => ({ ...fsa, combined_rank: 1 }));
+    if (FSAData.length < 2) {
+        return FSAData.map((fsa) => ({ ...fsa, combined_rank: 1 }));
     }
     // Helper function to calculate the mean (average) of an array of numbers.
     const getMean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
@@ -20,7 +20,7 @@ export default function calculateCombinedAssetRanks(data) {
 
 
     // --- Step 1: Calculate per capita data ---
-    const perCapitaData = data.map(fsa => ({
+    const perCapitaData = FSAData.map(fsa => ({
         ...fsa,
         parks_per_capita: fsa.park / fsa.Population,
         pools_per_capita: fsa.pool / fsa.Population,
