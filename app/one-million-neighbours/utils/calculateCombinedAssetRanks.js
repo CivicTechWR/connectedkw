@@ -69,7 +69,7 @@ export default function calculateCombinedAssetRanks(FSAFilters, FSAData) {
         const trails_std =  FSAFilters.trails ?  (fsa.trails_per_capita - meanTrails) / sdTrails : 0;
 
         // The combined metric is the average of the four standardized metrics.
-        const combined_metric = (parks_std + pools_std + cc_std + trails_std) / 4;
+        const combined_metric = Math.round((parks_std + pools_std + cc_std + trails_std) / 4 * 1000000) / 1000000;
 
         return {
             ...fsa,
