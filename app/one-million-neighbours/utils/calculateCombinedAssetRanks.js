@@ -1,4 +1,16 @@
-export default function calculateCombinedAssetRanks(FSAData) {
+// Calculate the combined rank of each FSA based on the selected filters
+
+// FSAfilters is an array of [{filterName: boolean}]
+// FSAData is an array of objects with at least the following keys:
+// {
+//     "GEO_NAME": "N0B",
+//     "Population": 86919,
+//     "park": 2,
+//     "pool": 2,
+//     "community_centre": 2,
+//     "trail": 20
+// }
+export default function calculateCombinedAssetRanks(FSAFilters, FSAData) {
     
     // If there are less than 2 neighbourhoods, return the original data with a combined_rank of 1
     if (FSAData.length < 2) {
@@ -48,11 +60,13 @@ export default function calculateCombinedAssetRanks(FSAData) {
     const sdTrails = getStdDev(trailsPerCapita);
 
     // --- Step 3: Calculate standardized values and the combined metric ---
+    // If a filter is not selected (value is false), its standardized value is set to 0 so it is not included in the combined metric.
+    // Ternary explained: (if this condition is true) ? (use this value) : (if it is false, use this value)
     const standardizedData = perCapitaData.map(fsa => {
-        const parks_std = (fsa.parks_per_capita - meanParks) / sdParks;
-        const pools_std = (fsa.pools_per_capita - meanPools) / sdPools;
-        const cc_std = (fsa.community_centre_per_capita - meanCC) / sdCC;
-        const trails_std = (fsa.trails_per_capita - meanTrails) / sdTrails;
+        const parks_std =  FSAFilters.parks ?  (fsa.parks_per_capita - meanParks) / sdParks : 0;
+        const pools_std =  FSAFilters.pools ?  (fsa.pools_per_capita - meanPools) / sdPools : 0;
+        const cc_std =  FSAFilters.centres ?  (fsa.community_centre_per_capita - meanCC) / sdCC : 0;
+        const trails_std =  FSAFilters.trails ?  (fsa.trails_per_capita - meanTrails) / sdTrails : 0;
 
         // The combined metric is the average of the four standardized metrics.
         const combined_metric = (parks_std + pools_std + cc_std + trails_std) / 4;
