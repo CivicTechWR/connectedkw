@@ -1,4 +1,9 @@
 export default function calculateCombinedAssetRanks(data) {
+    
+    // If there are less than 2 neighbourhoods, return the original data with a combined_rank of 1
+    if (data.length < 2) {
+        return data.map((fsa) => ({ ...fsa, combined_rank: 1 }));
+    }
     // Helper function to calculate the mean (average) of an array of numbers.
     const getMean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
 
@@ -6,10 +11,13 @@ export default function calculateCombinedAssetRanks(data) {
     // R's sd() function uses n-1 in the denominator, so we do the same here for consistency.
     const getStdDev = (arr) => {
         const mean = getMean(arr);
-        const squareDiffs = arr.map(value => Math.pow(value - mean, 2));
-        const avgSquareDiff = getMean(squareDiffs);
-        return Math.sqrt(avgSquareDiff);
+        if (arr.length < 2) return 0; // Sample standard deviation is not defined for a single value.
+        // Calculate the sum of squared differences from the mean.
+        const sumOfSquares = arr.map(value => Math.pow(value - mean, 2)).reduce((a, b) => a + b, 0);
+        // Divide by n-1 for the sample standard deviation.
+        return Math.sqrt(sumOfSquares / (arr.length - 1));
     };
+
 
     // --- Step 1: Calculate per capita data ---
     const perCapitaData = data.map(fsa => ({
