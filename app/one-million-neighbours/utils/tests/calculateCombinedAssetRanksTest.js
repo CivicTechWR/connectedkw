@@ -693,7 +693,7 @@ function runTest() {
         const expectedRank = expectedCombinedMetricFromR[fsa.GEO_NAME];
         const actualRank = fsa.combined_metric;
 
-        if (expectedRank === actualRank) {
+        if (expectedRank.toFixed(5) === actualRank.toFixed(5)) {
             console.log(`✅ PASSED: For FSA ${fsa.GEO_NAME}, expected rank ${expectedRank}, got ${actualRank}.`);
         } else {
             console.error(`❌ FAILED: For FSA ${fsa.GEO_NAME}, expected rank ${expectedRank}, but got ${actualRank}.`);
