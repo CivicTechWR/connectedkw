@@ -39,6 +39,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
         `<div>
           <h3 class="font-semibold">${feature.properties.GEO_DISPLAY_NAME}</h3>
           <p class="text-sm text-gray-600">FSA: ${feature.properties.CFSAUID}</p>
+          <p class="text-sm text-gray-600">Population: ${feature.properties.Population}</p>
           <p class="text-sm text-gray-600">Median age: ${feature.properties.Median_age_of_the_population}</p>
           <p class="text-sm text-gray-600">Total private dwellings: ${feature.properties.Total_private_dwellings}</p>
         </div>`
