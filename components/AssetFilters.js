@@ -6,7 +6,7 @@ export default function AssetFilters({ selectedAssets, onAssetToggle, assetTypes
         <section className="p-6 border-b border-gray-200" aria-labelledby="assets-heading">
             <div className="flex items-center justify-between mb-4">
                 <h2 id="assets-heading" className="text-sm font-semibold text-gray-900">
-                    Assets to Include
+                    Rank neighbourhoods by:
                 </h2>
                 <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
                     {selectedAssetCount} of {assetTypes.length}
