@@ -48,7 +48,7 @@ export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
 
     try {
         features = FSAGeoData.map(fsa => {
-            const fsaData = rankedFSAData.find(f => f.DGUID === fsa.DGUID)
+            const fsaData = FSAData.find(f => f.DGUID === fsa.DGUID)
             return {
                 "type": "Feature",
                 "properties": {
