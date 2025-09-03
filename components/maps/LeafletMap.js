@@ -10,7 +10,6 @@ const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapCo
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const GeoJSON = dynamic(() => import('react-leaflet').then(mod => mod.GeoJSON), { ssr: false })
 
-
 const categories = [
   {
     name: 1,
@@ -50,7 +49,6 @@ export default function LeafletMap({ geojson, fsaRankings }) {
       })
     }
   }, [])
-
 
   const style = useMemo(() => (feature) => {
     // GeoJSON takes an immutable data object so in order to get a dynamic style based on rankings we need to refer to data outside of the feature object
