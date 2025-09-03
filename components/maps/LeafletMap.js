@@ -1,73 +1,44 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
+
 import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const GeoJSON = dynamic(() => import('react-leaflet').then(mod => mod.GeoJSON), { ssr: false })
-const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false })
-// Fix for default markers in react-leaflet
-// import L from 'leaflet'
-// delete L.Icon.Default.prototype._getIconUrl
-// L.Icon.Default.mergeOptions({
-//   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
-//   iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
-//   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
-// })
+
 
 const categories = [
   {
-    name: 'top',
+    name: 1,
     color: '#de3f96',
     label: 'Top'
   },
   {
-    name: 'middle',
+    name: 2,
     color: '#00bcd9',
     label: 'Middle'
   },
   {
-    name: 'bottom',
+    name: 3,
     color: '#5251be',
     label: 'Bottom'
   }
 ]
 
-export default function LeafletMap({geojson, fsaData}) {
+export default function LeafletMap({ geojson, fsaRankings }) {
   const [selectedFSA, setSelectedFSA] = useState(null)
   const [map, setMap] = useState(null)
-  // const [loading, setLoading] = useState(true)
 
-  // useEffect(() => {
-  //   // Load FSA GeoJSON data
-  //   fetch('/data/fsa_2021_waterloo.json')
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       setFsaData(data)
-  //       setLoading(false)
-  //     })
-  //     .catch(error => {
-  //       console.error('Error loading FSA data:', error)
-  //       setLoading(false)
-  //     })
-  // }, [])
-
-  useEffect(() => {
-    if (selectedFSA) {
-      console.log(selectedFSA)
-    }
-  }, [selectedFSA])
-
-  const onEachFeature = (feature, layer) => {
+  const onEachFeature = useMemo(() => (feature, layer) => {
     if (feature.properties) {
       layer.bindPopup(
         `<div>
           <h3 class="font-semibold">${feature.properties.GEO_DISPLAY_NAME}</h3>
           <p class="text-sm text-gray-600">FSA: ${feature.properties.CFSAUID}</p>
-          <p class="text-sm text-gray-600">Population: ${feature.properties.Population}</p>
           <p class="text-sm text-gray-600">Median age: ${feature.properties.Median_age_of_the_population}</p>
           <p class="text-sm text-gray-600">Total private dwellings: ${feature.properties.Total_private_dwellings}</p>
         </div>`
@@ -77,10 +48,13 @@ export default function LeafletMap({geojson, fsaData}) {
         setSelectedFSA(feature.properties)
       })
     }
-  }
+  }, [])
 
-  const style = (feature) => {
-    const category = categories.find(c => c.name === feature.properties.ranking)
+
+  const style = useMemo(() => (feature) => {
+    // GeoJSON takes an immutable data object so in order to get a dynamic style based on rankings we need to refer to data outside of the feature object
+    const categoryNumber = fsaRankings[feature.properties.DGUID]
+    const category = categories.find(c => c.name === categoryNumber)
     return {
       fillColor: category.color,
       weight: 2,
@@ -88,15 +62,7 @@ export default function LeafletMap({geojson, fsaData}) {
       color: category.color,
       fillOpacity: 0.2
     }
-  }
-
-  // if (loading) {
-  //   return (
-  //     <div className="w-full h-96 flex items-center justify-center">
-  //       <div className="text-gray-500">Loading map...</div>
-  //     </div>
-  //   )
-  // }
+  }, [fsaRankings])
 
   return (
     <div className="w-full h-[500px] rounded-lg overflow-hidden">
@@ -123,4 +89,4 @@ export default function LeafletMap({geojson, fsaData}) {
       </MapContainer>
     </div>
   )
-} 
+}

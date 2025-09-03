@@ -1,13 +1,88 @@
 'use client'
 
+import { useState } from "react";
+
+import getRankGroup from "app/one-million-neighbours/utils/getRankGroup";
 import LeafletMap from "components/maps/LeafletMap";
 import OneMillionNeighboursLayout from "components/OneMillionNeighboursLayout";
+import SidebarComponent from "./SideBarComponent";
+import calculateCombinedAssetRanks from "app/one-million-neighbours/utils/calculateCombinedAssetRanks";
+const ASSET_TYPES = [
+    { key: 'centres', label: 'Community Centers' },
+    { key: 'trails', label: 'Trails & Paths' },
+    { key: 'pools', label: 'Public Pools' },
+    { key: 'parks', label: 'Parks & Green Space' }
+];
 
-export default function OneMillionNeighboursComponent({FSAData, FSAGeoJSON}) {
+const defaultGeoJSON = {
+    "type": "FeatureCollection",
+    "crs": {
+        "type": "name",
+        "properties": {
+            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
+        }
+    },
+    "name": "fsa_2021_reprojected",
+    "features": []
+}
+
+export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
+    const [selectedAssets, setSelectedAssets] = useState({
+        centres: true,
+        trails: true,
+        pools: true,
+        parks: true,
+    });
+
+    const handleAssetToggle = (key) => {
+        setSelectedAssets({
+            ...selectedAssets,
+            [key]: !selectedAssets[key]
+        });
+    };
+
+
+
+    let features = []
+    let totalNeighbourhoods = FSAData.length;
+
+    try {
+        features = FSAGeoData.map(fsa => {
+            const fsaData = rankedFSAData.find(f => f.DGUID === fsa.DGUID)
+            return {
+                "type": "Feature",
+                "properties": {
+                    "CFSAUID": fsa.GEO_NAME,
+                    "DGUID": fsa.DGUID,
+                    "id": fsa.id,
+                    "PRNAME": "Ontario",
+                    "LANDAREA": fsa.LANDAREA,
+                    ...fsaData,
+                },
+                geometry: JSON.parse(fsa.geometry)
+            }
+        })
+    } catch (error) {
+        console.error(error)
+    }
+
+    const rankedFSAData = calculateCombinedAssetRanks(selectedAssets, FSAData);
+    // Create a map of FSA DGUIDs to their rank groups (1, 2, or 3)
+    const fsaRankings = rankedFSAData.reduce((acc, fsa) => {
+        acc[fsa.DGUID] = getRankGroup(fsa.combined_rank, totalNeighbourhoods, 3)
+        return acc
+    }, {})
+
+    const FSAGeoJSON = {
+        ...defaultGeoJSON,
+        features: features
+    }
+
+    const sideBar = <SidebarComponent selectedAssets={selectedAssets} handleAssetToggle={handleAssetToggle} assetTypes={ASSET_TYPES} />
 
     return (
-        <OneMillionNeighboursLayout sidebar={<></>}>
-            <LeafletMap geojson={FSAGeoJSON} fsaData={FSAData}/>
+        <OneMillionNeighboursLayout sidebar={sideBar}>
+            <LeafletMap geojson={FSAGeoJSON} fsaRankings={fsaRankings} />
         </OneMillionNeighboursLayout>
     );
 
