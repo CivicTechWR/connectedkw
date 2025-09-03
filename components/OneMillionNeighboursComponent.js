@@ -5,8 +5,9 @@ import { useState } from "react";
 import getRankGroup from "app/one-million-neighbours/utils/getRankGroup";
 import LeafletMap from "components/maps/LeafletMap";
 import OneMillionNeighboursLayout from "components/OneMillionNeighboursLayout";
-import SidebarComponent from "./SideBarComponent";
 import calculateCombinedAssetRanks from "app/one-million-neighbours/utils/calculateCombinedAssetRanks";
+import AssetFilters from "components/AssetFilters";
+
 const ASSET_TYPES = [
     { key: 'centres', label: 'Community Centers' },
     { key: 'trails', label: 'Trails & Paths' },
@@ -78,7 +79,11 @@ export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
         features: features
     }
 
-    const sideBar = <SidebarComponent selectedAssets={selectedAssets} handleAssetToggle={handleAssetToggle} assetTypes={ASSET_TYPES} />
+    const sideBar = <AssetFilters
+        selectedAssets={selectedAssets}
+        onAssetToggle={handleAssetToggle}
+        assetTypes={ASSET_TYPES}
+    />
 
     return (
         <OneMillionNeighboursLayout sidebar={sideBar}>
