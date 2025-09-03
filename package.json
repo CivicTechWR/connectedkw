@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint --fix",
-    "supabase": "supabase"
+    "supabase": "supabase",
+    "test:rank": "tsx ./app/one-million-neighbours/utils/tests/calculateCombinedAssetRanksTest.js"
+
   },
   "dependencies": {
     "@directus/sdk": "19.0.0",
@@ -72,6 +74,7 @@
     "postcss": "^8.5.3",
     "prettier": "^3.5.3",
     "supabase": "^1.110.1",
-    "tailwindcss": "^4.1.3"
+    "tailwindcss": "^4.1.3",
+    "tsx": "^4.20.5"
   }
 }
