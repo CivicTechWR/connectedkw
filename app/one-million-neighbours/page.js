@@ -14,46 +14,13 @@ const defaultGeoJSON = {
 }
 
 export default async function OneMillionNeighboursPage() {
-  const FSAs = await getFSAGeoData()
+  const FSAGeoData = await getFSAGeoData()
   const FSAData = await getFSAData()
-
-  const featuresWithRanking = FSAData.map((feature, index) => {
-    return {
-      ...feature,
-      ranking: feature.combined_rank < 9 ? 'top' : feature.combined_rank < 17 ? 'middle' : 'bottom',
-    }
-  })
-
-  let features = []
-  try {
-    features = FSAs.map(fsa => {
-      const fsaData = featuresWithRanking.find(f => f.DGUID === fsa.DGUID)
-      return {
-        "type": "Feature",
-        "properties": {
-          "CFSAUID": fsa.GEO_NAME,
-          "DGUID": fsa.DGUID,
-          "id": fsa.id,
-          "PRNAME": "Ontario",
-          "LANDAREA": fsa.LANDAREA,
-          ...fsaData
-        },
-        geometry: JSON.parse(fsa.geometry)
-      }
-    })
-  } catch (error) {
-    console.error(error)
-  }
-
-  const FSAGeoJSON = {
-    ...defaultGeoJSON,
-    features: features
-  }
 
   return (
     <div className="container mx-auto px-4 py-16">
       <h1 className="text-4xl font-bold mb-8">One Million Neighbours</h1>
-      <OneMillionNeighboursComponent FSAData={FSAData} FSAGeoJSON={FSAGeoJSON} />
+      <OneMillionNeighboursComponent FSAData={FSAData} FSAGeoData={FSAGeoData} />
     </div>
   )
 }
