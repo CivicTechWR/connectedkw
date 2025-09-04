@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
+import FsaPopup from './FsaPopup'
 import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
 const TileLayer = dynamic(() => import('react-leaflet').then(mod => mod.TileLayer), { ssr: false })
 const GeoJSON = dynamic(() => import('react-leaflet').then(mod => mod.GeoJSON), { ssr: false })
-const Polygon = dynamic(() => import('react-leaflet').then(mod => mod.Polygon), { ssr: false })
+const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ssr: false })
 // Fix for default markers in react-leaflet
 // import L from 'leaflet'
 // delete L.Icon.Default.prototype._getIconUrl
@@ -22,38 +23,24 @@ const categories = [
   {
     name: 'top',
     color: '#de3f96',
-    label: 'Top'
+    label: 'Abundant access'
   },
   {
     name: 'middle',
     color: '#00bcd9',
-    label: 'Middle'
+    label: 'Average access'
   },
   {
     name: 'bottom',
     color: '#5251be',
-    label: 'Bottom'
+    label: 'Least access'
   }
 ]
 
 export default function LeafletMap({geojson, fsaData}) {
   const [selectedFSA, setSelectedFSA] = useState(null)
   const [map, setMap] = useState(null)
-  // const [loading, setLoading] = useState(true)
-
-  // useEffect(() => {
-  //   // Load FSA GeoJSON data
-  //   fetch('/data/fsa_2021_waterloo.json')
-  //     .then(response => response.json())
-  //     .then(data => {
-  //       setFsaData(data)
-  //       setLoading(false)
-  //     })
-  //     .catch(error => {
-  //       console.error('Error loading FSA data:', error)
-  //       setLoading(false)
-  //     })
-  // }, [])
+  const [popupPosition, setPopupPosition] = useState(null)
 
   useEffect(() => {
     if (selectedFSA) {
@@ -63,18 +50,10 @@ export default function LeafletMap({geojson, fsaData}) {
 
   const onEachFeature = (feature, layer) => {
     if (feature.properties) {
-      layer.bindPopup(
-        `<div>
-          <h3 class="font-semibold">${feature.properties.GEO_DISPLAY_NAME}</h3>
-          <p class="text-sm text-gray-600">FSA: ${feature.properties.CFSAUID}</p>
-          <p class="text-sm text-gray-600">Population: ${feature.properties.Population}</p>
-          <p class="text-sm text-gray-600">Median age: ${feature.properties.Median_age_of_the_population}</p>
-          <p class="text-sm text-gray-600">Total private dwellings: ${feature.properties.Total_private_dwellings}</p>
-        </div>`
-      )
 
-      layer.on('click', () => {
-        setSelectedFSA(feature.properties)
+      layer.on('click', (e) => {
+        setPopupPosition(e.latlng)
+        setSelectedFSA(feature)
       })
     }
   }
@@ -99,10 +78,10 @@ export default function LeafletMap({geojson, fsaData}) {
   // }
 
   return (
-    <div className="w-full h-[500px] rounded-lg overflow-hidden">
+    <div className="w-full h-full rounded-lg overflow-hidden">
       <MapContainer
-        center={[43.5, -80.5]} // Waterloo region
-        zoom={9}
+        center={[43.45, -80.5]} // Waterloo region
+        zoom={11}
         style={{ height: '100%', width: '100%' }}
         zoomControl={true}
         scrollWheelZoom={true}
@@ -118,6 +97,11 @@ export default function LeafletMap({geojson, fsaData}) {
             style={style}
             onEachFeature={onEachFeature}
           />
+        )}
+        {selectedFSA && popupPosition && (
+          <Popup position={popupPosition}>
+            <FsaPopup feature={selectedFSA} totalFSAs={fsaData.length} />
+          </Popup>
         )}
         <Legend categories={categories} />
       </MapContainer>
