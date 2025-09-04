@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
 import FsaPopup from './FsaPopup'
@@ -21,34 +21,28 @@ const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ss
 
 const categories = [
   {
-    name: 'top',
+    name: 1,
     color: '#de3f96',
     label: 'Abundant access'
   },
   {
-    name: 'middle',
+    name: 2,
     color: '#00bcd9',
     label: 'Average access'
   },
   {
-    name: 'bottom',
+    name: 3,
     color: '#5251be',
     label: 'Least access'
   }
 ]
 
-export default function LeafletMap({geojson, fsaData}) {
+export default function LeafletMap({ geojson, fsaRankings }) {
   const [selectedFSA, setSelectedFSA] = useState(null)
   const [map, setMap] = useState(null)
   const [popupPosition, setPopupPosition] = useState(null)
 
-  useEffect(() => {
-    if (selectedFSA) {
-      console.log(selectedFSA)
-    }
-  }, [selectedFSA])
-
-  const onEachFeature = (feature, layer) => {
+  const onEachFeature = useMemo(() => (feature, layer) => {
     if (feature.properties) {
 
       layer.on('click', (e) => {
@@ -56,10 +50,12 @@ export default function LeafletMap({geojson, fsaData}) {
         setSelectedFSA(feature)
       })
     }
-  }
+  }, [])
 
-  const style = (feature) => {
-    const category = categories.find(c => c.name === feature.properties.ranking)
+  const style = useMemo(() => (feature) => {
+    // GeoJSON takes an immutable data object so in order to get a dynamic style based on rankings we need to refer to data outside of the feature object
+    const categoryNumber = fsaRankings[feature.properties.DGUID]
+    const category = categories.find(c => c.name === categoryNumber)
     return {
       fillColor: category.color,
       weight: 2,
@@ -67,15 +63,7 @@ export default function LeafletMap({geojson, fsaData}) {
       color: category.color,
       fillOpacity: 0.2
     }
-  }
-
-  // if (loading) {
-  //   return (
-  //     <div className="w-full h-96 flex items-center justify-center">
-  //       <div className="text-gray-500">Loading map...</div>
-  //     </div>
-  //   )
-  // }
+  }, [fsaRankings])
 
   return (
     <div className="w-full h-full rounded-lg overflow-hidden">
@@ -107,4 +95,4 @@ export default function LeafletMap({geojson, fsaData}) {
       </MapContainer>
     </div>
   )
-} 
+}
