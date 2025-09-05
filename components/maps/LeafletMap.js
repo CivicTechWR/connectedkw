@@ -80,7 +80,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
         )}
         {selectedFSA && popupPosition && (
           <Popup position={popupPosition}>
-            <FsaPopup feature={selectedFSA} totalFSAs={fsaData.length} />
+            <FsaPopup feature={selectedFSA} totalFSAs={geojson.length} />
           </Popup>
         )}
         <Legend categories={categories} />
