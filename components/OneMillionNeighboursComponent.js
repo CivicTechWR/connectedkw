@@ -11,7 +11,7 @@ import AssetFilters from "components/AssetFilters";
 const ASSET_TYPES = [
     { key: 'centres', label: 'Community Centers' },
     { key: 'trails', label: 'Trails & Paths' },
-    { key: 'pools', label: 'Public Pools' },
+    { key: 'pools', label: 'Pools' },
     { key: 'parks', label: 'Parks & Green Space' }
 ];
 
