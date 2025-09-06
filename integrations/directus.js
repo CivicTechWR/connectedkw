@@ -955,6 +955,26 @@ const createEvent = async (eventData) => {
   }
 };
 
+const getFSAData = async () => {
+  const fsaData = await directus.request(
+    readItems('WATERLOO_FSA_DATA', {
+      fields: '*',
+    })
+  );
+
+  return fsaData;
+}
+
+const getFSAGeoData = async () => {
+  const fsaGeoData = await directus.request(
+    readItems('WATERLOO_GEO_DATA', {
+      fields: '*',
+    })
+  );
+
+  return fsaGeoData
+};
+
 export {
   getEvents,
   getEventCategories,
@@ -986,4 +1006,6 @@ export {
   importImage,
   createEvent,
   directusClient,
+  getFSAData,
+  getFSAGeoData,
 };

@@ -1,0 +1,182 @@
+---
+title: "Data Normalization for Civic Tech - One Million Neighbours project"
+author: "Craig A. Sloss"
+date: "2025-08-17"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+# Import data
+
+Load data as of August 16, 2025:
+
+```{r cars}
+original_data = read.csv("./WATERLOO_FSA_DATA 20250816-12317.csv") %>%
+  arrange(GEO_NAME)
+original_data %>% head()
+```
+
+## Check data quality
+
+Number of rows in the data:
+```{r}
+original_data %>% nrow()
+```
+
+Number of unique FSAs in the data:
+```{r}
+original_data %>% 
+  pull(GEO_NAME) %>%
+  n_distinct()
+```
+
+Discrepancy between the two numbers indicates that there are duplicated rows in this data -- each FSA appears to have 2 rows. A visual scan of the data suggests that duplicates may be due to some of the rows containing missing values for "community_centre" and other columns. Remove rows with missing values:
+
+```{r}
+original_data = original_data %>%
+  filter(!is.na(community_centre))
+original_data %>% head()
+```
+
+Re-check that each FSA corresponds to a single row in the data:
+```{r}
+original_data %>% nrow()
+```
+
+```{r}
+original_data %>% 
+  pull(GEO_NAME) %>%
+  n_distinct()
+```
+The two numbers agree, indicating there are no duplicated FSAs.
+
+
+Confirm that there is no missing data:
+```{r}
+original_data %>%
+  is.na() %>%
+  sum()
+```
+
+Provide a high-level summary as a reosanability check:
+```{r}
+original_data %>%
+  summary()
+```
+
+# Calculate metrics
+
+## Calculate per capita data
+
+Four metrics were identified as priorities to include in the map: parks, pools, community centres, and trails. To enable fair comparisons between FSAs of different population sizes, convert these to per-capita numbers by dividing by the 2021 population. Display a sample of the results as a reasonability check.
+
+```{r}
+per_capita_data = original_data %>%
+  mutate(parks_per_capita = park / Population,
+         pools_per_capita = pool / Population,
+         community_centre_per_capita = community_centre / Population,
+         trails_per_capita = trail / Population)
+per_capita_data %>% 
+  select(GEO_NAME,
+         parks_per_capita,
+         pools_per_capita,
+         community_centre_per_capita,
+         trails_per_capita) %>%
+  head()
+```
+
+Check for missing values:
+```{r}
+per_capita_data %>%
+  select(parks_per_capita, 
+         pools_per_capita, 
+         community_centre_per_capita, 
+         trails_per_capita) %>%
+  is.na() %>%
+  sum()
+```
+No missing values introduced. 
+
+High-level reasonability check (and to double-check later calculations):
+```{r}
+per_capita_data %>%
+  select(parks_per_capita, 
+         pools_per_capita, 
+         community_centre_per_capita, 
+         trails_per_capita) %>%
+  summary()
+```
+
+## Standardize data
+
+Convert all metrics so that they have a mean of 0 and standard deviation of 1. This ensures that they all have similar magnitudes (easier to compare and combine). The standardized values can be interpreted as: positive numbers mean the neighbourhood is above average for that metric. Negative numbers mean it's below average.
+
+```{r}
+mean_parks_per_capita = per_capita_data %>% pull(parks_per_capita) %>% mean()
+mean_parks_per_capita
+sd_parks_per_capita = per_capita_data %>% pull(parks_per_capita) %>% sd()
+sd_parks_per_capita
+```
+
+```{r}
+mean_pools_per_capita = per_capita_data %>% pull(pools_per_capita) %>% mean()
+mean_pools_per_capita
+sd_pools_per_capita = per_capita_data %>% pull(pools_per_capita) %>% sd()
+sd_pools_per_capita
+```
+
+```{r}
+mean_community_centre_per_capita = per_capita_data %>% pull(community_centre_per_capita) %>% mean()
+mean_community_centre_per_capita
+sd_community_centre_per_capita = per_capita_data %>% pull(community_centre_per_capita) %>% sd()
+sd_community_centre_per_capita
+```
+
+```{r}
+mean_trails_per_capita = per_capita_data %>% pull(trails_per_capita) %>% mean()
+mean_trails_per_capita
+sd_trails_per_capita = per_capita_data %>% pull(trails_per_capita) %>% sd()
+sd_trails_per_capita
+```
+
+Now use these to create standardized versions of the metrics. Introduce a new metric, "combined_metric", which is the average of all four standardized metric. Then convert this to a ranking (highest metric = rank 1, lowest metric = rank 23). Sort the data from highest to lowest rank.
+
+```{r}
+standardized_per_capita_data = per_capita_data %>%
+  mutate(parks_per_capita_standardized = (parks_per_capita - mean_parks_per_capita) / sd_parks_per_capita,
+         pools_per_capita_standardized = (pools_per_capita - mean_pools_per_capita) / sd_pools_per_capita,
+         community_centre_per_capita_standardized = (community_centre_per_capita - mean_community_centre_per_capita) / sd_community_centre_per_capita,
+         trails_per_capita_standardized = (trails_per_capita - mean_trails_per_capita) / sd_trails_per_capita) %>%
+  mutate(combined_metric = (parks_per_capita_standardized +
+                              pools_per_capita_standardized + 
+                              community_centre_per_capita_standardized +
+                              trails_per_capita_standardized) / 4) %>%
+  mutate(combined_rank = rank(-combined_metric)) %>%
+  arrange(combined_rank)
+```
+
+Reasonability check:
+```{r}
+standardized_per_capita_data %>% 
+  select(parks_per_capita_standardized, 
+       pools_per_capita_standardized,
+       community_centre_per_capita_standardized,
+       trails_per_capita_standardized,
+       combined_metric) %>%
+  summary()
+```
+
+Notice that all metrics have an average of 0, and similar ranges between min and max values, suggesting that the standardization has been successful in producing metrics that have similar magnitudes. 
+
+# Export data
+
+Remove some interim calculations to simplify the data, then export as a CSV
+```{r}
+exported_data = standardized_per_capita_data
+write_csv(exported_data, "./WATERLOO_FSA_DATA_STANDARDIZED 20250817.csv", quote = "all")
+```
+
