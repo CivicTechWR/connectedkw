@@ -51,6 +51,30 @@ export default async function AllArticles() {
       </Section>
       <Section>
           <div className="space-y-2 divide-y divide-slate-300">
+            <div className="w-full article py-4 gap-4 flex-auto flex flex-col sm:flex-row">
+                <div className={`w-full aspect-video sm:aspect-square sm:w-40 grow-0 relative min-h-0 overflow-hidden`}>
+                  <Link href={`/one-million-neighbours`}>
+                    <Image
+                      className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
+                      src={`/articles/1mn-map.png`}
+                      alt="one million neighbours" 
+                      title="one million neighbours"
+                      loading="lazy"
+                      height="200"
+                      width="200"
+                    />
+                  </Link>
+                </div>
+                <div>
+                  <Link href={`/one-million-neighbours`}>
+                    <h3>One Million Neighbours</h3>
+                  </Link>
+                    <p className="uppercase text-sm mb-2 text-grey"><time>Sept 6, 2025</time></p>
+                  <p className="">
+                    Mapping neighbourhood equity in Waterloo Region using open data
+                  </p>
+                </div>
+              </div>
           {
             pages.map(page => {
               const urlFragment = urlFragments[page.template]
