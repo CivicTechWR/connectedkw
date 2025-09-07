@@ -25,9 +25,9 @@ export default async function AllArticles() {
             <div className="flex justify-center items-center">
               <div>
                 <h1 className="text-4 mb-6 md:text-6xl font-title">
-                  Local info for families in KW
+                  Local info
                 </h1>
-                <p className="text-lg">{`Get the inside scoop on what's going on in Waterloo Region for kids and families.`}</p> 
+                <p className="text-lg">{`Get the inside scoop on what's going on in Waterloo Region.`}</p> 
                 <p className="text-lg">{`We publish articles, maps, recommendations, and more. We're always looking for contributors if you'd like to share your knowledge!`}</p> 
                 <p className="text-lg">{`Follow us on Instagram to find out about new content.`}</p>
                 <a href="https://www.instagram.com/connectedkw" className="btn my-6">
