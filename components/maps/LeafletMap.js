@@ -1,5 +1,4 @@
 'use client'
-
 import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
@@ -36,8 +35,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
 
   const onEachFeature = useMemo(() => (feature, layer) => {
     if (feature.properties) {
-
-      layer.on('click', (e) => {
+       layer.on('click', (e) => {
         setPopupPosition(e.latlng)
         setSelectedFSA(feature)
       })
@@ -58,7 +56,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
   }, [fsaRankings])
 
   return (
-    <div className="w-full h-full overflow-hidden">
+    <div className="w-full h-[50vh] md:h-full overflow-hidden">
       <MapContainer
         center={[43.45, -80.5]} // Waterloo region
         zoom={11}

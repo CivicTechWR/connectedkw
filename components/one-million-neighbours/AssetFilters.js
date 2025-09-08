@@ -1,11 +1,10 @@
-
 export default function AssetFilters({ selectedAssets, onAssetToggle, assetTypes }) {
     const selectedAssetCount = Object.values(selectedAssets).filter(Boolean).length;
 
     return (
-        <aside className="bg-white w-80 flex flex-col h-full">
+        <aside className="bg-white w-full md:w-80 flex flex-col h-auto md:h-full">
             <div className="flex-1 overflow-y-auto">
-                <section className="p-6" aria-labelledby="assets-heading">
+                <section className="p-4 md:p-6" aria-labelledby="assets-heading">
                     <div className="flex items-center justify-between mb-4">
                         <h2 id="assets-heading" className="text-sm font-semibold text-gray-900">
                             Rank neighbourhoods by:
@@ -29,6 +28,5 @@ export default function AssetFilters({ selectedAssets, onAssetToggle, assetTypes
                 </section>
             </div>
         </aside>
-
     );
 }
