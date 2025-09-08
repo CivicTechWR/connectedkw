@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getProfileSkills } from '../../../integrations/directus';
+import { getProfileSkills } from 'integrations/directus';
 
 export async function GET() {
   try {
