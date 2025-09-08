@@ -56,7 +56,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
   }, [fsaRankings])
 
   return (
-    <div className="w-full h-[50vh] md:h-full overflow-hidden">
+    <div className="w-full h-[60vh] md:h-full overflow-hidden">
       <MapContainer
         center={[43.45, -80.5]} // Waterloo region
         zoom={11}
