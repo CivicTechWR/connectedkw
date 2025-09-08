@@ -5,6 +5,14 @@ import GridCard from "components/GridCard"
 
 import { getPagesByTemplate, getEvents } from 'integrations/directus';
 
+const oneMnCardItem = {
+  slug: 'one-million-neighbours',
+  title: 'One Million Neighbours',
+  description: 'Mapping neighbourhood equity in Waterloo Region with open data',
+  image: '/articles/1mn-map.png',
+  classification: 'map'
+}
+
 export default async function Home() {
   const places = await getPagesByTemplate('map')
   const events = await getEvents(10)
@@ -74,6 +82,25 @@ export default async function Home() {
             Local Info 🐝
           </h2>
           <div className="flex flex-nowrap space-x-6 overflow-auto styled-scrollbar snap-x snap-mandatory ">
+            <div className={`w-10/12 md:w-5/12 lg:w-3/12 flex-none snap-center snap-always md:snap-start shadow snap-start transition-all relative p-0 items-start flex-col bg-white overflow-hidden mb-1`}>
+              <div className={`w-full h-full min-h-0`}>
+                <div className={`aspect-square flex-none overflow-hidden bg-latte`}>
+                  <Image
+                    className={`object-cover w-full h-full min-[500px]:max-md:aspect-square`}
+                    src={'/articles/1mn-map.png'}
+                    alt={"event image"}
+                    width={500}
+                    height={500}
+                  />
+                </div>
+                <div className={`basis-2/3 flex-auto text-left overflow-auto h-full styled-scrollbar p-3`}>
+                  <Link href={`/one-million-neighbours`}>
+                    <h3 className="text-xl mb-2 font-body font-medium">One Million Neighbours</h3>
+                  </Link>
+                    <p>Mapping neighbourhood equity in Waterloo Region with open data</p>
+                </div>
+              </div>
+            </div>
             {mapPages.map(map => <GridCard item={map} showImage showDescription key={map.slug} className="w-10/12 md:w-5/12 lg:w-3/12 flex-none snap-center snap-always md:snap-start" />)}
           </div>
           <div className="w-full mt-4">

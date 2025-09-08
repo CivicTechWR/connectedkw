@@ -2,11 +2,11 @@
 
 import { useState } from "react";
 
-import getRankGroup from "app/one-million-neighbours/utils/getRankGroup";
+import getRankGroup from "components/one-million-neighbours/utils/getRankGroup";
 import LeafletMap from "components/maps/LeafletMap";
-import OneMillionNeighboursLayout from "components/OneMillionNeighboursLayout";
-import calculateCombinedAssetRanks from "app/one-million-neighbours/utils/calculateCombinedAssetRanks";
-import AssetFilters from "components/AssetFilters";
+import OneMillionNeighboursLayout from "components/one-million-neighbours/OneMillionNeighboursLayout";
+import calculateCombinedAssetRanks from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
+import AssetFilters from "components/one-million-neighbours/AssetFilters";
 
 const ASSET_TYPES = [
     { key: 'centres', label: 'Community Centers' },

@@ -1,5 +1,5 @@
 import localFont from 'next/font/local';
-const slackey = localFont({ src: '../assets/fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
+const slackey = localFont({ src: '../../assets/fonts/Slackey/Slackey-Regular.ttf', variable: "--font-slackey" })
 import AuthProvider from 'components/auth/AuthProvider'
 import NavigationHeader from 'components/layout/NavigationHeader'
 import Footer from 'components/layout/Footer'
@@ -8,7 +8,7 @@ import PlausibleProvider from 'next-plausible'
 import InfoNotification from 'components/notifications/InfoNotification'
 import { Suspense } from 'react'
 
-import '../styles/globals.css'
+import '../../styles/globals.css'
 
 export const metadata = {
   title: {
@@ -68,14 +68,9 @@ export default function RootLayout({
         <body className={`${slackey.variable}`} position="relative">
           <div className={`flex flex-auto flex-col justify-stretch items-stretch min-h-screen w-full`}>
             <AuthProvider>
-              <NavigationHeader />
-              <Suspense fallback={null}>
-                <InfoNotification />
-              </Suspense>
               <main className="flex-auto snap-y">
                 {children}
               </main>
-              <Footer />
             </AuthProvider>
           </div>
         </body>

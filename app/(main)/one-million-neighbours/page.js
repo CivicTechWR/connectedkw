@@ -1,5 +1,5 @@
 import { getFSAGeoData, getFSAData } from 'integrations/directus';
-import OneMillionNeighboursComponent from 'components/OneMillionNeighboursComponent';
+import OneMillionNeighboursComponent from 'components/one-million-neighbours/OneMillionNeighboursComponent';
 
 const defaultGeoJSON = {
   "type": "FeatureCollection",
