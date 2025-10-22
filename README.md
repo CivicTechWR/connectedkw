@@ -39,6 +39,8 @@ npm install
 yarn install
 ```
 
+Create an `.env.local` file and copy in the environment variables (from the pinned comment in the Slack channel) 
+
 Then run the development server:
 
 ```bash
