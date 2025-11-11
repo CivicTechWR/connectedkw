@@ -9,10 +9,12 @@ import calculateCombinedAssetRanks from "components/one-million-neighbours/utils
 import AssetFilters from "components/one-million-neighbours/AssetFilters";
 
 const ASSET_TYPES = [
-    { key: 'centres', label: 'Community Centers' },
-    { key: 'trails', label: 'Trails & Paths' },
-    { key: 'pools', label: 'Pools' },
-    { key: 'parks', label: 'Parks & Green Space' }
+    { key: 'parks', label: 'Green Space' },
+    { key: 'schools', label: 'Schools' },
+    { key: 'libraries', label: 'Libraries' },
+    { key: 'health', label: 'Healthcare' },
+    { key: 'transportation', label: 'Light Rail Transit' },
+    { key: 'community_centres', label: 'Community Centres' },
 ];
 
 const defaultGeoJSON = {
@@ -27,12 +29,14 @@ const defaultGeoJSON = {
     "features": []
 }
 
-export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
+export default function OneMillionNeighboursComponent({ neighbourhoodData, neighbourhoodGeography }) {
     const [selectedAssets, setSelectedAssets] = useState({
-        centres: true,
-        trails: true,
-        pools: true,
         parks: true,
+        schools: true,
+        libraries: true,
+        health: true,
+        transportation: true,
+        community_centres: true,
     });
 
     const handleAssetToggle = (key) => {
@@ -45,36 +49,38 @@ export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
 
 
     let features = []
-    let totalNeighbourhoods = FSAData.length;
+    let totalNeighbourhoods = neighbourhoodData.length;
 
     try {
-        features = FSAGeoData.map(fsa => {
-            const fsaData = FSAData.find(f => f.DGUID === fsa.DGUID)
+        features = neighbourhoodGeography.map(neighbourhood => {
+            const properties = neighbourhoodData.find(f => f.DGUID === neighbourhood.DGUID)
             return {
                 "type": "Feature",
                 "properties": {
-                    "CFSAUID": fsa.GEO_NAME,
-                    "DGUID": fsa.DGUID,
-                    "id": fsa.id,
+                    "CSDNAME": neighbourhood.CSDNAME,
+                    "GEO_NAME": neighbourhood.GEO_NAME,
+                    "DGUID": neighbourhood.DGUID,
+                    "id": neighbourhood.id,
                     "PRNAME": "Ontario",
-                    "LANDAREA": fsa.LANDAREA,
-                    ...fsaData,
+                    "LANDAREA": neighbourhood.landarea,
+                    ...properties,
                 },
-                geometry: JSON.parse(fsa.geometry)
+                geometry: JSON.parse(neighbourhood.geometry)
             }
         })
     } catch (error) {
         console.error(error)
     }
 
-    const rankedFSAData = calculateCombinedAssetRanks(selectedAssets, FSAData);
-    // Create a map of FSA DGUIDs to their rank groups (1, 2, or 3)
-    const fsaRankings = rankedFSAData.reduce((acc, fsa) => {
-        acc[fsa.DGUID] = getRankGroup(fsa.combined_rank, totalNeighbourhoods, 3)
+    const rankedNeighbourhoodData = calculateCombinedAssetRanks(selectedAssets, neighbourhoodData);
+    
+    // Create a map of DGUIDs to their rank groups (1, 2, or 3)
+    const rankings = rankedNeighbourhoodData.reduce((acc, neighbourhood) => {
+        acc[neighbourhood.DGUID] = getRankGroup(neighbourhood.combined_rank, totalNeighbourhoods, 3)
         return acc
     }, {})
 
-    const FSAGeoJSON = {
+    const neighbourhoodGeoJSON = {
         ...defaultGeoJSON,
         features: features
     }
@@ -87,7 +93,7 @@ export default function OneMillionNeighboursComponent({ FSAData, FSAGeoData }) {
 
     return (
         <OneMillionNeighboursLayout sidebar={sideBar}>
-            <LeafletMap geojson={FSAGeoJSON} fsaRankings={fsaRankings} />
+            <LeafletMap geojson={neighbourhoodGeoJSON} rankings={rankings} />
         </OneMillionNeighboursLayout>
     );
 

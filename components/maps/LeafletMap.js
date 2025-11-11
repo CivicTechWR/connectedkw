@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
-import FsaPopup from './FsaPopup'
+import NeighbourhoodPopup from './NeighbourhoodPopup'
 import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
@@ -28,8 +28,8 @@ const categories = [
   }
 ]
 
-export default function LeafletMap({ geojson, fsaRankings }) {
-  const [selectedFSA, setSelectedFSA] = useState(null)
+export default function LeafletMap({ geojson, rankings }) {
+  const [selectedNeighbourhood, setSelectedNeighbourhood] = useState(null)
   const [map, setMap] = useState(null)
   const [popupPosition, setPopupPosition] = useState(null)
 
@@ -37,14 +37,14 @@ export default function LeafletMap({ geojson, fsaRankings }) {
     if (feature.properties) {
        layer.on('click', (e) => {
         setPopupPosition(e.latlng)
-        setSelectedFSA(feature)
+        setSelectedNeighbourhood(feature)
       })
     }
   }, [])
 
   const style = useMemo(() => (feature) => {
     // GeoJSON takes an immutable data object so in order to get a dynamic style based on rankings we need to refer to data outside of the feature object
-    const categoryNumber = fsaRankings[feature.properties.DGUID]
+    const categoryNumber = rankings[feature.properties.DGUID]
     const category = categories.find(c => c.name === categoryNumber)
     return {
       fillColor: category.color,
@@ -53,7 +53,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
       color: category.color,
       fillOpacity: 0.2
     }
-  }, [fsaRankings])
+  }, [rankings])
 
   return (
     <div className="w-full h-[60vh] md:h-full overflow-hidden">
@@ -76,9 +76,9 @@ export default function LeafletMap({ geojson, fsaRankings }) {
             onEachFeature={onEachFeature}
           />
         )}
-        {selectedFSA && popupPosition && (
+        {selectedNeighbourhood && popupPosition && (
           <Popup position={popupPosition}>
-            <FsaPopup feature={selectedFSA} totalFSAs={geojson.length} />
+            <NeighbourhoodPopup feature={selectedNeighbourhood} totalNeighbourhoods={geojson.length} />
           </Popup>
         )}
         <Legend categories={categories} />
