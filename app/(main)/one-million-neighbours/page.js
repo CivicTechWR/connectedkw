@@ -21,8 +21,9 @@ export default async function OneMillionNeighboursPage() {
   const FSAGeoData = await getFSAGeoData();
   const FSAData = await getFSAData();
 
-  // ? Getting feature data from backend, testing with playground collection
-  const playgroundFeatures = await getFeaturesByCollection(13);
+  // Fetch both collections
+  const playgroundFeatures = await getFeaturesByCollection(13); // Parks/Playgrounds
+  const publicArtFeatures = await getFeaturesByCollection(12); // Public Art
 
   return (
     <div className="container mx-auto px-4 py-16">
@@ -63,6 +64,7 @@ export default async function OneMillionNeighboursPage() {
         FSAData={FSAData}
         FSAGeoData={FSAGeoData}
         playgroundFeatures={playgroundFeatures}
+        publicArtFeatures={publicArtFeatures}
       />
       <div className="mt-6">
         <h2 className="text-lg font-bold mb-4">

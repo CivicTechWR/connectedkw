@@ -28,10 +28,11 @@ const defaultGeoJSON = {
 };
 
 export default function OneMillionNeighboursComponent({
-  FSAData,
-  FSAGeoData,
-  playgroundFeatures,
-}) {
+                                                        FSAData,
+                                                        FSAGeoData,
+                                                        playgroundFeatures,
+                                                        publicArtFeatures,
+                                                      }) {
   const [selectedAssets, setSelectedAssets] = useState({
     centres: true,
     trails: true,
@@ -81,6 +82,18 @@ export default function OneMillionNeighboursComponent({
     features: features,
   };
 
+  // Combine all features with category labels
+  const combinedFeatures = [
+    ...playgroundFeatures.map(feature => ({
+      ...feature,
+      category: 'parks', // Add category identifier
+    })),
+    ...publicArtFeatures.map(feature => ({
+      ...feature,
+      category: 'publicArt', // Add category identifier
+    })),
+  ];
+
   const sideBar = (
     <AssetFilters
       selectedAssets={selectedAssets}
@@ -94,7 +107,7 @@ export default function OneMillionNeighboursComponent({
       <LeafletMap
         geojson={FSAGeoJSON}
         fsaRankings={fsaRankings}
-        playgroundFeatures={playgroundFeatures}
+        features={combinedFeatures} // Pass combined features instead of just playgroundFeatures
       />
     </OneMillionNeighboursLayout>
   );

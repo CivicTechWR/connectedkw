@@ -28,6 +28,18 @@ const categories = [
   },
 ];
 
+// Feature categories for markers
+const FEATURE_CATEGORIES = {
+  parks: {
+    color: '#06d6a0', // green
+    label: 'Parks',
+  },
+  publicArt: {
+    color: '#de3f96', // pink
+    label: 'Public Art',
+  },
+};
+
 const mapConfig = {
   center: [43.45, -80.5],
   zoom: 11,
@@ -35,15 +47,71 @@ const mapConfig = {
   scrollWheelZoom: true,
 };
 
-const clusterOptions = {
-  chunkedLoading: true,
-  maxClusterRadius: 80,
-  iconCreateFunction: (cluster) =>
-    L.divIcon({
+// Smart cluster icon that adapts to single or multi-category
+const createClusterIcon = (cluster) => {
+  // Count markers by category
+  const categoryCount = {};
+  cluster.getAllChildMarkers().forEach((marker) => {
+    const category = marker.options.markerCategory;
+    if (category) {
+      categoryCount[category] = (categoryCount[category] || 0) + 1;
+    }
+  });
+
+  const categoryKeys = Object.keys(categoryCount);
+
+  // Single category or no category info: simple green circle
+  if (categoryKeys.length <= 1) {
+    return L.divIcon({
       html: `<span class="cluster-icon">${cluster.getChildCount()}</span>`,
       className: 'custom-marker-cluster',
       iconSize: L.point(33, 33, true),
-    }),
+    });
+  }
+
+  // Multi-category: Create segmented display
+  const segments = Object.entries(categoryCount)
+    .map(([category, count]) => {
+      const config = FEATURE_CATEGORIES[category];
+      return `
+        <div style="
+          background-color: ${config.color};
+          color: white;
+          padding: 4px 10px;
+          font-weight: bold;
+          font-size: 13px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          min-width: 28px;
+          height: 100%;
+          font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        ">
+          ${count}
+        </div>
+      `;
+    })
+    .join('<div style="width: 1px; background: white; height: 100%;"></div>');
+
+  return L.divIcon({
+    html: `
+      <div style="
+        display: inline-flex;
+        align-items: center;
+        background: white;
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.9);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+        overflow: hidden;
+        height: 30px;
+        line-height: 1;
+      ">
+        ${segments}
+      </div>
+    `,
+    className: 'custom-multi-marker-cluster',
+    iconSize: null,
+  });
 };
 
 // Custom icon for playground features
@@ -64,11 +132,16 @@ const MarkerClusterMemo = React.memo(function MarkerCluster({ markers }) {
   useEffect(() => {
     if (!map) return;
 
-    const markerClusterGroup = L.markerClusterGroup(clusterOptions);
+    const markerClusterGroup = L.markerClusterGroup({
+      chunkedLoading: true,
+      maxClusterRadius: 80,
+      iconCreateFunction: createClusterIcon, // ← Use our new function
+    });
 
     const markersLayer = markers.reduce((group, marker) => {
       const leafletMarker = L.marker(marker.coordinates, {
         icon: playgroundIcon,
+        markerCategory: marker.category || 'parks',
       }).bindPopup(`
         <div>
           <h3 class="font-bold mb-2">${marker.name}</h3>
@@ -89,12 +162,14 @@ const MarkerClusterMemo = React.memo(function MarkerCluster({ markers }) {
 });
 
 export default function LeafletMapClient({
-  geojson,
-  fsaRankings,
-  playgroundFeatures,
-}) {
+                                           geojson,
+                                           fsaRankings,
+                                           features,
+                                           playgroundFeatures,
+                                         }) {
   const [selectedFSA, setSelectedFSA] = useState(null);
   const [popupPosition, setPopupPosition] = useState(null);
+  const featureData = features || playgroundFeatures || [];
 
   const onEachFeature = useMemo(
     () => (feature, layer) => {
@@ -110,7 +185,7 @@ export default function LeafletMapClient({
 
   const playgroundMarkers = useMemo(
     () =>
-      playgroundFeatures
+      featureData
         .filter((feature) => feature.location?.coordinates?.coordinates)
         .map((feature) => ({
           coordinates: [
@@ -120,8 +195,9 @@ export default function LeafletMapClient({
           name: feature.title || 'Unnamed Location',
           address: feature.location.street_address || '',
           description: feature.description || '',
+          category: feature.category || 'parks',
         })),
-    [playgroundFeatures]
+    [featureData]
   );
 
   const style = useMemo(
@@ -146,20 +222,27 @@ export default function LeafletMapClient({
   return (
     <div className="w-full h-[60vh] md:h-full overflow-hidden">
       <style jsx global>{`
-        .custom-marker-cluster {
-          background: #06d6a0;
-          border-radius: 50%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          border: 2px solid #fff;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-        }
-        .cluster-icon {
-          color: white;
-          font-weight: bold;
-          font-size: 14px;
-        }
+          .custom-marker-cluster {
+              background: #06d6a0;
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 2px solid #fff;
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+          }
+          .cluster-icon {
+              color: white;
+              font-weight: bold;
+              font-size: 14px;
+          }
+          .custom-multi-marker-cluster {
+              background: transparent !important;
+              border: none !important;
+          }
+          .custom-multi-marker-cluster div {
+              border: none !important;
+          }
       `}</style>
       <MapContainer {...mapConfig} style={{ height: '100%', width: '100%' }}>
         <TileLayer
