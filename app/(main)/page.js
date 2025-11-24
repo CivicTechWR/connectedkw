@@ -8,7 +8,7 @@ import { getPagesByTemplate, getEvents } from 'integrations/directus';
 const oneMnCardItem = {
   slug: 'one-million-neighbours',
   title: 'One Million Neighbours',
-  description: 'Mapping neighbourhood equity in Waterloo Region with open data',
+  description: 'Mapping neighbourhood services in Waterloo Region with open data',
   image: '/articles/1mn-map.png',
   classification: 'map'
 }
@@ -97,7 +97,7 @@ export default async function Home() {
                   <Link href={`/one-million-neighbours`}>
                     <h3 className="text-xl mb-2 font-body font-medium">One Million Neighbours</h3>
                   </Link>
-                    <p>Mapping neighbourhood equity in Waterloo Region with open data</p>
+                    <p>Mapping neighbourhood services in Waterloo Region with open data</p>
                 </div>
               </div>
             </div>

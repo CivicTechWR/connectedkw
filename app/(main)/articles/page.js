@@ -71,7 +71,7 @@ export default async function AllArticles() {
                   </Link>
                     <p className="uppercase text-sm mb-2 text-grey"><time>Sept 6, 2025</time></p>
                   <p className="">
-                    Mapping neighbourhood equity in Waterloo Region using open data
+                    Mapping neighbourhood services in Waterloo Region using open data
                   </p>
                 </div>
               </div>

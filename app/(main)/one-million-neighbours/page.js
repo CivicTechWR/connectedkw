@@ -21,10 +21,10 @@ export default async function OneMillionNeighboursPage() {
     <div className="container mx-auto px-4 py-16">
       <div className="mb-6">
         <h1 className="text-4xl font-bold mb-6 text-center">Who Has Access?</h1>
-        <p className="text-2xl font-bold mb-6 text-center">Mapping neighbourhood equity in Waterloo Region</p>
+        <p className="text-2xl font-bold mb-6 text-center">Mapping neighbourhood services in Waterloo Region</p>
         <p>As Waterloo Region grows to One Million Neighbours in the next few decades, how can we build toward a future that is inclusive, resilient, and abundant for all? </p>
-        <p>This map is a proof of concept showing the level of access to parks, pools, trails, and community centres. Which neighbourhoods have abundant access? Which ones need more investment in public space? (“Neighbourhoods” are defined by the first three letters of the postal code, for example, N2R)</p>
-        <p>This map is one way we are measuring progress towards the <a href="https://onemillionneighbours.ca/" target="_blank" rel="noopener noreferrer">One Million Neighbours vision</a>, a bottom-up vision for the future created by non-profits and community groups over the course of 8 roundtable discussions in 2024 and 2025. We identified common priorities and built future scenarios based on the concept of multisolving: that is, finding solutions that solve multiple problems at the same time, while advancing equity.</p>
+        <p>This map shows the level of access to services like parks, green space, transit, healthcare, and community space. Which neighbourhoods have abundant access? Which ones need more investment?</p>
+        <p>This map is one way we are measuring progress towards the <a href="https://onemillionneighbours.ca/" target="_blank" rel="noopener noreferrer">One Million Neighbours vision</a>, created by non-profits and community groups across Waterloo Region. We identified common priorities and envisioned future scenarios based on multisolving: finding solutions that solve multiple problems at the same time, while advancing equity.</p>
       </div>
       <OneMillionNeighboursComponent neighbourhoodData={neighbourhoodData} neighbourhoodGeography={neighbourhoodGeography} />
       <div className="mt-6">
