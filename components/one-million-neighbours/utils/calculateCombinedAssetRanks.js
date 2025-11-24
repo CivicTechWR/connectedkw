@@ -79,7 +79,7 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
         const libraries_std = neighbourhoodFilters.libraries ? (neighbourhood.libraries_per_capita - meanLibraries) / sdLibraries : 0;
         const health_std = neighbourhoodFilters.health ? (neighbourhood.health_per_capita - meanHealth) / sdHealth : 0;
         const transit_std = neighbourhoodFilters.transit ? (neighbourhood.transit_per_capita - meanTransit) / sdTransit : 0;
-        const community_spaces_std = neighbourhoodFilters.community_spaces ? (neighbourhood.community_spaces_per_capita - meanCommunitySpace) / sdCommunitySpace : 0;
+        const community_spaces_std = neighbourhoodFilters.community_spaces ? (neighbourhood.community_spaces_per_capita - meanCommunitySpaces) / sdCommunitySpaces : 0;
 
         // The combined metric is the average of the 6 standardized metrics.
         const combined_metric = Math.round((parks_std + schools_std + libraries_std + health_std + transit_std + community_spaces_std) / 6 * 1000000) / 1000000;
