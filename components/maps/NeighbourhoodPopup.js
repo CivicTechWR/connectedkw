@@ -32,12 +32,12 @@ const NeighbourhoodPopup = ({ feature, totalNeighbourhoods=60 }) => {
 
           <div className="flex justify-between gap-4 border-b py-1">
             <div>Transit</div>
-            <div>{feature.properties.assets_transportation_count}</div>
+            <div>{feature.properties.assets_transit_count}</div>
           </div>
 
           <div className="flex justify-between gap-4 border-b py-1">
-            <div>Community Centres</div>
-            <div>{feature.properties.assets_community_centres_count}</div>
+            <div>Community Space</div>
+            <div>{feature.properties.assets_community_spaces_count}</div>
           </div>
         </div>
       </div>

@@ -9,8 +9,8 @@
 //     "assets_schools_count": 5,
 //     "assets_libraries_count": 5,
 //     "assets_health_count": 5,
-//     "assets_transportation_count": 5,
-//     "assets_community_centres_count": 5,
+//     "assets_transit_count": 5,
+//     "assets_community_spaces_count": 5,
 // }
 export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighbourhoodData) {
     
@@ -40,8 +40,8 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
         schools_per_capita: neighbourhood.assets_schools_count / neighbourhood.population_2021,
         libraries_per_capita: neighbourhood.assets_libraries_count / neighbourhood.population_2021,
         health_per_capita: neighbourhood.assets_health_count / neighbourhood.population_2021,
-        transportation_per_capita: neighbourhood.assets_transportation_count / neighbourhood.population_2021,
-        community_centres_per_capita: neighbourhood.assets_community_centres_count / neighbourhood.population_2021,
+        transit_per_capita: neighbourhood.assets_transit_count / neighbourhood.population_2021,
+        community_spaces_per_capita: neighbourhood.assets_community_spaces_count / neighbourhood.population_2021,
     }));
 
     // --- Step 2: Standardize data (get means and standard deviations first) ---
@@ -50,24 +50,24 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
     const schoolsPerCapita = perCapitaData.map(d => d.schools_per_capita);
     const librariesPerCapita = perCapitaData.map(d => d.libraries_per_capita);
     const healthPerCapita = perCapitaData.map(d => d.health_per_capita);
-    const transportationPerCapita = perCapitaData.map(d => d.transportation_per_capita);
-    const communityCentresPerCapita = perCapitaData.map(d => d.community_centres_per_capita);
+    const transitPerCapita = perCapitaData.map(d => d.transit_per_capita);
+    const communitySpacesPerCapita = perCapitaData.map(d => d.community_spaces_per_capita);
 
     // Calculate the mean for each metric.
     const meanParks = getMean(parksPerCapita);
     const meanSchools = getMean(schoolsPerCapita);
     const meanLibraries = getMean(librariesPerCapita);
     const meanHealth = getMean(healthPerCapita);
-    const meanTransportation = getMean(transportationPerCapita);
-    const meanCommunityCentres = getMean(communityCentresPerCapita);
+    const meanTransit = getMean(transitPerCapita);
+    const meanCommunitySpaces = getMean(communitySpacesPerCapita);
 
     // Calculate the standard deviation for each metric.
     const sdParks = getStdDev(parksPerCapita);
     const sdSchools = getStdDev(schoolsPerCapita);
     const sdLibraries = getStdDev(librariesPerCapita);
     const sdHealth = getStdDev(healthPerCapita);
-    const sdTransportation = getStdDev(transportationPerCapita);
-    const sdCommunityCentres = getStdDev(communityCentresPerCapita);
+    const sdTransit = getStdDev(transitPerCapita);
+    const sdCommunitySpaces = getStdDev(communitySpacesPerCapita);
 
     // --- Step 3: Calculate standardized values and the combined metric ---
     // If a filter is not selected (value is false), its standardized value is set to 0 so it is not included in the combined metric.
@@ -78,11 +78,11 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
         const schools_std = neighbourhoodFilters.schools ? (neighbourhood.schools_per_capita - meanSchools) / sdSchools : 0;
         const libraries_std = neighbourhoodFilters.libraries ? (neighbourhood.libraries_per_capita - meanLibraries) / sdLibraries : 0;
         const health_std = neighbourhoodFilters.health ? (neighbourhood.health_per_capita - meanHealth) / sdHealth : 0;
-        const transportation_std = neighbourhoodFilters.transportation ? (neighbourhood.transportation_per_capita - meanTransportation) / sdTransportation : 0;
-        const community_centres_std = neighbourhoodFilters.community_centres ? (neighbourhood.community_centres_per_capita - meanCommunityCentres) / sdCommunityCentres : 0;
+        const transit_std = neighbourhoodFilters.transit ? (neighbourhood.transit_per_capita - meanTransit) / sdTransit : 0;
+        const community_spaces_std = neighbourhoodFilters.community_spaces ? (neighbourhood.community_spaces_per_capita - meanCommunitySpace) / sdCommunitySpace : 0;
 
         // The combined metric is the average of the 6 standardized metrics.
-        const combined_metric = Math.round((parks_std + schools_std + libraries_std + health_std + transportation_std + community_centres_std) / 6 * 1000000) / 1000000;
+        const combined_metric = Math.round((parks_std + schools_std + libraries_std + health_std + transit_std + community_spaces_std) / 6 * 1000000) / 1000000;
 
         return {
             ...neighbourhood,
@@ -90,8 +90,8 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
             schools_per_capita_standardized: schools_std,
             libraries_per_capita_standardized: libraries_std,
             health_per_capita_standardized: health_std,
-            transportation_per_capita_standardized: transportation_std,
-            community_centres_per_capita_standardized: community_centres_std,
+            transit_per_capita_standardized: transit_std,
+            community_spaces_per_capita_standardized: community_spaces_std,
             combined_metric: combined_metric,
         };
     });

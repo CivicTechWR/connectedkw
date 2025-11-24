@@ -13,8 +13,8 @@ const ASSET_TYPES = [
     { key: 'schools', label: 'Schools' },
     { key: 'libraries', label: 'Libraries' },
     { key: 'health', label: 'Healthcare' },
-    { key: 'transportation', label: 'Light Rail Transit' },
-    { key: 'community_centres', label: 'Community Centres' },
+    { key: 'transit', label: 'Transit' },
+    { key: 'community_spaces', label: 'Community Space' },
 ];
 
 const defaultGeoJSON = {
@@ -35,8 +35,8 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
         schools: true,
         libraries: true,
         health: true,
-        transportation: true,
-        community_centres: true,
+        transit: true,
+        community_spaces: true,
     });
 
     const handleAssetToggle = (key) => {
