@@ -1,7 +1,7 @@
 import calculateCombinedAssetRanks from '../calculateCombinedAssetRanks';
 
 // --- Unit Test Implementation ---
-const FSADataFromR = [
+const neighbourhoodDataFromR = [
     {
         "GEO_NAME": "N0B",
         "Median_age_of_the_population": 42.8,
@@ -676,29 +676,29 @@ function runTest() {
     
     // 2. Define the expected output from the R script, extracted from your data.
     // create an object mapping GEO_NAME to data for easy lookup
-    const expectedCombinedMetricFromR = FSADataFromR.reduce((acc, d) => {
+    const expectedCombinedMetricFromR = neighbourhoodDataFromR.reduce((acc, d) => {
         acc[d.GEO_NAME] = d.combined_metric;
         return acc;
     }, {});
 
-    const FSAFilters = { parks: true, pools: true, centres: true, trails: true };
+    const neighbourhoodFilters = { parks: true, pools: true, centres: true, trails: true };
 
     // 3. Run the function with the test data.
-    const actualResult = calculateCombinedAssetRanks(FSAFilters, FSADataFromR);
+    const actualResult = calculateCombinedAssetRanks(neighbourhoodFilters, neighbourhoodDataFromR);
 
     // 4. Assert and check the results.
     let testsPassed = true;
     let failedTests = [];
-    actualResult.forEach(fsa => {
-        const expectedRank = expectedCombinedMetricFromR[fsa.GEO_NAME];
-        const actualRank = fsa.combined_metric;
+    actualResult.forEach(neighbourhood => {
+        const expectedRank = expectedCombinedMetricFromR[neighbourhood.GEO_NAME];
+        const actualRank = neighbourhood.combined_metric;
 
         if (expectedRank.toFixed(5) === actualRank.toFixed(5)) {
-            console.log(`✅ PASSED: For FSA ${fsa.GEO_NAME}, expected rank ${expectedRank}, got ${actualRank}.`);
+            console.log(`✅ PASSED: For neighbourhood ${neighbourhood.GEO_NAME}, expected rank ${expectedRank}, got ${actualRank}.`);
         } else {
-            console.error(`❌ FAILED: For FSA ${fsa.GEO_NAME}, expected rank ${expectedRank}, but got ${actualRank}.`);
+            console.error(`❌ FAILED: For neighbourhood ${neighbourhood.GEO_NAME}, expected rank ${expectedRank}, but got ${actualRank}.`);
             testsPassed = false;
-            failedTests.push({fsa: fsa.GEO_NAME, expected: expectedRank, actual: actualRank});
+            failedTests.push({neighbourhood: neighbourhood.GEO_NAME, expected: expectedRank, actual: actualRank});
         }
     });
 
@@ -714,7 +714,7 @@ function runTest() {
     // Display the full output for inspection
     console.log("\nFull calculation result from JavaScript:");
     console.table(actualResult.map(d => ({
-        FSA: d.GEO_NAME,
+        Neighbourhood: d.GEO_NAME,
         Combined_Metric: d.combined_metric.toFixed(6), // Increased precision for debugging
         Rank: d.combined_rank,
     })));

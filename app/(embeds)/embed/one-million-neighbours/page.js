@@ -1,13 +1,13 @@
-import { getFSAGeoData, getFSAData } from 'integrations/directus';
+import { getNeighbourhoodData, getNeighbourhoodGeography } from 'integrations/directus';
 import OneMillionNeighboursComponent from 'components/one-million-neighbours/OneMillionNeighboursComponent';
 
 export default async function OneMillionNeighboursPageEmbed() {
-  const FSAGeoData = await getFSAGeoData()
-  const FSAData = await getFSAData()
+  const neighbourhoodGeography = await getNeighbourhoodGeography()
+  const neighbourhoodData = await getNeighbourhoodData()
 
   return (
     <div className="h-screen w-screen">
-      <OneMillionNeighboursComponent FSAData={FSAData} FSAGeoData={FSAGeoData} />
+      <OneMillionNeighboursComponent neighbourhoodData={neighbourhoodData} neighbourhoodGeography={neighbourhoodGeography} />
     </div>
   )
 }

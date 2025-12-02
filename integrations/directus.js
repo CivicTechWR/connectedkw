@@ -955,24 +955,24 @@ const createEvent = async (eventData) => {
   }
 };
 
-const getFSAData = async () => {
-  const fsaData = await directus.request(
-    readItems('WATERLOO_FSA_DATA', {
+const getNeighbourhoodData = async () => {
+  const data = await directus.request(
+    readItems('Waterloo_Region_ADAs_Properties', {
       fields: '*',
     })
   );
 
-  return fsaData;
+  return data;
 }
 
-const getFSAGeoData = async () => {
-  const fsaGeoData = await directus.request(
-    readItems('WATERLOO_GEO_DATA', {
+const getNeighbourhoodGeography = async () => {
+  const data = await directus.request(
+    readItems('Waterloo_Region_ADAs', {
       fields: '*',
     })
   );
 
-  return fsaGeoData
+  return data
 };
 
 export {
@@ -1006,6 +1006,6 @@ export {
   importImage,
   createEvent,
   directusClient,
-  getFSAData,
-  getFSAGeoData,
+  getNeighbourhoodData,
+  getNeighbourhoodGeography,
 };
