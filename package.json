@@ -9,7 +9,6 @@
     "lint": "next lint --fix",
     "supabase": "supabase",
     "test:rank": "tsx ./app/one-million-neighbours/utils/tests/calculateCombinedAssetRanksTest.js"
-
   },
   "dependencies": {
     "@directus/sdk": "19.0.0",
@@ -42,6 +41,7 @@
     "ics": "^3.7.6",
     "isomorphic-dompurify": "^2.22.0",
     "leaflet": "^1.9.4",
+    "leaflet.markercluster": "^1.5.3",
     "luxon": "^3.4.4",
     "marked": "^13.0.2",
     "next": "^15.2.2",
