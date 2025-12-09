@@ -29,12 +29,12 @@ export default async function OneMillionNeighboursPage() {
       <OneMillionNeighboursComponent neighbourhoodData={neighbourhoodData} neighbourhoodGeography={neighbourhoodGeography} />
       <div className="mt-6">
         <h2 className="text-lg font-bold mb-4">How the ratings are calculated</h2>
-        <p>The ratings of neighbourhoods as “abundant,” “average,” or “least” access to resources are calculated as follows:</p>  
+        <p>The ratings of neighbourhoods as “most,” “average,” or “least” access to services are calculated as follows:</p>  
         <ul className="list-disc pl-5 mb-4">
-          <li className="mb-2">For each type of resource selected on the filter, divide by the population in the neighbourhood to get a per-capita value.</li>
-          <li className="mb-2">Adjust the sizes of the per-capita values so that they all have similar sizes. This ensures that all resource types are treated on an equal basis when combined.</li>
-          <li className="mb-2">Calculate the average among all resources selected on the filter</li>
-          <li className="mb-2">After combining all resources, the top third of neighbourhoods are rated as “abundant.” The middle third are “average” and the lowest third are rated as “least access.”</li>
+          <li className="mb-2">For each type of service selected on the filter, divide by the population in the neighbourhood to get a per-capita value.</li>
+          <li className="mb-2">Adjust the sizes of the per-capita values so that they all have similar weight. This ensures that all resource types are treated on an equal basis when combined.</li>
+          <li className="mb-2">Calculate the average among all selected services</li>
+          <li className="mb-2">After combining all resources, the top third of neighbourhoods are rated as “most access.” The middle third are “average” and the lowest third are rated as “least access.”</li>
         </ul>
       </div>
     </div>

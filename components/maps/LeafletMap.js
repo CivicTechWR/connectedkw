@@ -13,17 +13,17 @@ const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ss
 const categories = [
   {
     name: 1,
-    color: '#de3f96',
-    label: 'Abundant access'
+    color: '#00B88A',
+    label: 'Most access'
   },
   {
     name: 2,
-    color: '#00bcd9',
+    color: '#DE54A0',
     label: 'Average access'
   },
   {
     name: 3,
-    color: '#5251be',
+    color: '#7378cc',
     label: 'Least access'
   }
 ]
@@ -66,8 +66,8 @@ export default function LeafletMap({ geojson, rankings }) {
         ref={setMap}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution= '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
         {geojson && (
           <GeoJSON
@@ -78,7 +78,7 @@ export default function LeafletMap({ geojson, rankings }) {
         )}
         {selectedNeighbourhood && popupPosition && (
           <Popup position={popupPosition}>
-            <NeighbourhoodPopup feature={selectedNeighbourhood} totalNeighbourhoods={geojson.length} />
+            <NeighbourhoodPopup feature={selectedNeighbourhood} />
           </Popup>
         )}
         <Legend categories={categories} />

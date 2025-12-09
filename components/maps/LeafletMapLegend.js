@@ -2,7 +2,7 @@ const Legend = ({ categories }) => {
     if (!categories || categories.length === 0) return null
   
     return (
-      <div className='leaflet-bottom leaflet-left'>
+      <div className='leaflet-top leaflet-right'>
         <div className="leaflet-control leaflet-bar">
             <div className="legend bg-white p-2">
               <p className="font-semibold text-black mb-2">Legend</p>
