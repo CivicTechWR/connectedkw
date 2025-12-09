@@ -100,10 +100,32 @@ export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighb
     // Sort in descending order (highest combined_metric first).
     const sortedData = standardizedData.sort((a, b) => b.combined_metric - a.combined_metric);
 
-    // Assign the rank based on the sorted order (index + 1).
+    // Split sorted data into rank groups based on combined metric
+    const combined_metric_max = sortedData[0].combined_metric;
+    const combined_metric_min = sortedData[sortedData.length - 1].combined_metric;
+    const combined_metric_range = combined_metric_max - combined_metric_min;
+    const getRankFromMetric = (combined_metric, index) => {
+
+        // If the metric is zero, always make sure it's in the 3rd group
+        const combined_metric_percent = (combined_metric - combined_metric_min) / combined_metric_range * 100;
+        if (combined_metric_percent === 0) return 3;
+
+        // Otherwise group them based on their sorted position
+        // Top third is in group 1
+        // Middle third is in group 2
+        // Bottom third is in group 3
+        if (index < (sortedData.length / 3)) {
+            return 1;
+        } else if (index < (sortedData.length / 3 * 2)) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
     const rankedData = sortedData.map((neighbourhood, index) => ({
         ...neighbourhood,
-        combined_rank: index + 1,
+        combined_rank: getRankFromMetric(neighbourhood.combined_metric, index),
     }));
 
     return rankedData;

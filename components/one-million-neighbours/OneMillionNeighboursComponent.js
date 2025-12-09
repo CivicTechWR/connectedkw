@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 
-import getRankGroup from "components/one-million-neighbours/utils/getRankGroup";
 import LeafletMap from "components/maps/LeafletMap";
 import OneMillionNeighboursLayout from "components/one-million-neighbours/OneMillionNeighboursLayout";
 import calculateCombinedAssetRanks from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
@@ -14,7 +13,7 @@ const ASSET_TYPES = [
     { key: 'libraries', label: 'Libraries' },
     { key: 'health', label: 'Healthcare' },
     { key: 'transit', label: 'Transit' },
-    { key: 'community_spaces', label: 'Community Space' },
+    { key: 'community_spaces', label: 'Community Spaces' },
 ];
 
 const defaultGeoJSON = {
@@ -76,7 +75,7 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
     
     // Create a map of DGUIDs to their rank groups (1, 2, or 3)
     const rankings = rankedNeighbourhoodData.reduce((acc, neighbourhood) => {
-        acc[neighbourhood.DGUID] = getRankGroup(neighbourhood.combined_rank, totalNeighbourhoods, 3)
+        acc[neighbourhood.DGUID] = neighbourhood.combined_rank;
         return acc
     }, {})
 
