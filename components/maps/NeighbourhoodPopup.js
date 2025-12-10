@@ -1,7 +1,7 @@
 const NeighbourhoodPopup = ({ feature }) => {
     return (
       <div className="max-h-80 overflow-auto">
-        <h3 class="text-blue">{feature.properties.GEO_NAME}</h3>
+        <h3 className="text-blue">{feature.properties.GEO_NAME}</h3>
         <div className="text-sm">
           <div>Population {feature.properties.population_2021.toLocaleString()}</div>
 
