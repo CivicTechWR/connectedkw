@@ -9,7 +9,6 @@
     "lint": "next lint --fix",
     "supabase": "supabase",
     "test:rank": "tsx ./app/one-million-neighbours/utils/tests/calculateCombinedAssetRanksTest.js"
-
   },
   "dependencies": {
     "@directus/sdk": "19.0.0",
@@ -44,7 +43,7 @@
     "leaflet": "^1.9.4",
     "luxon": "^3.4.4",
     "marked": "^13.0.2",
-    "next": "^15.2.2",
+    "next": "15.2.6",
     "next-auth": "^4.24.11",
     "next-plausible": "^3.12.4",
     "next-pwa": "^5.6.0",
