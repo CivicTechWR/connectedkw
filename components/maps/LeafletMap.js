@@ -2,7 +2,7 @@
 import { useState, useMemo } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
-import FsaPopup from './FsaPopup'
+import NeighbourhoodPopup from './NeighbourhoodPopup'
 import 'leaflet/dist/leaflet.css'
 
 const MapContainer = dynamic(() => import('react-leaflet').then(mod => mod.MapContainer), { ssr: false })
@@ -13,23 +13,23 @@ const Popup = dynamic(() => import('react-leaflet').then(mod => mod.Popup), { ss
 const categories = [
   {
     name: 1,
-    color: '#de3f96',
-    label: 'Abundant access'
+    color: '#00B88A',
+    label: 'Most access'
   },
   {
     name: 2,
-    color: '#00bcd9',
+    color: '#DE54A0',
     label: 'Average access'
   },
   {
     name: 3,
-    color: '#5251be',
+    color: '#7378cc',
     label: 'Least access'
   }
 ]
 
-export default function LeafletMap({ geojson, fsaRankings }) {
-  const [selectedFSA, setSelectedFSA] = useState(null)
+export default function LeafletMap({ geojson, rankings }) {
+  const [selectedNeighbourhood, setSelectedNeighbourhood] = useState(null)
   const [map, setMap] = useState(null)
   const [popupPosition, setPopupPosition] = useState(null)
 
@@ -37,14 +37,14 @@ export default function LeafletMap({ geojson, fsaRankings }) {
     if (feature.properties) {
        layer.on('click', (e) => {
         setPopupPosition(e.latlng)
-        setSelectedFSA(feature)
+        setSelectedNeighbourhood(feature)
       })
     }
   }, [])
 
   const style = useMemo(() => (feature) => {
     // GeoJSON takes an immutable data object so in order to get a dynamic style based on rankings we need to refer to data outside of the feature object
-    const categoryNumber = fsaRankings[feature.properties.DGUID]
+    const categoryNumber = rankings[feature.properties.DGUID]
     const category = categories.find(c => c.name === categoryNumber)
     return {
       fillColor: category.color,
@@ -53,7 +53,7 @@ export default function LeafletMap({ geojson, fsaRankings }) {
       color: category.color,
       fillOpacity: 0.2
     }
-  }, [fsaRankings])
+  }, [rankings])
 
   return (
     <div className="w-full h-[60vh] md:h-full overflow-hidden">
@@ -66,8 +66,8 @@ export default function LeafletMap({ geojson, fsaRankings }) {
         ref={setMap}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution= '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png"
         />
         {geojson && (
           <GeoJSON
@@ -76,9 +76,9 @@ export default function LeafletMap({ geojson, fsaRankings }) {
             onEachFeature={onEachFeature}
           />
         )}
-        {selectedFSA && popupPosition && (
+        {selectedNeighbourhood && popupPosition && (
           <Popup position={popupPosition}>
-            <FsaPopup feature={selectedFSA} totalFSAs={geojson.length} />
+            <NeighbourhoodPopup feature={selectedNeighbourhood} />
           </Popup>
         )}
         <Legend categories={categories} />

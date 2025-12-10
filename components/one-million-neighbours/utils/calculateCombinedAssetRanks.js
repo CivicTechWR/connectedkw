@@ -1,20 +1,22 @@
-// Calculate the combined rank of each FSA based on the selected filters
+// Calculate the combined rank of each Neighbourhood based on the selected filters
 
-// FSAfilters is an array of [{filterName: boolean}]
-// FSAData is an array of objects with at least the following keys:
+// neighbourhoodFilters is an array of [{filterName: boolean}]
+// neighbourhoodData is an array of objects with at least the following keys:
 // {
-//     "GEO_NAME": "N0B",
-//     "Population": 86919,
-//     "park": 2,
-//     "pool": 2,
-//     "community_centre": 2,
-//     "trail": 20
+//     "GEO_NAME": "Uptown Waterloo",
+//     "population_2021": 86919,
+//     "assets_parks_count": 5,
+//     "assets_schools_count": 5,
+//     "assets_libraries_count": 5,
+//     "assets_health_count": 5,
+//     "assets_transit_count": 5,
+//     "assets_community_spaces_count": 5,
 // }
-export default function calculateCombinedAssetRanks(FSAFilters, FSAData) {
+export default function calculateCombinedAssetRanks(neighbourhoodFilters, neighbourhoodData) {
     
     // If there are less than 2 neighbourhoods, return the original data with a combined_rank of 1
-    if (FSAData.length < 2) {
-        return FSAData.map((fsa) => ({ ...fsa, combined_rank: 1 }));
+    if (neighbourhoodData.length < 2) {
+        return neighbourhoodData.map((neighbourhood) => ({ ...neighbourhood, combined_rank: 1 }));
     }
     // Helper function to calculate the mean (average) of an array of numbers.
     const getMean = (arr) => arr.reduce((acc, val) => acc + val, 0) / arr.length;
@@ -32,51 +34,64 @@ export default function calculateCombinedAssetRanks(FSAFilters, FSAData) {
 
 
     // --- Step 1: Calculate per capita data ---
-    const perCapitaData = FSAData.map(fsa => ({
-        ...fsa,
-        parks_per_capita: fsa.park / fsa.Population,
-        pools_per_capita: fsa.pool / fsa.Population,
-        community_centre_per_capita: fsa.community_centre / fsa.Population,
-        trails_per_capita: fsa.trail / fsa.Population,
+    const perCapitaData = neighbourhoodData.map(neighbourhood => ({
+        ...neighbourhood,
+        parks_per_capita: neighbourhood.assets_parks_count / neighbourhood.population_2021,
+        schools_per_capita: neighbourhood.assets_schools_count / neighbourhood.population_2021,
+        libraries_per_capita: neighbourhood.assets_libraries_count / neighbourhood.population_2021,
+        health_per_capita: neighbourhood.assets_health_count / neighbourhood.population_2021,
+        transit_per_capita: neighbourhood.assets_transit_count / neighbourhood.population_2021,
+        community_spaces_per_capita: neighbourhood.assets_community_spaces_count / neighbourhood.population_2021,
     }));
 
     // --- Step 2: Standardize data (get means and standard deviations first) ---
     // Create arrays of each per-capita metric to easily calculate stats.
     const parksPerCapita = perCapitaData.map(d => d.parks_per_capita);
-    const poolsPerCapita = perCapitaData.map(d => d.pools_per_capita);
-    const ccPerCapita = perCapitaData.map(d => d.community_centre_per_capita);
-    const trailsPerCapita = perCapitaData.map(d => d.trails_per_capita);
+    const schoolsPerCapita = perCapitaData.map(d => d.schools_per_capita);
+    const librariesPerCapita = perCapitaData.map(d => d.libraries_per_capita);
+    const healthPerCapita = perCapitaData.map(d => d.health_per_capita);
+    const transitPerCapita = perCapitaData.map(d => d.transit_per_capita);
+    const communitySpacesPerCapita = perCapitaData.map(d => d.community_spaces_per_capita);
 
     // Calculate the mean for each metric.
     const meanParks = getMean(parksPerCapita);
-    const meanPools = getMean(poolsPerCapita);
-    const meanCC = getMean(ccPerCapita);
-    const meanTrails = getMean(trailsPerCapita);
+    const meanSchools = getMean(schoolsPerCapita);
+    const meanLibraries = getMean(librariesPerCapita);
+    const meanHealth = getMean(healthPerCapita);
+    const meanTransit = getMean(transitPerCapita);
+    const meanCommunitySpaces = getMean(communitySpacesPerCapita);
 
     // Calculate the standard deviation for each metric.
     const sdParks = getStdDev(parksPerCapita);
-    const sdPools = getStdDev(poolsPerCapita);
-    const sdCC = getStdDev(ccPerCapita);
-    const sdTrails = getStdDev(trailsPerCapita);
+    const sdSchools = getStdDev(schoolsPerCapita);
+    const sdLibraries = getStdDev(librariesPerCapita);
+    const sdHealth = getStdDev(healthPerCapita);
+    const sdTransit = getStdDev(transitPerCapita);
+    const sdCommunitySpaces = getStdDev(communitySpacesPerCapita);
 
     // --- Step 3: Calculate standardized values and the combined metric ---
     // If a filter is not selected (value is false), its standardized value is set to 0 so it is not included in the combined metric.
     // Ternary explained: (if this condition is true) ? (use this value) : (if it is false, use this value)
-    const standardizedData = perCapitaData.map(fsa => {
-        const parks_std =  FSAFilters.parks ?  (fsa.parks_per_capita - meanParks) / sdParks : 0;
-        const pools_std =  FSAFilters.pools ?  (fsa.pools_per_capita - meanPools) / sdPools : 0;
-        const cc_std =  FSAFilters.centres ?  (fsa.community_centre_per_capita - meanCC) / sdCC : 0;
-        const trails_std =  FSAFilters.trails ?  (fsa.trails_per_capita - meanTrails) / sdTrails : 0;
+    const standardizedData = perCapitaData.map(neighbourhood => {
 
-        // The combined metric is the average of the four standardized metrics.
-        const combined_metric = Math.round((parks_std + pools_std + cc_std + trails_std) / 4 * 1000000) / 1000000;
+        const parks_std = neighbourhoodFilters.parks ? (neighbourhood.parks_per_capita - meanParks) / sdParks : 0;
+        const schools_std = neighbourhoodFilters.schools ? (neighbourhood.schools_per_capita - meanSchools) / sdSchools : 0;
+        const libraries_std = neighbourhoodFilters.libraries ? (neighbourhood.libraries_per_capita - meanLibraries) / sdLibraries : 0;
+        const health_std = neighbourhoodFilters.health ? (neighbourhood.health_per_capita - meanHealth) / sdHealth : 0;
+        const transit_std = neighbourhoodFilters.transit ? (neighbourhood.transit_per_capita - meanTransit) / sdTransit : 0;
+        const community_spaces_std = neighbourhoodFilters.community_spaces ? (neighbourhood.community_spaces_per_capita - meanCommunitySpaces) / sdCommunitySpaces : 0;
+
+        // The combined metric is the average of the 6 standardized metrics.
+        const combined_metric = Math.round((parks_std + schools_std + libraries_std + health_std + transit_std + community_spaces_std) / 6 * 1000000) / 1000000;
 
         return {
-            ...fsa,
+            ...neighbourhood,
             parks_per_capita_standardized: parks_std,
-            pools_per_capita_standardized: pools_std,
-            community_centre_per_capita_standardized: cc_std,
-            trails_per_capita_standardized: trails_std,
+            schools_per_capita_standardized: schools_std,
+            libraries_per_capita_standardized: libraries_std,
+            health_per_capita_standardized: health_std,
+            transit_per_capita_standardized: transit_std,
+            community_spaces_per_capita_standardized: community_spaces_std,
             combined_metric: combined_metric,
         };
     });
@@ -85,10 +100,32 @@ export default function calculateCombinedAssetRanks(FSAFilters, FSAData) {
     // Sort in descending order (highest combined_metric first).
     const sortedData = standardizedData.sort((a, b) => b.combined_metric - a.combined_metric);
 
-    // Assign the rank based on the sorted order (index + 1).
-    const rankedData = sortedData.map((fsa, index) => ({
-        ...fsa,
-        combined_rank: index + 1,
+    // Split sorted data into rank groups based on combined metric
+    const combined_metric_max = sortedData[0].combined_metric;
+    const combined_metric_min = sortedData[sortedData.length - 1].combined_metric;
+    const combined_metric_range = combined_metric_max - combined_metric_min;
+    const getRankFromMetric = (combined_metric, index) => {
+
+        // If the metric is zero, always make sure it's in the 3rd group
+        const combined_metric_percent = (combined_metric - combined_metric_min) / combined_metric_range * 100;
+        if (combined_metric_percent === 0) return 3;
+
+        // Otherwise group them based on their sorted position
+        // Top third is in group 1
+        // Middle third is in group 2
+        // Bottom third is in group 3
+        if (index < (sortedData.length / 3)) {
+            return 1;
+        } else if (index < (sortedData.length / 3 * 2)) {
+            return 2;
+        } else {
+            return 3;
+        }
+    }
+
+    const rankedData = sortedData.map((neighbourhood, index) => ({
+        ...neighbourhood,
+        combined_rank: getRankFromMetric(neighbourhood.combined_metric, index),
     }));
 
     return rankedData;
