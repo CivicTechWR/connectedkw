@@ -36,25 +36,25 @@ function isValidPublicUrl(url) {
 function getExtractor(url) {
   try {
     const { hostname } = new URL(url);
-    if (hostname.endsWith('eventbrite.com') || hostname.endsWith('eventbrite.ca')) {
+    if (hostname === 'eventbrite.com' || hostname.endsWith('.eventbrite.com') || hostname === 'eventbrite.ca' || hostname.endsWith('.eventbrite.ca')) {
       return eventbriteExtractor;
     }
-    if (hostname.endsWith('meetup.com')) {
+    if (hostname === 'meetup.com' || hostname.endsWith('.meetup.com')) {
       return meetupExtractor;
     }
-    if (hostname.endsWith('explorewaterloo.ca')) {
+    if (hostname === 'explorewaterloo.ca' || hostname.endsWith('.explorewaterloo.ca')) {
       return exploreWaterlooExtractor;
     }
-    if (hostname.endsWith('calendar.waterlooregionmuseum.ca')) {
+    if (hostname === 'calendar.waterlooregionmuseum.ca') {
       return waterlooRegionMuseumExtractor;
     }
-    if (hostname.endsWith('calendar.kitchener.ca')) {
+    if (hostname === 'calendar.kitchener.ca') {
       return cityOfKitchenerExtractor;
     }
-    if (hostname.endsWith('events.cambridge.ca')) {
+    if (hostname === 'events.cambridge.ca') {
       return cityOfCambridgeExtractor;
     }
-    if (hostname.endsWith('events.waterloo.ca')) {
+    if (hostname === 'events.waterloo.ca') {
       return cityOfWaterlooExtractor;
     }
   } catch {
@@ -74,8 +74,8 @@ export const importEventFromUrl = async (url) => {
     }
 
     try { const { hostname } = new URL(url);
-      if (hostname.endsWith('facebook.com')) return { error: 'Facebook events are not supported, please use the event form.' };
-      if (hostname.endsWith('instagram.com')) return { error: 'Instagram posts are not supported, please use the event form.' };
+      if (hostname === 'facebook.com' || hostname.endsWith('.facebook.com')) return { error: 'Facebook events are not supported, please use the event form.' };
+      if (hostname === 'instagram.com' || hostname.endsWith('.instagram.com')) return { error: 'Instagram posts are not supported, please use the event form.' };
     } catch { return { error: 'Invalid URL.' }; }
 
     // Fetch the webpage content
