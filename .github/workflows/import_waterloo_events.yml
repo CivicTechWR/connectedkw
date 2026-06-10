@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - 'waterloo_integration'
+permissions: {}
+
 jobs:
   build:
     name: Import City of Waterloo events
