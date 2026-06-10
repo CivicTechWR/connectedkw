@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - 'explore_integration'
+permissions: {}
+
 jobs:
   build:
     name: Import Explore Waterloo events
