@@ -21,27 +21,44 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
+function isValidPublicUrl(url) {
+  try {
+    const { protocol, hostname } = new URL(url);
+    if (!['http:', 'https:'].includes(protocol)) return false;
+    if (/^(localhost|127\.0\.0\.1|::1|0\.0\.0\.0)$/.test(hostname)) return false;
+    if (/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.|169\.254\.)/.test(hostname)) return false;
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 function getExtractor(url) {
-  if (url.includes('eventbrite.com') || url.includes('eventbrite.ca')) {
-    return eventbriteExtractor;
-  }
-  if (url.includes('meetup.com')) {
-    return meetupExtractor;
-  }
-  if (url.includes('explorewaterloo.ca')) {
-    return exploreWaterlooExtractor;
-  }
-  if (url.includes('calendar.waterlooregionmuseum.ca')) {
-    return waterlooRegionMuseumExtractor;
-  }
-  if (url.includes('calendar.kitchener.ca')) {
-    return cityOfKitchenerExtractor;
-  }
-  if (url.includes('events.cambridge.ca')) {
-    return cityOfCambridgeExtractor;
-  }
-  if (url.includes('events.waterloo.ca')) {
-    return cityOfWaterlooExtractor;
+  try {
+    const { hostname } = new URL(url);
+    if (hostname === 'eventbrite.com' || hostname.endsWith('.eventbrite.com') || hostname === 'eventbrite.ca' || hostname.endsWith('.eventbrite.ca')) {
+      return eventbriteExtractor;
+    }
+    if (hostname === 'meetup.com' || hostname.endsWith('.meetup.com')) {
+      return meetupExtractor;
+    }
+    if (hostname === 'explorewaterloo.ca' || hostname.endsWith('.explorewaterloo.ca')) {
+      return exploreWaterlooExtractor;
+    }
+    if (hostname === 'calendar.waterlooregionmuseum.ca') {
+      return waterlooRegionMuseumExtractor;
+    }
+    if (hostname === 'calendar.kitchener.ca') {
+      return cityOfKitchenerExtractor;
+    }
+    if (hostname === 'events.cambridge.ca') {
+      return cityOfCambridgeExtractor;
+    }
+    if (hostname === 'events.waterloo.ca') {
+      return cityOfWaterlooExtractor;
+    }
+  } catch {
+    return null;
   }
   return null;
 }
@@ -52,13 +69,14 @@ export const importEventFromUrl = async (url) => {
       return { error: 'URL is required' };
     }
 
-    if (url.includes('facebook.com/events')) {
-      return { error: 'Facebook events are not supported, please use the event form.' };
+    if (!isValidPublicUrl(url)) {
+      return { error: 'Invalid or unsupported URL.' };
     }
 
-    if (url.includes('instagram.com/')) {
-      return { error: 'Instagram posts are not supported, please use the event form.' };
-    }
+    try { const { hostname } = new URL(url);
+      if (hostname === 'facebook.com' || hostname.endsWith('.facebook.com')) return { error: 'Facebook events are not supported, please use the event form.' };
+      if (hostname === 'instagram.com' || hostname.endsWith('.instagram.com')) return { error: 'Instagram posts are not supported, please use the event form.' };
+    } catch { return { error: 'Invalid URL.' }; }
 
     // Fetch the webpage content
     const response = await fetch(url);
