@@ -9,7 +9,7 @@
     "lint": "next lint --fix",
     "supabase": "supabase",
     "test:rank": "tsx ./app/one-million-neighbours/utils/tests/calculateCombinedAssetRanksTest.js",
-    "test:da-scores": "node --test ./components/one-million-neighbours/utils/tests/calculateDAScoresTest.js"
+    "test:da": "node --test ./components/one-million-neighbours/utils/tests/calculateDAScoresTest.js ./components/one-million-neighbours/utils/tests/aggregateDAsTest.js"
   },
   "dependencies": {
     "@directus/sdk": "19.0.0",

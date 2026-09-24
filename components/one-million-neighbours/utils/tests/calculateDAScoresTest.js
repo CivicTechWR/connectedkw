@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import calculateDAScores, { CATEGORIES, NORMALIZERS, toNumberOrNull } from "../calculateDAScores.js";
+import calculateDAScores, { CATEGORIES, NORMALIZERS, categorizeByThirds, createDAScorer, toNumberOrNull } from "../calculateDAScores.js";
 
 // Made-up fixture of 10 DAs. Column names are placeholders until #98 is audited.
 // Includes blanks (null, "", ".."), zero population, and exact ties.
@@ -226,4 +226,29 @@ test("toNumberOrNull", () => {
     assert.equal(toNumberOrNull(undefined), null);
     assert.equal(toNumberOrNull(NaN), null);
     assert.equal(toNumberOrNull(Infinity), null);
+});
+
+test("categorizeByThirds places scores that are not in the reference list", () => {
+    const getCategory = categorizeByThirds([3, 2, 1]);
+    assert.equal(getCategory(10), CATEGORIES.MOST);
+    assert.equal(getCategory(2.5), CATEGORIES.SOME);
+    assert.equal(getCategory(1.5), CATEGORIES.LEAST);
+    assert.equal(getCategory(-10), CATEGORIES.LEAST);
+});
+
+test("createDAScorer scores a reference DA the same as calculateDAScores", () => {
+    const scoreDA = createDAScorer(das, measures);
+    for (const da of calculateDAScores(das, measures)) {
+        const { score, category, coverage, normalized, zero_population } = scoreDA(da);
+        assert.deepEqual({ score, category, coverage, normalized, zero_population },
+            { score: da.score, category: da.category, coverage: da.coverage, normalized: da.normalized, zero_population: da.zero_population });
+    }
+});
+
+test("createDAScorer treats a measure with no reference data as missing", () => {
+    const scoreDA = createDAScorer([{ prox_idx_parks: 0.5 }, { prox_idx_parks: 0.7 }], ["prox_idx_parks", "prox_idx_lib"]);
+    const result = scoreDA({ prox_idx_parks: 0.7, prox_idx_lib: 0.9 });
+    assert.equal(result.normalized.prox_idx_lib, null);
+    assert.equal(result.coverage, 0.5);
+    assert.ok(Number.isFinite(result.score));
 });

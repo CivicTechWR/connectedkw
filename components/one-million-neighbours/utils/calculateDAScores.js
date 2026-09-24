@@ -90,18 +90,22 @@ export const NORMALIZERS = {
 
 // Default categorizer: split scored DAs into thirds by rank.
 // Tied scores always share a rank, so ties always land in the same category.
+// Also works for a score that is not in the list, like a group of DAs (see aggregateDAs.js).
 export const categorizeByThirds = (scores) => {
-    const sorted = [...scores].sort((a, b) => b - a);
     return (score) => {
         // Competition rank: number of DAs with a strictly higher score.
-        const rank = sorted.findIndex((s) => s === score);
-        if (rank < sorted.length / 3) return CATEGORIES.MOST;
-        if (rank < (sorted.length / 3) * 2) return CATEGORIES.SOME;
+        const rank = scores.filter((s) => s > score).length;
+        if (rank < scores.length / 3) return CATEGORIES.MOST;
+        if (rank < (scores.length / 3) * 2) return CATEGORIES.SOME;
         return CATEGORIES.LEAST;
     };
 };
 
-export default function calculateDAScores(das, measures, options = {}) {
+// Build a scorer from a reference group of DAs (normally every DA in the region).
+// The returned function scores any area against that reference without changing it,
+// so a single DA and a group of DAs (see aggregateDAs.js) are scored the same way.
+// It returns { score, category, coverage, normalized, zero_population } for one area.
+export function createDAScorer(referenceDAs, measures, options = {}) {
     const {
         weights = {},
         normalize = "zscore",
@@ -110,7 +114,7 @@ export default function calculateDAScores(das, measures, options = {}) {
         populationKey = "population",
     } = options;
 
-    if (!Array.isArray(das)) throw new TypeError("das must be an array");
+    if (!Array.isArray(referenceDAs)) throw new TypeError("das must be an array");
     if (!Array.isArray(measures) || measures.length === 0) {
         throw new TypeError("measures must be a non-empty array of column names");
     }
@@ -128,22 +132,23 @@ export default function calculateDAScores(das, measures, options = {}) {
     const totalWeight = Object.values(measureWeights).reduce((sum, w) => sum + w, 0);
     if (totalWeight === 0) throw new Error("At least one measure needs a weight above 0");
 
-    // --- Step 1: Build a normalizer per measure from the values that are present ---
+    // --- Step 1: Build a normalizer per measure from the reference values that are present ---
     const normalizers = Object.fromEntries(measures.map((measure) => {
-        const values = das.map((da) => toNumberOrNull(da[measure])).filter((v) => v !== null);
+        const values = referenceDAs.map((da) => toNumberOrNull(da[measure])).filter((v) => v !== null);
         return [measure, values.length > 0 ? makeNormalizer(values) : null];
     }));
 
-    // --- Step 2: Weighted average of the measures each DA has data for ---
-    const scored = das.map((da) => {
-        const population = toNumberOrNull(da[populationKey]);
+    // --- Step 2: Weighted average of the measures an area has data for ---
+    const scoreArea = (area) => {
+        const population = toNumberOrNull(area[populationKey]);
         const normalized = {};
         let weightWithData = 0;
         let weightedSum = 0;
 
         for (const measure of measures) {
-            const value = toNumberOrNull(da[measure]);
-            if (value === null) {
+            const value = toNumberOrNull(area[measure]);
+            // No reference data for a measure means it can't be compared, so treat it as missing
+            if (value === null || normalizers[measure] === null) {
                 normalized[measure] = null;
                 continue;
             }
@@ -156,20 +161,29 @@ export default function calculateDAScores(das, measures, options = {}) {
         const hasEnoughData = weightWithData > 0 && coverage >= minCoverage;
 
         return {
-            ...da,
             score: hasEnoughData ? round(weightedSum / weightWithData) : null,
             coverage,
             normalized,
             zero_population: population === null || population === 0,
         };
-    });
+    };
 
-    // --- Step 3: Categorize DAs that have a score ---
-    const scores = scored.filter((da) => da.score !== null).map((da) => da.score);
-    const getCategory = scores.length > 0 ? categorize(scores) : null;
+    // --- Step 3: Categorize against the reference DAs that have a score ---
+    const referenceScores = referenceDAs.map((da) => scoreArea(da).score).filter((score) => score !== null);
+    const getCategory = referenceScores.length > 0 ? categorize(referenceScores) : null;
 
-    return scored.map((da) => ({
-        ...da,
-        category: da.score === null ? CATEGORIES.NOT_ENOUGH_DATA : getCategory(da.score),
-    }));
+    return (area) => {
+        const result = scoreArea(area);
+        return {
+            ...result,
+            category: result.score === null || getCategory === null
+                ? CATEGORIES.NOT_ENOUGH_DATA
+                : getCategory(result.score),
+        };
+    };
+}
+
+export default function calculateDAScores(das, measures, options = {}) {
+    const scoreDA = createDAScorer(das, measures, options);
+    return das.map((da) => ({ ...da, ...scoreDA(da) }));
 }
