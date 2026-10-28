@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 
-import LeafletMap from "components/maps/LeafletMap";
+import DisseminationAreaMap from "components/maps/DisseminationAreaMap";
 import OneMillionNeighboursLayout from "components/one-million-neighbours/OneMillionNeighboursLayout";
 import calculateCombinedAssetRanks from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
 import AssetFilters from "components/one-million-neighbours/AssetFilters";
@@ -27,19 +27,17 @@ const PROFILE_STATS = [
     { key: 'visible_minority', label: 'Visible minorities' }
 ];
 
-const defaultGeoJSON = {
+// Directus rows carry their GeoJSON geometry in a `geometry` field; every other field becomes a feature property
+const toFeatureCollection = (rows) => ({
     "type": "FeatureCollection",
-    "crs": {
-        "type": "name",
-        "properties": {
-            "name": "urn:ogc:def:crs:OGC:1.3:CRS84"
-        }
-    },
-    "name": "fsa_2021_reprojected",
-    "features": []
-}
+    "features": rows.map(({ geometry, ...properties }) => ({
+        "type": "Feature",
+        "properties": properties,
+        "geometry": geometry,
+    })),
+})
 
-export default function OneMillionNeighboursComponent({ neighbourhoodData, neighbourhoodGeography }) {
+export default function OneMillionNeighboursComponent({ disseminationAreas, parks, neighbourhoodData, neighbourhoodGeography }) {
     const [selectedAssets, setSelectedAssets] = useState({
         parks: true,
         schools: true,
@@ -58,13 +56,10 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
         });
     };
 
-
-
-    let features = []
-    let totalNeighbourhoods = neighbourhoodData.length;
+    let neighbourhoodFeatures = []
 
     try {
-        features = neighbourhoodGeography.map(neighbourhood => {
+        neighbourhoodFeatures = neighbourhoodGeography.map(neighbourhood => {
             const properties = neighbourhoodData.find(f => f.DGUID === neighbourhood.DGUID)
             return {
                 "type": "Feature",
@@ -87,6 +82,7 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
 
     const rankedNeighbourhoodData = calculateCombinedAssetRanks(selectedAssets, neighbourhoodData);
 
+<<<<<<< HEAD
     let selectionTitle = null;
     let selectionStats = null;
     let selectionScores = null;
@@ -186,9 +182,12 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
     }, {})
 
     const neighbourhoodGeoJSON = {
-        ...defaultGeoJSON,
-        features: features
+        "type": "FeatureCollection",
+        "features": neighbourhoodFeatures,
     }
+
+    const disseminationAreaGeoJSON = toFeatureCollection(disseminationAreas)
+    const parksGeoJSON = toFeatureCollection(parks)
 
     const sideBar = <AssetFilters
       selectedAssets={selectedAssets}
@@ -207,14 +206,14 @@ export default function OneMillionNeighboursComponent({ neighbourhoodData, neigh
     />
 
     return (
-      <OneMillionNeighboursLayout sidebar={sideBar}>
-          <LeafletMap
-            geojson={neighbourhoodGeoJSON}
-            rankings={rankings}
-            onRegionSelect={handleRegionSelect}
-            regionalProfileAverages={regionalProfileAverages}
-          />
-      </OneMillionNeighboursLayout>
-    );
 
+        <OneMillionNeighboursLayout sidebar={sideBar}>
+            <DisseminationAreaMap
+                geojson={disseminationAreaGeoJSON}
+                neighbourhoodGeojson={neighbourhoodGeoJSON}
+                parksGeojson={parksGeoJSON}
+                rankings={rankings}
+            />
+        </OneMillionNeighboursLayout>
+    );
 }
