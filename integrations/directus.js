@@ -975,6 +975,28 @@ const getNeighbourhoodGeography = async () => {
   return data
 };
 
+const getDisseminationAreas = async () => {
+  const data = await directus.request(
+    readItems('onemill_season9_test', {
+      fields: ['DAUID', 'city', 'LANDAREA', 'population_2021', 'population_2025_estimate', 'geometry'],
+      limit: -1,
+    })
+  );
+
+  return data
+};
+
+const getParks = async () => {
+  const data = await directus.request(
+    readItems('parks_da', {
+      fields: ['geometry'],
+      limit: -1,
+    })
+  );
+
+  return data
+};
+
 export {
   getEvents,
   getEventCategories,
@@ -1008,4 +1030,6 @@ export {
   directusClient,
   getNeighbourhoodData,
   getNeighbourhoodGeography,
+  getDisseminationAreas,
+  getParks,
 };
