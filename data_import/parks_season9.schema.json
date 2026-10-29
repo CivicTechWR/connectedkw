@@ -1,0 +1,32 @@
+{
+  "collection": "parks_season9",
+  "source": "parks_season9.geojson",
+  "note": "",
+  "primaryKey": "park_id",
+  "geometry": {
+    "field": "geometry",
+    "type": "geometry"
+  },
+  "fields": {
+    "park_id": {
+      "type": "string"
+    },
+    "nearby_population_2021": {
+      "type": "integer"
+    },
+    "nearby_population_2025_estimate": {
+      "type": "integer"
+    },
+    "name": {
+      "type": "string"
+    },
+    "leisure": {
+      "type": "string"
+    },
+    "natural": {
+      "type": "string"
+    }
+  },
+  "rename": {},
+  "drop": ["geometry_types"]
+}
