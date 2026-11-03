@@ -29,6 +29,8 @@ export default async function OneMillionNeighboursPage() {
         <p>This map is one way we are measuring progress towards the <a href="https://onemillionneighbours.ca/" target="_blank" rel="noopener noreferrer">One Million Neighbours vision</a>, created by non-profits and community groups across Waterloo Region. We identified common priorities and envisioned future scenarios based on multisolving: finding solutions that solve multiple problems at the same time, while advancing equity.</p>
       </div>
       <OneMillionNeighboursComponent disseminationAreas={disseminationAreas} parks={parks} neighbourhoodData={neighbourhoodData} neighbourhoodGeography={neighbourhoodGeography} />
+
+
       <div className="mt-6">
         <h2 className="text-lg font-bold mb-4">How the ratings are calculated</h2>
         <p>The ratings of neighbourhoods as “most,” “average,” or “least” access to services are calculated as follows:</p>  

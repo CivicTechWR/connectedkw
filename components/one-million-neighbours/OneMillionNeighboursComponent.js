@@ -6,6 +6,7 @@ import DisseminationAreaMap from "components/maps/DisseminationAreaMap";
 import OneMillionNeighboursLayout from "components/one-million-neighbours/OneMillionNeighboursLayout";
 import calculateCombinedAssetRanks from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
 import AssetFilters from "components/one-million-neighbours/AssetFilters";
+import OneMillionNeighboursTable from "components/one-million-neighbours/OneMillionNeighboursTable";
 
 const ASSET_TYPES = [
     { key: 'parks', label: 'Green Space', dataKey: 'assets_parks_count', scoreKey: 'assets_parks_score' },
@@ -82,7 +83,6 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
 
     const rankedNeighbourhoodData = calculateCombinedAssetRanks(selectedAssets, neighbourhoodData);
 
-<<<<<<< HEAD
     let selectionTitle = null;
     let selectionStats = null;
     let selectionScores = null;
@@ -156,6 +156,9 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
         setActiveNeighbourhoodIds(prev => prev.filter(id => id !== idToRemove));
     }, []);
 
+
+    const totalNeighbourhoods = neighbourhoodData.length;
+
     const regionalAverages = ASSET_TYPES.reduce((acc, asset) => {
         const totalAssets = neighbourhoodData.reduce((sum, n) => sum + (Number(n[asset.dataKey]) || 0), 0);
         const totalPopulation = neighbourhoodData.reduce((sum, n) => sum + (Number(n.population_2021) || 0), 0);
@@ -204,16 +207,38 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
       selectedRegions={selectedRegions}
       onRemoveRegion={handleRemoveRegion}
     />
-
     return (
+      <>
 
-        <OneMillionNeighboursLayout sidebar={sideBar}>
-            <DisseminationAreaMap
+          <OneMillionNeighboursLayout sidebar={sideBar}>
+              <DisseminationAreaMap
                 geojson={disseminationAreaGeoJSON}
                 neighbourhoodGeojson={neighbourhoodGeoJSON}
                 parksGeojson={parksGeoJSON}
                 rankings={rankings}
-            />
-        </OneMillionNeighboursLayout>
+                onRegionSelect={handleRegionSelect}
+              />
+
+
+          </OneMillionNeighboursLayout>
+
+          <OneMillionNeighboursTable
+            selectedAssets={selectedAssets}
+            onAssetToggle={handleAssetToggle}
+            assetTypes={ASSET_TYPES}
+            profileTypes={PROFILE_STATS}
+            regionalAverages={regionalAverages}
+            regionalScores={regionalScores}
+            regionalProfileAverages={regionalProfileAverages}
+            selectionTitle={selectionTitle}
+            selectionStats={selectionStats}
+            selectionScores={selectionScores}
+            selectionProfileStats={selectionProfileStats}
+            selectedRegions={selectedRegions}
+            onRemoveRegion={handleRemoveRegion}
+          />
+
+      </>
+
     );
 }
