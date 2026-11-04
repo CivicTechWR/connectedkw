@@ -46,23 +46,23 @@ export default function OneMillionNeighboursTable({
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="table-auto w-auto text-left text-sm">
+        <div className="overflow-x-auto w-full">
+          <table className="table-auto w-full min-w-max text-sm">
             <thead>
             <tr className="border-b border-gray-200">
-              <th className="w-32 py-2 px-1 font-semibold text-left">Asset Filter</th>
+              <th className="w-24 py-2 px-1 font-semibold text-left align-bottom">Asset Filter</th>
 
               {isExpanded && selectedRegions.length > 1 && selectedRegions.map(region => (
                 <th key={region.id}
-                    className="w-16 py-2 px-2 font-semibold text-center text-blue-800 text-xs break-words align-bottom leading-tight">
+                    className="w-14 py-2 px-1 font-semibold text-center text-blue-800 text-xs break-words align-bottom leading-tight">
                   {region.name}
                 </th>
               ))}
 
               {selectionTitle && (
                 <th
-                  className="w-16 py-2 px-2 font-semibold text-center text-blue-600 break-words align-bottom leading-tight">
-                  <div className="flex flex-col items-center justify-end gap-1">
+                  className="w-14 py-2 px-1 font-semibold text-center text-blue-600 break-words align-bottom leading-tight">
+                  <div className="flex flex-col items-center justify-center gap-1">
                     {selectedRegions.length > 1 && (
                       <button
                         onClick={() => setIsExpanded(!isExpanded)}
@@ -79,9 +79,7 @@ export default function OneMillionNeighboursTable({
                   </div>
                 </th>
               )}
-              <th className="w-16 py-2 px-2 font-semibold text-center align-bottom break-words leading-tight">
-                Region (per 1000)
-              </th>
+              <th className="w-14 py-2 px-1 font-semibold text-center align-bottom break-words leading-tight">Region (per 1000)</th>
             </tr>
             </thead>
             <tbody>
@@ -107,17 +105,17 @@ export default function OneMillionNeighboursTable({
                   </td>
                   {isExpanded && selectedRegions.length > 1 && selectedRegions.map(region => (
                     <td key={region.id}
-                        className={`py-2 px-2 text-center font-medium transition-colors ${getScoreStyle(region.scores[key])}`}>
+                        className={`py-2 px-1 text-center font-medium transition-colors ${getScoreStyle(region.scores[key])}`}>
                       {region.stats[key]}
                     </td>
                   ))}
                   {selectionStats && (
                     <td
-                      className={`py-2 px-2 text-center font-medium transition-colors ${getScoreStyle(selectionScores[key])}`}>
+                      className={`py-2 px-1 text-center font-medium transition-colors ${getScoreStyle(selectionScores[key])}`}>
                       {selectionStats[key]}
                     </td>
                   )}
-                  <td className={`py-2 px-2 text-center transition-colors ${getScoreStyle(regionalScores[key])}`}>
+                  <td className={`py-2 px-1 text-center transition-colors ${getScoreStyle(regionalScores[key])}`}>
                     {regionalAverages[key]}
                   </td>
                 </tr>
@@ -147,23 +145,23 @@ export default function OneMillionNeighboursTable({
               <tbody>
               {profileTypes.map(({ key, label }) => (
                 <tr key={key} className="border-b border-gray-100 bg-white">
-                  <td className="py-2 px-1 text-sm text-left text-gray-700 whitespace-nowrap">{label}</td>
+                  <td className="py-2 px-1 text-sm text-gray-700 whitespace-nowrap">{label}</td>
 
                   {isExpanded && selectedRegions.length > 1 && selectedRegions.map(region => (
                     <td key={`${region.id}-${key}`}
-                        className="py-2 px-2 text-center text-sm transition-colors bg-gray-50 text-gray-700">
+                        className="py-2 px-1 text-center text-sm transition-colors bg-gray-50 text-gray-700">
                       {region.profileStats?.[key] ? `${region.profileStats[key]}%` : '-'}
                     </td>
                   ))}
 
                   {selectionTitle && (
                     <td
-                      className="py-2 px-2 text-center text-sm font-medium transition-colors bg-gray-100 text-gray-900">
+                      className="py-2 px-1 text-center text-sm font-medium transition-colors bg-gray-100 text-gray-900">
                       {selectionProfileStats?.[key] ? `${selectionProfileStats[key]}%` : '-'}
                     </td>
                   )}
 
-                  <td className="py-2 px-2 text-center text-sm transition-colors bg-gray-50 text-gray-700">
+                  <td className="py-2 px-1 text-center text-sm transition-colors bg-gray-50 text-gray-700">
                     {regionalProfileAverages?.[key] ? `${regionalProfileAverages[key]}%` : '-'}
                   </td>
                 </tr>
