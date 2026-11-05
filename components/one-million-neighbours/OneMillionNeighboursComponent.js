@@ -196,16 +196,7 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
       selectedAssets={selectedAssets}
       onAssetToggle={handleAssetToggle}
       assetTypes={ASSET_TYPES}
-      profileTypes={PROFILE_STATS}
-      regionalAverages={regionalAverages}
-      regionalScores={regionalScores}
-      regionalProfileAverages={regionalProfileAverages}
-      selectionTitle={selectionTitle}
-      selectionStats={selectionStats}
-      selectionScores={selectionScores}
-      selectionProfileStats={selectionProfileStats}
-      selectedRegions={selectedRegions}
-      onRemoveRegion={handleRemoveRegion}
+
     />
     return (
       <>
