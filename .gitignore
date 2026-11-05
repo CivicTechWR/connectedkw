@@ -37,4 +37,3 @@ yarn-error.log*
 next-env.d.ts
 
 .idea
-.pnpm-workspace.yaml

@@ -1,4 +1,11 @@
 const NeighbourhoodPopup = ({ feature }) => {
+  if (!feature?.properties) {
+    return null;
+  }
+
+  const { GEO_NAME, population_2021 } = feature.properties;
+  const formattedPopulation = population_2021 ? Number(population_2021).toLocaleString() : 'N/A';
+
   return (
     <div className="max-h-80 overflow-auto">
       <h3 className="text-blue">{feature.properties.GEO_NAME}</h3>
