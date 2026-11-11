@@ -44,6 +44,7 @@
     "ics": "^3.7.6",
     "isomorphic-dompurify": "^2.22.0",
     "leaflet": "^1.9.4",
+    "leaflet-lasso": "^2.2.13",
     "luxon": "^3.4.4",
     "marked": "^13.0.2",
     "next": "15.2.6",

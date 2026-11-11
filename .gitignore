@@ -36,6 +36,9 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# IDE
+.idea
+
 # data import: raw data and backups stay local; reviewed schemas and the README are committed
 /data_import/*
 !/data_import/README.md

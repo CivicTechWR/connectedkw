@@ -962,6 +962,8 @@ const getNeighbourhoodData = async () => {
     })
   );
 
+  console.log(data[0]);
+
   return data;
 }
 
