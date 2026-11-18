@@ -9,12 +9,13 @@ import AssetFilters from "components/one-million-neighbours/AssetFilters";
 import OneMillionNeighboursTable from "components/one-million-neighbours/OneMillionNeighboursTable";
 
 const ASSET_TYPES = [
-    { key: 'parks', label: 'Green Space', dataKey: 'assets_parks_count', scoreKey: 'assets_parks_score' },
-    { key: 'schools', label: 'Schools', dataKey: 'assets_schools_count', scoreKey: 'assets_schools_score' },
-    { key: 'libraries', label: 'Libraries', dataKey: 'assets_libraries_count', scoreKey: 'assets_libraries_score' },
-    { key: 'health', label: 'Healthcare', dataKey: 'assets_health_count', scoreKey: 'assets_health_score' },
-    { key: 'transit', label: 'Transit', dataKey: 'assets_transit_count', scoreKey: 'assets_transit_score' },
-    { key: 'community_spaces', label: 'Community Spaces', dataKey: 'assets_community_spaces_count', scoreKey: 'assets_community_spaces_score' },
+    { key: 'parks', label: 'Green Space', dataKey: 'assets_parks_count', scoreKey: 'parks_score_2025' },
+    { key: 'schools', label: 'Schools', dataKey: 'assets_schools_count', scoreKey: 'schools_score_2025' },
+    { key: 'libraries', label: 'Libraries', dataKey: 'assets_libraries_count', scoreKey: 'libraries_score_2025' },
+    { key: 'health', label: 'Healthcare', dataKey: 'assets_health_count', scoreKey: 'health_score_2025' },
+    { key: 'transit', label: 'Transit', dataKey: 'assets_transit_count', scoreKey: 'transit_score_2025' },
+    { key: 'community_spaces', label: 'Community Spaces', dataKey: 'assets_community_spaces_count', scoreKey: 'community_spaces_score_2025' },
+    { key: 'child_care', label: 'Child Care', dataKey: 'assets_child_care_count', scoreKey: 'child_care_score_2025' },
 ];
 
 const PROFILE_STATS = [
