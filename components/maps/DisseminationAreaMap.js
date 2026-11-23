@@ -1,5 +1,4 @@
 'use client'
-'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
@@ -74,42 +73,42 @@ const parkPointToLayer = (feature, latlng) => {
 }
 
 const ParkPatternDefs = () => (
-    <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-      <defs>
-        <pattern id={PARK_PATTERN_ID} width="16" height="16" patternUnits="userSpaceOnUse">
-          <rect width="16" height="16" fill={PARK_LIGHT_GREEN} />
-          <path d={`${treePath(4, 4)}${treePath(12, 7)}${treePath(6, 12)}`} fill={PARK_GREEN} />
-        </pattern>
-      </defs>
-    </svg>
+  <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+    <defs>
+      <pattern id={PARK_PATTERN_ID} width="16" height="16" patternUnits="userSpaceOnUse">
+        <rect width="16" height="16" fill={PARK_LIGHT_GREEN} />
+        <path d={`${treePath(4, 4)}${treePath(12, 7)}${treePath(6, 12)}`} fill={PARK_GREEN} />
+      </pattern>
+    </defs>
+  </svg>
 )
 
 const DisseminationAreaDetails = ({ feature }) => {
   const { DAUID, city, LANDAREA, population_2021, population_2025_estimate } = feature.properties
   return (
-      <div className="mb-4">
-        <h3 className="text-blue">Dissemination area {DAUID}</h3>
-        <table className="text-sm text-right">
-          <tbody>
-          <tr>
-            <td className="py-1 pr-2 text-left">City</td>
-            <td className="py-1 px-2 border-l border-gray-300">{city}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Population (2021)</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(population_2021).toLocaleString()}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Population (2025 est.)</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(population_2025_estimate).toLocaleString()}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Land area</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(LANDAREA).toLocaleString(undefined, { maximumFractionDigits: 2 })} km²</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+    <div className="mb-4">
+      <h3 className="text-blue">Dissemination area {DAUID}</h3>
+      <table className="text-sm text-right">
+        <tbody>
+        <tr>
+          <td className="py-1 pr-2 text-left">City</td>
+          <td className="py-1 px-2 border-l border-gray-300">{city}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Population (2021)</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(population_2021).toLocaleString()}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Population (2025 est.)</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(population_2025_estimate).toLocaleString()}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Land area</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(LANDAREA).toLocaleString(undefined, { maximumFractionDigits: 2 })} km²</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -245,9 +244,14 @@ function CustomZoomControl() {
   const { useMap } = require('react-leaflet')
   const map = useMap()
 
-  // The default coordinates and zoom level to reset to
-  const defaultCenter = [43.45, -80.5]
-  const defaultZoom = 11
+  useEffect(() => {
+    if (!map) return
+    const boundsMinZoom = map.getBoundsZoom(WATERLOO_REGION_BOUNDS)
+    map.setMinZoom(boundsMinZoom)
+    if (map.getZoom() < boundsMinZoom) {
+      map.fitBounds(WATERLOO_REGION_BOUNDS)
+    }
+  }, [map])
 
   return (
     <div
@@ -262,10 +266,10 @@ function CustomZoomControl() {
       <button
         onClick={(e) => {
           e.preventDefault();
-          map.zoomIn();
+          map.fitBounds(WATERLOO_REGION_BOUNDS);
         }}
-        title="Zoom in"
-        className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 border-b border-gray-200 font-bold text-xl"
+        title="Reset map view"
+        className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 border-b border-gray-200"
       >
         +
       </button>
@@ -287,7 +291,9 @@ function CustomZoomControl() {
       <button
         onClick={(e) => {
           e.preventDefault();
-          map.zoomOut();
+          if (map.getZoom() > map.getMinZoom()) {
+            map.zoomOut();
+          }
         }}
         title="Zoom out"
         className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 font-bold text-xl"
@@ -303,10 +309,11 @@ export default function DisseminationAreaMap({
                                                neighbourhoodGeojson,
                                                parksGeojson,
                                                rankings,
+                                               boundaryType = 'ada', onBoundaryTypeChange,
                                                onRegionSelect,
-                                               regionalProfileAverages,
+                                               regionalProfileAverages
                                              }) {
-  const [selectedNeighbourhoods, setSelectedNeighbourhoods] = useState([]);
+  const [selectedNeighbourhoods, setSelectedNeighbourhoods] = useState([])
   const [popupPosition, setPopupPosition] = useState(null)
   const [clickedDA, setClickedDA] = useState(null)
   const [lassoEnabled, setLassoEnabled] = useState(false)
@@ -315,18 +322,28 @@ export default function DisseminationAreaMap({
   const featureClickedRef = useRef(false)
   const lassoEnabledRef = useRef(lassoEnabled)
   const compareEnabledRef = useRef(compareEnabled)
+  const boundaryTypeRef = useRef(boundaryType)
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Sync selected regions back to parent component for sidebar
+  const isDA = boundaryType === 'da'
+  const idKey = isDA ? 'DAUID' : 'DGUID'
+
+  useEffect(() => {
+    boundaryTypeRef.current = boundaryType
+    setSelectedNeighbourhoods([])
+    setPopupPosition(null)
+    setClickedDA(null)
+  }, [boundaryType])
+
   useEffect(() => {
     if (onRegionSelect) {
-      onRegionSelect(selectedNeighbourhoods.map(f => f.properties.DGUID));
+      onRegionSelect(selectedNeighbourhoods.map(f => String(f.properties[idKey])))
     }
-  }, [selectedNeighbourhoods, onRegionSelect]);
+  }, [selectedNeighbourhoods, idKey, onRegionSelect])
 
   useEffect(() => {
     lassoEnabledRef.current = lassoEnabled
@@ -430,12 +447,7 @@ export default function DisseminationAreaMap({
   return (
     <div className="w-full h-[60vh] md:h-full overflow-hidden relative">
       <ParkPatternDefs />
-      <style>{`
-          .leaflet-top.leaflet-left {
-            margin-left: 150px;
-            margin-top: 4px; 
-          }
-        `}</style>
+      <style>{'.leaflet-top.leaflet-left { margin-left: 150px; margin-top: 4px; }'}</style>
       <MapContainer
         center={[43.45, -80.5]}
         zoom={11}
