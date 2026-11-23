@@ -1,5 +1,4 @@
 'use client'
-'use client'
 import { useState, useMemo, useRef, useEffect } from 'react'
 import dynamic from 'next/dynamic'
 import Legend from './LeafletMapLegend'
@@ -17,6 +16,12 @@ const LayersControlOverlay = dynamic(() => import('react-leaflet').then(mod => m
 
 
 const MapControllerWrapper = dynamic(() => Promise.resolve(({ children }) => <>{children}</>), { ssr: false })
+
+const WATERLOO_REGION_BOUNDS = [
+  [43.2, -80.8],
+  [43.7, -80.2]
+];
+
 
 const categories = [
   { name: 1, color: '#00B88A', label: 'Most access' },
@@ -68,42 +73,42 @@ const parkPointToLayer = (feature, latlng) => {
 }
 
 const ParkPatternDefs = () => (
-    <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-      <defs>
-        <pattern id={PARK_PATTERN_ID} width="16" height="16" patternUnits="userSpaceOnUse">
-          <rect width="16" height="16" fill={PARK_LIGHT_GREEN} />
-          <path d={`${treePath(4, 4)}${treePath(12, 7)}${treePath(6, 12)}`} fill={PARK_GREEN} />
-        </pattern>
-      </defs>
-    </svg>
+  <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
+    <defs>
+      <pattern id={PARK_PATTERN_ID} width="16" height="16" patternUnits="userSpaceOnUse">
+        <rect width="16" height="16" fill={PARK_LIGHT_GREEN} />
+        <path d={`${treePath(4, 4)}${treePath(12, 7)}${treePath(6, 12)}`} fill={PARK_GREEN} />
+      </pattern>
+    </defs>
+  </svg>
 )
 
 const DisseminationAreaDetails = ({ feature }) => {
   const { DAUID, city, LANDAREA, population_2021, population_2025_estimate } = feature.properties
   return (
-      <div className="mb-4">
-        <h3 className="text-blue">Dissemination area {DAUID}</h3>
-        <table className="text-sm text-right">
-          <tbody>
-          <tr>
-            <td className="py-1 pr-2 text-left">City</td>
-            <td className="py-1 px-2 border-l border-gray-300">{city}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Population (2021)</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(population_2021).toLocaleString()}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Population (2025 est.)</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(population_2025_estimate).toLocaleString()}</td>
-          </tr>
-          <tr className="border-t border-gray-300">
-            <td className="py-1 pr-2 text-left">Land area</td>
-            <td className="py-1 px-2 border-l border-gray-300">{Number(LANDAREA).toLocaleString(undefined, { maximumFractionDigits: 2 })} km²</td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
+    <div className="mb-4">
+      <h3 className="text-blue">Dissemination area {DAUID}</h3>
+      <table className="text-sm text-right">
+        <tbody>
+        <tr>
+          <td className="py-1 pr-2 text-left">City</td>
+          <td className="py-1 px-2 border-l border-gray-300">{city}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Population (2021)</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(population_2021).toLocaleString()}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Population (2025 est.)</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(population_2025_estimate).toLocaleString()}</td>
+        </tr>
+        <tr className="border-t border-gray-300">
+          <td className="py-1 pr-2 text-left">Land area</td>
+          <td className="py-1 px-2 border-l border-gray-300">{Number(LANDAREA).toLocaleString(undefined, { maximumFractionDigits: 2 })} km²</td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -202,6 +207,7 @@ function LassoSelection({ lassoEnabled, setLassoEnabled, setSelectedNeighbourhoo
               setPopupPosition(event.latLngs[0])
             }
           }
+          setLassoEnabled(false)
         }
 
         map.on('lasso.finished', handleLassoFinished)
@@ -233,7 +239,80 @@ function LassoSelection({ lassoEnabled, setLassoEnabled, setSelectedNeighbourhoo
   return null
 }
 
-export default function DisseminationAreaMap({ geojson, neighbourhoodGeojson, parksGeojson, rankings, onRegionSelect, regionalProfileAverages }) {
+
+function CustomZoomControl() {
+  const { useMap } = require('react-leaflet')
+  const map = useMap()
+
+  useEffect(() => {
+    if (!map) return
+    const boundsMinZoom = map.getBoundsZoom(WATERLOO_REGION_BOUNDS)
+    map.setMinZoom(boundsMinZoom)
+    if (map.getZoom() < boundsMinZoom) {
+      map.fitBounds(WATERLOO_REGION_BOUNDS)
+    }
+  }, [map])
+
+  return (
+    <div
+      className="absolute top-4 left-4 flex flex-col bg-white rounded shadow-md overflow-hidden"
+      style={{ zIndex: 1000 }}
+      // Prevent map dragging or zooming when clicking these buttons
+      onMouseDown={(e) => e.stopPropagation()}
+      onClick={(e) => e.stopPropagation()}
+      onDoubleClick={(e) => e.stopPropagation()}
+      onWheel={(e) => e.stopPropagation()}
+    >
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          map.fitBounds(WATERLOO_REGION_BOUNDS);
+        }}
+        title="Reset map view"
+        className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 border-b border-gray-200"
+      >
+        +
+      </button>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          map.fitBounds(WATERLOO_REGION_BOUNDS);
+        }}
+        title="Reset map view"
+        className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 border-b border-gray-200"
+      >
+        {/* Home Icon */}
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24"
+             stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round"
+                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+        </svg>
+      </button>
+      <button
+        onClick={(e) => {
+          e.preventDefault();
+          if (map.getZoom() > map.getMinZoom()) {
+            map.zoomOut();
+          }
+        }}
+        title="Zoom out"
+        className="w-8 h-8 flex items-center justify-center bg-white text-gray-700 hover:bg-gray-100 font-bold text-xl"
+      >
+        &minus;
+      </button>
+    </div>
+  )
+}
+
+export default function DisseminationAreaMap({
+                                               geojson,
+                                               neighbourhoodGeojson,
+                                               parksGeojson,
+                                               rankings,
+                                               boundaryType = 'ada', onBoundaryTypeChange,
+                                               onRegionSelect,
+                                               regionalProfileAverages
+                                             }) {
   const [selectedNeighbourhoods, setSelectedNeighbourhoods] = useState([])
   const [popupPosition, setPopupPosition] = useState(null)
   const [clickedDA, setClickedDA] = useState(null)
@@ -243,18 +322,28 @@ export default function DisseminationAreaMap({ geojson, neighbourhoodGeojson, pa
   const featureClickedRef = useRef(false)
   const lassoEnabledRef = useRef(lassoEnabled)
   const compareEnabledRef = useRef(compareEnabled)
+  const boundaryTypeRef = useRef(boundaryType)
   const [isMounted, setIsMounted] = useState(false)
 
   useEffect(() => {
     setIsMounted(true)
   }, [])
 
-  // Sync selected regions back to parent component for sidebar
+  const isDA = boundaryType === 'da'
+  const idKey = isDA ? 'DAUID' : 'DGUID'
+
+  useEffect(() => {
+    boundaryTypeRef.current = boundaryType
+    setSelectedNeighbourhoods([])
+    setPopupPosition(null)
+    setClickedDA(null)
+  }, [boundaryType])
+
   useEffect(() => {
     if (onRegionSelect) {
-      onRegionSelect(selectedNeighbourhoods.map(f => f.properties.DGUID));
+      onRegionSelect(selectedNeighbourhoods.map(f => String(f.properties[idKey])))
     }
-  }, [selectedNeighbourhoods, onRegionSelect]);
+  }, [selectedNeighbourhoods, idKey, onRegionSelect])
 
   useEffect(() => {
     lassoEnabledRef.current = lassoEnabled
@@ -356,138 +445,154 @@ export default function DisseminationAreaMap({ geojson, neighbourhoodGeojson, pa
   }
 
   return (
-      <div className="w-full h-[60vh] md:h-full overflow-hidden relative">
-        <ParkPatternDefs />
-        <MapContainer
-            center={[43.45, -80.5]}
-            zoom={11}
-            style={{ height: '100%', width: '100%' }}
-            zoomControl={true}
-            scrollWheelZoom={true}
-        >
-          <TileLayer
-              attribution='&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-          />
+    <div className="w-full h-[60vh] md:h-full overflow-hidden relative">
+      <ParkPatternDefs />
+      <style>{'.leaflet-top.leaflet-left { margin-left: 150px; margin-top: 4px; }'}</style>
+      <MapContainer
+        center={[43.45, -80.5]}
+        zoom={11}
+        minZoom={10}
+        maxBounds={WATERLOO_REGION_BOUNDS}
+        maxBoundsViscosity={1.0}
+        style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+          url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
 
-          <Pane name="neighbourhoods" style={{ zIndex: 410 }} />
-          <Pane name="disseminationAreas" style={{ zIndex: 420 }} />
-          <Pane name="parks" style={{ zIndex: 430 }} />
+        <Pane name="neighbourhoods" style={{ zIndex: 410 }} />
+        <Pane name="disseminationAreas" style={{ zIndex: 420 }} />
+        <Pane name="parks" style={{ zIndex: 430 }} />
 
-          <LayersControl position="topleft">
-            {neighbourhoodGeojson && (
-                <LayersControlOverlay checked name="Aggregate dissemination areas (access ranking)">
-                  <GeoJSON
-                      data={neighbourhoodGeojson}
-                      style={neighbourhoodStyle}
-                      onEachFeature={onEachNeighbourhood}
-                      pane="neighbourhoods"
-                  />
-                </LayersControlOverlay>
-            )}
-            {geojson && (
-                <LayersControlOverlay checked name="Dissemination areas">
-                  <GeoJSON
-                      data={geojson}
-                      style={baseStyle}
-                      onEachFeature={onEachFeature}
-                      pane="disseminationAreas"
-                  />
-                </LayersControlOverlay>
-            )}
-            {parksGeojson && (
-                <LayersControlOverlay name={parksLayerName}>
-                  <GeoJSON
-                      data={parksGeojson}
-                      style={parkStyle}
-                      pointToLayer={parkPointToLayer}
-                      interactive={false}
-                      pane="parks"
-                  />
-                </LayersControlOverlay>
-            )}
-          </LayersControl>
-
-          <MapControllerWrapper>
-            <MapController
-                selectedNeighbourhoods={selectedNeighbourhoods}
-                setSelectedNeighbourhoods={setSelectedNeighbourhoods}
-                setPopupPosition={setPopupPosition}
-                setClickedDA={setClickedDA}
-                rankings={rankings}
-                featureClickedRef={featureClickedRef}
-            />
-            <LassoSelection
-                lassoEnabled={lassoEnabled}
-                setLassoEnabled={setLassoEnabled}
-                setSelectedNeighbourhoods={setSelectedNeighbourhoods}
-                setPopupPosition={setPopupPosition}
-                setClickedDA={setClickedDA}
-            />
-          </MapControllerWrapper>
-
-          {selectedNeighbourhoods.length > 0 && popupPosition && (
-              <Popup
-                  key={`popup-${compareEnabled}-${selectedNeighbourhoods.length}`}
-                  position={popupPosition}
-                  closeButton={false}
-                  maxWidth={800}
-                  minWidth={50}
-              >
-                <div className="space-y-4">
-                  {clickedDA && <DisseminationAreaDetails feature={clickedDA} />}
-                  {clickedDA && selectedNeighbourhoods.length > 0 && <hr className="border-gray-300" />}
-
-                  <div>
-                    <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Aggregate dissemination area(s)</p>
-                    <NeighbourhoodPopup
-                        features={selectedNeighbourhoods}
-                        onRemoveFeature={handleRemoveFeature}
-                        isCompareMode={compareEnabled}
-                        regionalProfileAverages={regionalProfileAverages}
-                    />
-                  </div>
-                </div>
-              </Popup>
+        <LayersControl position="topleft">
+          {neighbourhoodGeojson && (
+            <LayersControlOverlay checked name="Aggregate dissemination areas (access ranking)">
+              <GeoJSON
+                data={neighbourhoodGeojson}
+                style={neighbourhoodStyle}
+                onEachFeature={onEachNeighbourhood}
+                pane="neighbourhoods"
+              />
+            </LayersControlOverlay>
           )}
+          {geojson && (
+            <LayersControlOverlay checked name="Dissemination areas">
+              <GeoJSON
+                data={geojson}
+                style={baseStyle}
+                onEachFeature={onEachFeature}
+                pane="disseminationAreas"
+              />
+            </LayersControlOverlay>
+          )}
+          {parksGeojson && (
+            <LayersControlOverlay name={parksLayerName}>
+              <GeoJSON
+                data={parksGeojson}
+                style={parkStyle}
+                pointToLayer={parkPointToLayer}
+                interactive={false}
+                pane="parks"
+              />
+            </LayersControlOverlay>
+          )}
+        </LayersControl>
 
-          <Legend categories={categories} />
-        </MapContainer>
+        <MapControllerWrapper>
+          <CustomZoomControl />
+          <MapController
+            selectedNeighbourhoods={selectedNeighbourhoods}
+            setSelectedNeighbourhoods={setSelectedNeighbourhoods}
+            setPopupPosition={setPopupPosition}
+            setClickedDA={setClickedDA}
+            rankings={rankings}
+            featureClickedRef={featureClickedRef}
+          />
+          <LassoSelection
+            lassoEnabled={lassoEnabled}
+            setLassoEnabled={setLassoEnabled}
+            setSelectedNeighbourhoods={setSelectedNeighbourhoods}
+            setPopupPosition={setPopupPosition}
+            setClickedDA={setClickedDA}
+          />
+        </MapControllerWrapper>
 
-        {/* Action Buttons Overlay */}
-        <div className="absolute top-4 left-14 flex flex-row gap-2" style={{ zIndex: 1000 }}>
-          <button
-              onClick={() => setLassoEnabled(!lassoEnabled)}
-              title="Toggle Lasso"
-              className={`p-2 flex items-center justify-center bg-white rounded shadow-md border-2 transition-colors ${lassoEnabled ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-transparent text-gray-700 hover:bg-gray-50'}`}
+        {selectedNeighbourhoods.length > 0 && popupPosition && (
+          <Popup
+            key={`popup-${compareEnabled}-${selectedNeighbourhoods.length}`}
+            position={popupPosition}
+            closeButton={false}
+            maxWidth={800}
+            minWidth={50}
           >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M7 22a5 5 0 0 1-2-4" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.3 14A6.8 6.8 0 0 1 2 10c0-4.4 4.5-8 10-8s10 3.6 10 8-4.5 8-10 8a12 12 0 0 1-5-1" />
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
-            </svg>
-          </button>
-          <button
-              onClick={() => setCompareEnabled(!compareEnabled)}
-              title="Select multiple"
-              className={`p-2 bg-white rounded shadow border-2 transition-colors ${compareEnabled ? 'border-blue-500 text-blue-500 bg-blue-50' : 'border-transparent text-gray-700 hover:bg-gray-100'}`}
+            <div className="space-y-4">
+              {clickedDA && <DisseminationAreaDetails feature={clickedDA} />}
+              {clickedDA && selectedNeighbourhoods.length > 0 && <hr className="border-gray-300" />}
+
+              <div>
+                <p className="text-xs uppercase tracking-wide text-gray-500 mb-2">Aggregate dissemination
+                  area(s)</p>
+                <NeighbourhoodPopup
+                  features={selectedNeighbourhoods}
+                  onRemoveFeature={handleRemoveFeature}
+                  isCompareMode={compareEnabled}
+                  regionalProfileAverages={regionalProfileAverages}
+                />
+              </div>
+            </div>
+          </Popup>
+        )}
+
+        <Legend categories={categories} />
+      </MapContainer>
+
+      {/* Action Buttons Overlay */}
+      <div
+        className="absolute top-4 left-16 flex flex-row items-center bg-white rounded shadow-md border border-gray-200 divide-x divide-gray-200 overflow-hidden"
+        style={{ zIndex: 1000 }}
+        onMouseDown={(e) => e.stopPropagation()}
+        onClick={(e) => e.stopPropagation()}
+        onDoubleClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={() => setLassoEnabled(!lassoEnabled)}
+          title="Draw a freehand lasso to select areas"
+          aria-pressed={lassoEnabled}
+          className={`px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium transition-colors ${lassoEnabled ? 'bg-blue-50 text-blue-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M7 22a5 5 0 0 1-2-4" />
+            <path strokeLinecap="round" strokeLinejoin="round"
+                  d="M3.3 14A6.8 6.8 0 0 1 2 10c0-4.4 4.5-8 10-8s10 3.6 10 8-4.5 8-10 8a12 12 0 0 1-5-1" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 18a2 2 0 1 0 0-4 2 2 0 0 0 0 4z" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setCompareEnabled(!compareEnabled)}
+          title="Click multiple areas to compare"
+          aria-pressed={compareEnabled}
+          className={`px-3 py-1.5 flex items-center gap-1.5 text-xs font-medium transition-colors ${compareEnabled ? 'bg-blue-50 text-blue-700' : 'bg-white text-gray-700 hover:bg-gray-50'}`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            width="16"
+            height="16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
           >
-            <svg
-                xmlns="http://www.w3.org/2000/svg"
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-            >
-              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-              <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            </svg>
-          </button>
-        </div>
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+          </svg>
+
+        </button>
       </div>
+    </div>
   )
 }

@@ -4,7 +4,7 @@ import { useState, useCallback } from "react";
 
 import DisseminationAreaMap from "components/maps/DisseminationAreaMap";
 import OneMillionNeighboursLayout from "components/one-million-neighbours/OneMillionNeighboursLayout";
-import calculateCombinedAssetRanks from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
+import calculateCombinedAssetRanks, { calculateClusterScores, getClusterRankTier } from "components/one-million-neighbours/utils/calculateCombinedAssetRanks";
 import AssetFilters from "components/one-million-neighbours/AssetFilters";
 import OneMillionNeighboursTable from "components/one-million-neighbours/OneMillionNeighboursTable";
 
@@ -48,7 +48,13 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
         community_spaces: true,
     });
 
-    const [activeNeighbourhoodIds, setActiveNeighbourhoodIds] = useState([]);
+    const [boundaryType, setBoundaryType] = useState('ada');
+    const [activeRegionIds, setActiveRegionIds] = useState([]);
+
+    const handleBoundaryTypeChange = useCallback((nextType) => {
+        setBoundaryType(nextType);
+        setActiveRegionIds([]);
+    }, []);
 
     const handleAssetToggle = (key) => {
         setSelectedAssets({
@@ -80,58 +86,81 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
         console.error(error)
     }
 
+    const isDA = boundaryType === 'da';
+    const activeDataset = isDA ? disseminationAreas : neighbourhoodData;
+    const idField = isDA ? 'DAUID' : 'DGUID';
 
-    const rankedNeighbourhoodData = calculateCombinedAssetRanks(selectedAssets, neighbourhoodData);
+    const rankedAdaData = calculateCombinedAssetRanks(selectedAssets, neighbourhoodData);
+    const rankedDataset = isDA
+      ? calculateCombinedAssetRanks(selectedAssets, disseminationAreas)
+      : rankedAdaData;
 
     let selectionTitle = null;
     let selectionStats = null;
     let selectionScores = null;
     let selectedRegions = [];
     let selectionProfileStats = null;
+    let selectionRankTier = null;
 
-    if (activeNeighbourhoodIds.length > 0) {
-        const activeGeos = neighbourhoodGeography.filter(g => activeNeighbourhoodIds.includes(g.DGUID));
-        const activeData = neighbourhoodData.filter(n => activeNeighbourhoodIds.includes(n.DGUID));
+    if (activeRegionIds.length > 0) {
+        const activeData = activeDataset.filter(item => activeRegionIds.includes(String(item[idField])));
 
-        // Maps ID, Name, and calculates individual stats/scores for rendering expanded columns
-        selectedRegions = activeGeos.map(g => {
-            const data = activeData.find(d => d.DGUID === g.DGUID);
+        selectedRegions = activeData.map(data => {
             const stats = {};
             const scores = {};
             const profileStats = {};
+            const pop = Number(data.population_2021) || 0;
 
-            if (data) {
-                const pop = Number(data.population_2021) || 0;
-                ASSET_TYPES.forEach(asset => {
-                    const count = Number(data[asset.dataKey]) || 0;
-                    stats[asset.key] = pop > 0 ? ((count / pop) * 1000).toFixed(1) : '-';
-                    scores[asset.key] = Number(data[asset.scoreKey]) || 0;
-                });
-                PROFILE_STATS.forEach(stat => {
-                    profileStats[stat.key] = data[stat.key] !== undefined ? Number(data[stat.key]).toFixed(1) : '-';
-                });
-            }
-            return { id: g.DGUID, name: g.GEO_NAME, stats, scores, profileStats };
+            ASSET_TYPES.forEach(asset => {
+                const count = Number(data[asset.dataKey]) || 0;
+                stats[asset.key] = pop > 0 && data[asset.dataKey] !== undefined
+                  ? ((count / pop) * 1000).toFixed(1)
+                  : Number(data[asset.scoreKey] ?? 0).toFixed(2);
+                scores[asset.key] = Number(data[asset.scoreKey]) || 0;
+            });
+
+            PROFILE_STATS.forEach(stat => {
+                profileStats[stat.key] = data[stat.key] !== undefined ? Number(data[stat.key]).toFixed(1) : '-';
+            });
+
+            const name = isDA
+              ? `DA ${data.DAUID}`
+              : (neighbourhoodGeography.find(g => g.DGUID === data.DGUID)?.GEO_NAME || data.GEO_NAME || data.DGUID);
+
+            return { id: String(data[idField]), name, stats, scores, profileStats };
         });
 
-        if (activeNeighbourhoodIds.length === 1) {
-            selectionTitle = selectedRegions[0].name || 'Selected Region';
+        if (activeRegionIds.length === 1) {
+            selectionTitle = selectedRegions[0]?.name || 'Selected Region';
         } else {
-            selectionTitle = 'Custom Selection';
+            selectionTitle = isDA ? `Selected DAs (${activeRegionIds.length})` : 'Custom Selection';
         }
 
-        selectionStats = ASSET_TYPES.reduce((acc, asset) => {
-            const totalAssets = activeData.reduce((sum, n) => sum + (Number(n[asset.dataKey]) || 0), 0);
-            const totalPopulation = activeData.reduce((sum, n) => sum + (Number(n.population_2021) || 0), 0);
-            acc[asset.key] = totalPopulation > 0 ? ((totalAssets / totalPopulation) * 1000).toFixed(1) : '-';
-            return acc;
-        }, {});
+        if (isDA) {
+            const cluster = calculateClusterScores(activeData);
+            selectionScores = ASSET_TYPES.reduce((acc, asset) => {
+                acc[asset.key] = cluster[asset.scoreKey] ?? 0;
+                return acc;
+            }, {});
+            selectionStats = ASSET_TYPES.reduce((acc, asset) => {
+                acc[asset.key] = (cluster[asset.scoreKey] ?? 0).toFixed(2);
+                return acc;
+            }, {});
+            selectionRankTier = getClusterRankTier(cluster, selectedAssets, rankedAdaData);
+        } else {
+            selectionStats = ASSET_TYPES.reduce((acc, asset) => {
+                const totalAssets = activeData.reduce((sum, n) => sum + (Number(n[asset.dataKey]) || 0), 0);
+                const totalPopulation = activeData.reduce((sum, n) => sum + (Number(n.population_2021) || 0), 0);
+                acc[asset.key] = totalPopulation > 0 ? ((totalAssets / totalPopulation) * 1000).toFixed(1) : '-';
+                return acc;
+            }, {});
 
-        selectionScores = ASSET_TYPES.reduce((acc, asset) => {
-            const totalScore = activeData.reduce((sum, n) => sum + (Number(n[asset.scoreKey]) || 0), 0);
-            acc[asset.key] = activeData.length > 0 ? (totalScore / activeData.length) : 0;
-            return acc;
-        }, {});
+            selectionScores = ASSET_TYPES.reduce((acc, asset) => {
+                const totalScore = activeData.reduce((sum, n) => sum + (Number(n[asset.scoreKey]) || 0), 0);
+                acc[asset.key] = activeData.length > 0 ? (totalScore / activeData.length) : 0;
+                return acc;
+            }, {});
+        }
 
         selectionProfileStats = PROFILE_STATS.reduce((acc, stat) => {
             const total = activeData.reduce((sum, n) => sum + (Number(n[stat.key]) || 0), 0);
@@ -140,49 +169,50 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
         }, {});
     }
 
-    const activeNeighbourhoods = rankedNeighbourhoodData.filter(n => activeNeighbourhoodIds.includes(n.DGUID));
-
     const handleRegionSelect = useCallback((selectedIds) => {
-        setActiveNeighbourhoodIds(prev => {
-            // Evaluate prev state against incoming state to prevent infinite render loop
-            if (prev.length === selectedIds.length && prev.every(id => selectedIds.includes(id))) {
+        const normalizedIds = selectedIds.map(String);
+        setActiveRegionIds(prev => {
+            if (prev.length === normalizedIds.length && prev.every(id => normalizedIds.includes(id))) {
                 return prev;
             }
-            return selectedIds;
+            return normalizedIds;
         });
     }, []);
 
     const handleRemoveRegion = useCallback((idToRemove) => {
-        setActiveNeighbourhoodIds(prev => prev.filter(id => id !== idToRemove));
+        setActiveRegionIds(prev => prev.filter(id => id !== String(idToRemove)));
     }, []);
 
-
-    const totalNeighbourhoods = neighbourhoodData.length;
+    const totalItems = activeDataset.length;
 
     const regionalAverages = ASSET_TYPES.reduce((acc, asset) => {
-        const totalAssets = neighbourhoodData.reduce((sum, n) => sum + (Number(n[asset.dataKey]) || 0), 0);
-        const totalPopulation = neighbourhoodData.reduce((sum, n) => sum + (Number(n.population_2021) || 0), 0);
-        acc[asset.key] = totalPopulation > 0 ? ((totalAssets / totalPopulation) * 1000).toFixed(2) : '0.00';
+        if (isDA) {
+            const totalScore = activeDataset.reduce((sum, n) => sum + (Number(n[asset.scoreKey]) || 0), 0);
+            acc[asset.key] = totalItems > 0 ? (totalScore / totalItems).toFixed(2) : '0.00';
+        } else {
+            const totalAssets = activeDataset.reduce((sum, n) => sum + (Number(n[asset.dataKey]) || 0), 0);
+            const totalPopulation = activeDataset.reduce((sum, n) => sum + (Number(n.population_2021) || 0), 0);
+            acc[asset.key] = totalPopulation > 0 ? ((totalAssets / totalPopulation) * 1000).toFixed(2) : '0.00';
+        }
         return acc;
     }, {});
 
     const regionalScores = ASSET_TYPES.reduce((acc, asset) => {
-        const totalScore = neighbourhoodData.reduce((sum, n) => sum + (Number(n[asset.scoreKey]) || 0), 0);
-        acc[asset.key] = totalNeighbourhoods > 0 ? (totalScore / totalNeighbourhoods) : 0;
+        const totalScore = activeDataset.reduce((sum, n) => sum + (Number(n[asset.scoreKey]) || 0), 0);
+        acc[asset.key] = totalItems > 0 ? (totalScore / totalItems) : 0;
         return acc;
     }, {});
 
     const regionalProfileAverages = PROFILE_STATS.reduce((acc, stat) => {
-        const total = neighbourhoodData.reduce((sum, n) => sum + (Number(n[stat.key]) || 0), 0);
-        acc[stat.key] = totalNeighbourhoods > 0 ? (total / totalNeighbourhoods).toFixed(1) : '-';
+        const total = activeDataset.reduce((sum, n) => sum + (Number(n[stat.key]) || 0), 0);
+        acc[stat.key] = totalItems > 0 ? (total / totalItems).toFixed(1) : '-';
         return acc;
     }, {});
 
-    // Create a map of DGUIDs to their rank groups (1, 2, or 3)
-    const rankings = rankedNeighbourhoodData.reduce((acc, neighbourhood) => {
-        acc[neighbourhood.DGUID] = neighbourhood.combined_rank;
-        return acc
-    }, {})
+    const rankings = rankedDataset.reduce((acc, item) => {
+        acc[String(item[idField])] = item.combined_rank;
+        return acc;
+    }, {});
 
     const neighbourhoodGeoJSON = {
         "type": "FeatureCollection",
@@ -216,6 +246,8 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
                 neighbourhoodGeojson={neighbourhoodGeoJSON}
                 parksGeojson={parksGeoJSON}
                 rankings={rankings}
+                boundaryType={boundaryType}
+                onBoundaryTypeChange={handleBoundaryTypeChange}
                 onRegionSelect={handleRegionSelect}
               />
 
@@ -236,6 +268,8 @@ export default function OneMillionNeighboursComponent({ disseminationAreas, park
             selectionProfileStats={selectionProfileStats}
             selectedRegions={selectedRegions}
             onRemoveRegion={handleRemoveRegion}
+            boundaryType={boundaryType}
+            selectionRankTier={selectionRankTier}
           />
 
       </>
